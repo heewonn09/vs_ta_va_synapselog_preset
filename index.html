@@ -112,7 +112,49 @@ canvas { display: block; }
   box-shadow: 0 4px 14px rgba(0,0,0,0.5); white-space: nowrap;
 }
 
-/* ── 우측 패널 전체 컨테이너 ── */
+/* ── 페이지 추가 패널 ── */
+#add-page-panel {
+  background: rgba(14,16,24,0.9);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px; padding: 10px 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid rgba(255,159,67,0.4);
+}
+#add-page-panel .panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #ff9f43; margin-bottom: 8px;
+}
+#add-page-panel input {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 7px 10px; font-size: 11px; font-family: inherit;
+  color: #fff; outline: none; margin-bottom: 6px;
+  transition: border-color 0.2s;
+}
+#add-page-panel input:focus { border-color: rgba(255,159,67,0.5); }
+#add-page-panel input::placeholder { color: rgba(255,255,255,0.2); }
+#add-page-btn {
+  width: 100%; background: rgba(255,159,67,0.12);
+  border: 1px solid rgba(255,159,67,0.35); border-radius: 6px;
+  padding: 7px; color: #ff9f43; font-size: 11px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+}
+#add-page-btn:hover { background: rgba(255,159,67,0.22); }
+#add-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#add-page-error { font-size: 11px; color: #ff6b6b; margin-top: 4px; display: none; }
+#added-pages-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.added-page-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.04); border-radius: 4px; padding: 4px 8px;
+}
+.added-page-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.added-page-remove {
+  background: none; border: none; color: rgba(255,255,255,0.3);
+  cursor: pointer; font-size: 12px; flex-shrink: 0; padding: 0 2px;
+}
+.added-page-remove:hover { color: #ff6b6b; }
 #right-area {
   position: fixed; top: 16px; right: 18px; z-index: 200;
   display: flex; flex-direction: column; gap: 10px;
@@ -319,7 +361,7 @@ canvas { display: block; }
   <div id="logo">
     <div id="logo-text">Synapse<span class="accent">Log</span></div>
   </div>
-  <!-- 슬라이더 패널 — 항상 열림 -->
+  <!-- 슬라이더 패널 -->
   <div id="left-panel">
     <div class="panel-title">그래프 설정</div>
     <div class="ctrl-group">
@@ -334,6 +376,14 @@ canvas { display: block; }
       <div class="ctrl-label-row"><span>링크 장력 (Link Distance)</span><span class="val" id="v-dist">150</span></div>
       <input type="range" id="cfg-dist" min="60" max="250" step="5" value="150">
     </div>
+  </div>
+  <!-- 페이지 추가 패널 -->
+  <div id="add-page-panel">
+    <div class="panel-title">페이지 추가</div>
+    <input type="text" id="add-page-id" placeholder="추가할 Page ID" />
+    <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
+    <div id="add-page-error"></div>
+    <div id="added-pages-list"></div>
   </div>
 </div>
 
@@ -673,6 +723,9 @@ let isPanning=false, panStartX=0, panStartY=0, panStartOffsetX=0, panStartOffset
 // 계층별 순차 등장 — 얽힘 방지
 // level 0 → 1 → 2 → 3 → 4 순서로 딜레이를 두고 활성화
 // ── Vercel API 호출 → 그래프 시작 ──
+let _savedToken = ''; // 토큰 재사용을 위해 저장
+let _addedPageIds = new Set(); // 중복 방지
+
 async function startGraph() {
   const token = document.getElementById('input-token').value.trim();
   const pageId = document.getElementById('input-page-id').value.trim().replace(/-/g, '');
@@ -697,10 +750,11 @@ async function startGraph() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
 
-    // 입력 화면 숨기기
+    _savedToken = token;
+    _addedPageIds.add(pageId);
+
     document.getElementById('login-screen').style.display = 'none';
 
-    // 페이지 타이틀로 루트 노드 이름 설정
     window._NOTION_TITLE = data.title || '노션 페이지';
     window._NOTION_MARKDOWN = data.markdown || '';
 
@@ -711,6 +765,105 @@ async function startGraph() {
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.textContent = '그래프 생성하기';
+  }
+}
+
+// ── 페이지 추가 ──
+async function addPage() {
+  const pageId = document.getElementById('add-page-id').value.trim().replace(/-/g, '');
+  const errEl = document.getElementById('add-page-error');
+  const btn = document.getElementById('add-page-btn');
+
+  if (!pageId) { errEl.textContent = 'Page ID를 입력해주세요'; errEl.style.display = 'block'; return; }
+  if (_addedPageIds.has(pageId)) { errEl.textContent = '이미 추가된 페이지예요'; errEl.style.display = 'block'; return; }
+  if (!_savedToken) { errEl.textContent = '토큰 정보가 없어요. 새로고침 후 다시 시도해주세요'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _savedToken, pageId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
+
+    _addedPageIds.add(pageId);
+
+    // 기존 그래프에 새 페이지 노드 추가
+    mergeGraph(data.title || '추가 페이지', data.markdown || '');
+
+    // 추가된 페이지 목록 표시
+    const list = document.getElementById('added-pages-list');
+    const item = document.createElement('div');
+    item.className = 'added-page-item';
+    item.dataset.pageId = pageId;
+    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="added-page-remove" onclick="removePage('${pageId}', this.parentElement)">✕</button>`;
+    list.appendChild(item);
+
+    document.getElementById('add-page-id').value = '';
+    btn.disabled = false;
+    btn.textContent = '+ 노드 불러오기';
+    isStable = false;
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '+ 노드 불러오기';
+  }
+}
+
+// 추가된 페이지 제거
+function removePage(pageId, el) {
+  _addedPageIds.delete(pageId);
+  el.remove();
+  // 해당 페이지의 노드들 제거 후 재빌드
+  nodes = nodes.filter(n => n.sourcePageId !== pageId);
+  edges = edges.filter(e => nodeMap[e.from] && nodeMap[e.to]);
+  const newMap = {};
+  nodes.forEach(n => { newMap[n.id] = n; });
+  Object.assign(nodeMap, newMap);
+  isStable = false;
+}
+
+// 기존 그래프에 새 페이지 노드 병합
+function mergeGraph(title, markdown) {
+  const result = parseMarkdown(markdown, title);
+  const offset = nodes.length;
+  const idMap = {};
+
+  // 새 노드들 — pageId 태그 붙여서 추적
+  result.nodes.forEach(n => {
+    const newId = 'n' + (nodes.length);
+    idMap[n.id] = newId;
+    n.id = newId;
+    n.sourcePageId = title; // 나중에 제거 시 식별용
+    // 루트 노드가 아니면 위치 랜덤
+    if (n.level > 0) {
+      n.x = W/2 + (Math.random()-0.5)*400;
+      n.y = H/2 + (Math.random()-0.5)*400;
+    }
+    nodes.push(n);
+    nodeMap[newId] = n;
+  });
+
+  // 새 엣지들 ID 매핑
+  result.edges.forEach(e => {
+    const newFrom = idMap[e.from];
+    const newTo = idMap[e.to];
+    if (newFrom && newTo) {
+      edges.push({ from: newFrom, to: newTo });
+    }
+  });
+
+  // 새 루트 노드를 기존 그래프 루트에 연결
+  const existingRoot = nodes.find(n => n.level === 0 && !n.sourcePageId);
+  const newRoot = result.nodes.find(n => n.level === 0);
+  if (existingRoot && newRoot) {
+    edges.push({ from: existingRoot.id, to: idMap[newRoot.id] });
   }
 }
 
