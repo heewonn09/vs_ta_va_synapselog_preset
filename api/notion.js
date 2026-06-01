@@ -1,154 +1,1174 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시냅스 다이어리 — 내면의 신경망</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0c0d12; overflow: hidden; font-family: 'Noto Sans KR', sans-serif; }
+canvas { display: block; }
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+/* ── 입력 화면 ── */
+#login-screen {
+  position: fixed; inset: 0; background: #0c0d12;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+#login-box {
+  background: rgba(14,16,24,0.95);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-top: 2px solid rgba(255,159,67,0.6);
+  border-radius: 14px; padding: 32px 28px;
+  width: 360px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+#login-box .login-title {
+  font-size: 20px; font-weight: 700; color: #fff;
+  text-align: center; margin-bottom: 4px;
+}
+#login-box .login-title span { color: #ff9f43; }
+#login-box .login-sub {
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  text-align: center; margin-bottom: 24px;
+}
+.login-field { margin-bottom: 14px; }
+.login-field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.5); letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.login-field input {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  color: #fff; outline: none;
+  transition: border-color 0.2s;
+}
+.login-field input:focus { border-color: rgba(255,159,67,0.5); }
+.login-field input::placeholder { color: rgba(255,255,255,0.2); }
+#login-btn {
+  width: 100%; margin-top: 8px;
+  background: rgba(255,159,67,0.15);
+  border: 1px solid rgba(255,159,67,0.4);
+  border-radius: 8px; padding: 11px;
+  color: #ff9f43; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; letter-spacing: 0.04em;
+  transition: background 0.2s;
+}
+#login-btn:hover { background: rgba(255,159,67,0.25); }
+#login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#login-error {
+  margin-top: 10px; font-size: 12px; color: #ff6b6b;
+  text-align: center; display: none;
+}
+.login-help {
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px; color: rgba(255,255,255,0.25); line-height: 1.7;
+}
+.login-help a { color: rgba(255,159,67,0.6); text-decoration: none; }
+.login-help a:hover { color: #ff9f43; }
 
-  const { token, pageId } = req.body;
-  if (!token || !pageId) return res.status(400).json({ error: 'token과 pageId가 필요해요' });
+/* ── 검색창 ── */
+#search-container {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-60%);
+  z-index: 200;
+}
+#search-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(14,16,24,0.9);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-top: none;
+  /* 하단만 오렌지 구분선 */
+  border-bottom: 2px solid rgba(255,159,67,0.6);
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  min-width: 240px;
+}
+#search-bar input {
+  border: none; outline: none; font-size: 13px; font-family: inherit;
+  background: transparent; width: 200px; color: #fff; flex: 1;
+}
+#search-bar input::placeholder { color: rgba(255,255,255,0.3); }
+#search-btn {
+  background: none; border: none; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+#search-btn svg { width: 16px; height: 16px; }
+#clear-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; color: rgba(255,255,255,0.3); padding: 0; display: none; flex-shrink: 0;
+}
 
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    'Notion-Version': '2022-06-28',
-  };
+/* ── 호버 툴팁 ── */
+#tooltip {
+  position: fixed; background: rgba(14,16,24,0.95);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
+  padding: 6px 11px; font-size: 11px; font-weight: 600; color: #fff;
+  pointer-events: none; display: none; z-index: 400;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5); white-space: nowrap;
+}
 
-  function extractRichText(richTextArr) {
-    if (!richTextArr) return '';
-    return richTextArr.map(t => {
-      let str = t.plain_text || '';
-      if (t.annotations?.bold) str = `**${str}**`;
-      return str;
-    }).join('');
+/* ── 페이지 추가 패널 ── */
+#add-page-panel {
+  background: rgba(14,16,24,0.9);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px; padding: 10px 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid rgba(255,159,67,0.4);
+}
+#add-page-panel .panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #ff9f43; margin-bottom: 8px;
+}
+#add-page-panel input {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 7px 10px; font-size: 11px; font-family: inherit;
+  color: #fff; outline: none; margin-bottom: 6px;
+  transition: border-color 0.2s;
+}
+#add-page-panel input:focus { border-color: rgba(255,159,67,0.5); }
+#add-page-panel input::placeholder { color: rgba(255,255,255,0.2); }
+#add-page-btn {
+  width: 100%; background: rgba(255,159,67,0.12);
+  border: 1px solid rgba(255,159,67,0.35); border-radius: 6px;
+  padding: 7px; color: #ff9f43; font-size: 11px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+}
+#add-page-btn:hover { background: rgba(255,159,67,0.22); }
+#add-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#add-page-error { font-size: 11px; color: #ff6b6b; margin-top: 4px; display: none; }
+#added-pages-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.added-page-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.04); border-radius: 4px; padding: 4px 8px;
+}
+.added-page-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.added-page-remove {
+  background: none; border: none; color: rgba(255,255,255,0.3);
+  cursor: pointer; font-size: 12px; flex-shrink: 0; padding: 0 2px;
+}
+.added-page-remove:hover { color: #ff6b6b; }
+#right-area {
+  position: fixed; top: 16px; right: 18px; z-index: 200;
+  display: flex; flex-direction: column; gap: 10px;
+  width: 260px;
+}
+
+/* ── 로고 — SVG 없이 이름만 중앙 정렬 ── */
+#logo {
+  display: flex; align-items: center; justify-content: center;
+  user-select: none; padding: 14px 16px;
+  background: rgba(14,16,24,0.9);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(255,159,67,0.6);
+}
+#logo-text {
+  color: #fff; font-size: 20px; font-weight: 700;
+  letter-spacing: 0.02em; text-align: center;
+}
+#logo-text .accent { color: #ff9f43; }
+
+/* 슬라이더 패널 — 항상 열림 */
+#left-panel {
+  background: rgba(14,16,24,0.9);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px; padding: 10px 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid rgba(255,159,67,0.4);
+}
+#left-panel .panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #ff9f43;
+  margin-bottom: 8px;
+}
+#left-panel .ctrl-group { margin-bottom: 8px; }
+#left-panel .ctrl-group:last-child { margin-bottom: 0; }
+#left-panel .ctrl-label-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 4px;
+}
+#left-panel .ctrl-label-row .val { color: #ff9f43; font-weight: 700; font-family: monospace; font-size: 11px; }
+#left-panel input[type=range] {
+  -webkit-appearance: none; width: 100%;
+  background: rgba(255,255,255,0.12); height: 3px; border-radius: 2px; outline: none;
+}
+#left-panel input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: #ff9f43; cursor: pointer;
+  box-shadow: 0 0 7px rgba(255,159,67,0.6);
+}
+
+/* ── 우측 디테일 패널 ── */
+#detail-panel {
+  position: fixed; top: 0; right: -300px; width: 278px; height: 100vh;
+  background: rgba(12,13,20,0.98);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  z-index: 180; display: flex; flex-direction: column;
+  transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+  /* 닫기 버튼 absolute 기준 */
+}
+#detail-panel.open { right: 0; }
+
+/* 닫기 버튼 — 제목 오른쪽에 고정 */
+#detail-close {
+  background: rgba(255,255,255,0.1); border: none; color: #ddd; font-size: 14px;
+  cursor: pointer; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+#detail-close:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+/* 꺾인 구분선 카드 */
+#detail-card {
+  margin: 0 12px;
+  background: rgba(14,16,24,0.9);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-top: 2px solid rgba(255,159,67,0.6);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+  overflow: hidden;
+  /* 헤더는 이제 카드 안에 없고 별도 처리 */
+  display: none;
+}
+
+#detail-header { display: none; }
+#detail-cat-badge { display: none; }
+
+#detail-body {
+  flex: 1; overflow-y: auto;
+  padding: 20px 20px 24px;
+}
+#detail-body::-webkit-scrollbar { width: 3px; }
+#detail-body::-webkit-scrollbar-track { background: transparent; }
+#detail-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* 상단 여백 — JS에서 margin-top 동적으로 설정 */
+#detail-title-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 10px; margin-bottom: 12px;
+}
+#detail-title {
+  font-size: 19px; font-weight: 700; color: #fff;
+  line-height: 1.4; word-break: keep-all; flex: 1;
+}
+
+/* 날짜 + 카테고리 가로 배치 */
+#detail-meta-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 18px; flex-wrap: wrap;
+}
+#detail-date {
+  font-size: 11px; color: #ff9f43; font-family: monospace; font-weight: 600;
+  letter-spacing: 0.03em; display: none;
+}
+#detail-date::before { content: '📅 '; }
+#detail-cat-inline {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 10px;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.65); display: none;
+}
+
+#detail-divider { height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 16px; }
+#detail-content {
+  font-size: 13px; color: #ccc; line-height: 1.9;
+  white-space: pre-wrap; word-break: keep-all;
+}
+#detail-content strong { color: #f0f0f0; font-weight: 600; }
+
+/* ── 하단 상태 표시 ── */
+#status {
+  position: fixed; bottom: 20px; right: 20px;
+  background: rgba(18,20,28,0.85); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px; padding: 6px 12px; font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  transition: right 0.28s; pointer-events: none;
+}
+#status.panel-open { right: 294px; }
+
+/* 노드클릭/휠 힌트 — 검색창 중앙 기준 정렬 */
+#wheel-hint {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-60%);
+  color: rgba(255,255,255,0.55); font-size: 11px; letter-spacing: 0.04em; pointer-events: none;
+}
+#search-result-count {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-60%);
+  background: rgba(52,73,94,0.9); color: #ddd; border-radius: 12px;
+  padding: 4px 14px; font-size: 11px; display: none;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+</style>
+</head>
+<body>
+<!-- ── 입력 화면 ── -->
+<div id="login-screen">
+  <div id="login-box">
+    <div class="login-title">Synapse<span>Log</span></div>
+    <div class="login-sub">노션 페이지를 신경망 그래프로 시각화해요</div>
+    <div class="login-field">
+      <label>Notion API Token</label>
+      <input type="password" id="input-token" placeholder="secret_xxxxxxxxxxxxxx" />
+    </div>
+    <div class="login-field">
+      <label>Page ID</label>
+      <input type="text" id="input-page-id" placeholder="32자리 페이지 ID" />
+    </div>
+    <button id="login-btn" onclick="startGraph()">그래프 생성하기</button>
+    <div id="login-error"></div>
+    <div class="login-help">
+      <b style="color:rgba(255,255,255,0.4)">토큰 발급 방법</b><br>
+      1. <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> 접속<br>
+      2. New integration → 이름 입력 → Submit<br>
+      3. Internal Integration Token 복사<br>
+      4. 노션 페이지 우측 상단 ··· → Connect to → 방금 만든 integration 연결<br><br>
+      <b style="color:rgba(255,255,255,0.4)">Page ID 찾는 방법</b><br>
+      페이지 URL에서 마지막 32자리 (하이픈 제외)
+    </div>
+  </div>
+</div>
+
+<canvas id="c"></canvas>
+
+<div id="search-container">
+  <div id="search-bar">
+    <input type="text" id="search-input" placeholder="키워드 검색" />
+    <button id="clear-btn">✕</button>
+    <button id="search-btn" aria-label="검색">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6.5" cy="6.5" r="4.5" stroke="#ff9f43" stroke-width="1.6"/>
+        <line x1="10" y1="10" x2="14" y2="14" stroke="#ff9f43" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- 우측 상단: 로고 + 슬라이더 패널 -->
+<div id="right-area">
+  <div id="logo">
+    <div id="logo-text">Synapse<span class="accent">Log</span></div>
+  </div>
+  <!-- 슬라이더 패널 -->
+  <div id="left-panel">
+    <div class="panel-title">그래프 설정</div>
+    <div class="ctrl-group">
+      <div class="ctrl-label-row"><span>노드 반발력 (Repulsion)</span><span class="val" id="v-rep">3000</span></div>
+      <input type="range" id="cfg-rep" min="1000" max="25000" step="500" value="3000">
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label-row"><span>중앙 인력 (Gravity)</span><span class="val" id="v-grav">0.0001</span></div>
+      <input type="range" id="cfg-grav" min="0.0001" max="0.0030" step="0.0001" value="0.0001">
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label-row"><span>링크 장력 (Link Distance)</span><span class="val" id="v-dist">150</span></div>
+      <input type="range" id="cfg-dist" min="60" max="250" step="5" value="150">
+    </div>
+  </div>
+  <!-- 페이지 추가 패널 -->
+  <div id="add-page-panel">
+    <div class="panel-title">페이지 추가</div>
+    <input type="text" id="add-page-id" placeholder="추가할 Page ID" />
+    <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
+    <div id="add-page-error"></div>
+    <div id="added-pages-list"></div>
+  </div>
+</div>
+
+<!-- 호버 미니 툴팁 -->
+<div id="tooltip"></div>
+
+<!-- 클릭 시 우측 디테일 패널 -->
+<div id="detail-panel">
+  <div id="detail-body">
+    <div id="detail-title-row">
+      <div id="detail-title"></div>
+      <button id="detail-close" onclick="closePanel()">✕</button>
+    </div>
+    <div id="detail-meta-row">
+      <span id="detail-date"></span>
+      <span id="detail-cat-inline"></span>
+    </div>
+    <div id="detail-divider"></div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<div id="status"></div>
+<div id="wheel-hint">노드 클릭 → 상세 보기 · 휠 → 확대/축소</div>
+<div id="search-result-count"></div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+const statusEl = document.getElementById('status');
+const searchInput = document.getElementById('search-input');
+const clearBtn = document.getElementById('clear-btn');
+const searchResultEl = document.getElementById('search-result-count');
+
+const cfgRep = document.getElementById('cfg-rep');
+const cfgGrav = document.getElementById('cfg-grav');
+const cfgDist = document.getElementById('cfg-dist');
+const vRep = document.getElementById('v-rep');
+const vGrav = document.getElementById('v-grav');
+const vDist = document.getElementById('v-dist');
+
+let W = window.innerWidth, H = window.innerHeight;
+canvas.width = W; canvas.height = H;
+
+// 계층별 노드 반지름 (level 0=루트, 1=H1, 2=H2, 3=H3, 4=H4/볼드)
+function nodeR(level) {
+  return [10, 8, 6.5, 5.5, 4.5][Math.min(level, 4)];
+}
+let scale = 0.85;
+let panX = 0, panY = 0;
+let searchKeyword = '';
+let searchMode = 'keyword';
+let searchMatches = new Set();
+let isStable = false;
+
+let CONFIG = { repulsion: 3000, gravity: 0.0001, linkDistance: 150 };
+
+function updateConfig() {
+  CONFIG.repulsion = parseFloat(cfgRep.value);
+  CONFIG.gravity = parseFloat(cfgGrav.value);
+  CONFIG.linkDistance = parseFloat(cfgDist.value);
+  vRep.textContent = cfgRep.value;
+  vGrav.textContent = cfgGrav.value;
+  vDist.textContent = cfgDist.value;
+  isStable = false;
+}
+cfgRep.addEventListener('input', updateConfig);
+cfgGrav.addEventListener('input', updateConfig);
+cfgDist.addEventListener('input', updateConfig);
+
+const CAT_COLORS = {
+  root: '#ffffff',
+  exp:  '#00d2d3',
+  value:'#a29bfe',
+  sub:  '#74b9ff'
+};
+
+function hexToRgb(hex) {
+  if (!hex || hex[0] !== '#') return [150,150,150];
+  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+}
+function rgbStr(rgb, a=1) { return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
+function getColor(cat) { return CAT_COLORS[cat] || CAT_COLORS.sub; }
+
+// 마크다운 정리 — 볼드 **, 대괄호 [], 해시 # 등 제거
+function cleanLabel(str) {
+  if (!str) return '';
+  return str
+    .replace(/\*\*([^*]+)\*\*/g, '$1')   // **볼드** → 텍스트만
+    .replace(/\*([^*]+)\*/g, '$1')        // *이탤릭* → 텍스트만
+    .replace(/[\[\]#`]/g, '')             // [], #, ` 제거
+    .replace(/\{[^}]*\}/g, '')            // {color=...} 제거
+    .replace(/→|⇒|—/g, '')               // 화살표 제거
+    .trim();
+}
+
+// desc 정리 — **볼드** 는 그대로 유지, 나머지 마크다운 기호만 제거
+function cleanDesc(str) {
+  if (!str) return '';
+  return str
+    .replace(/\*([^*]+)\*/g, '$1')       // *이탤릭* 제거 (볼드 ** 는 건드리지 않음)
+    .replace(/[\[\]#`]/g, '')
+    .replace(/\{[^}]*\}/g, '')
+    .trim();
+}
+
+const SEMANTIC_DICTIONARY = {
+  '일기': ['회상', '기억', '경험', '생각', '하루', '5월', '4월', '3월', '정리'],
+  '성장': ['변화', '가재', '탈피', '결핍', '껍질', '인간', '발전', '노력', '갑옷'],
+  '마이클잭슨': ['영화', '가족', '감정', '압박', '아버지', '시청', '눈물'],
+  '도덕': ['선의', '우월감', '친절', '이익', '올바름', '행동'],
+  '브랜딩': ['콘텐츠', 'sns', '릴스', '캐러셀', '미디어', '유저', '흐름', '시스템'],
+  '인간': ['사람', '관계', '타인', '존중', '이해', '맥락', '개별성', 'mbti']
+};
+
+function parseMarkdown(text, rootTitle) {
+  const nodes = [], edges = [], nodeMap = {};
+  let nid = 0;
+
+  function addNode(rawLabel, cat, desc='', parentId=null, date='', level=0) {
+    const label = cleanLabel(rawLabel);
+    if (!label || label.length < 1) return null;
+
+    const parentNode = nodeMap[parentId];
+    let finalCat = cat;
+    if (parentNode && parentNode.level > 0) finalCat = parentNode.cat;
+
+    const id = 'n' + (nid++);
+    const angle = Math.random() * Math.PI * 2;
+    let r = level === 0 ? 0 : (level === 1 ? 140 : (level === 2 ? 240 : 360));
+    r += (Math.random() - 0.5) * 40;
+
+    const n = {
+      id, label, cat: finalCat, desc: cleanDesc(desc), date,
+      x: W/2 + Math.cos(angle)*r,
+      y: H/2 + Math.sin(angle)*r,
+      vx: 0, vy: 0,
+      level, fixed: level === 0
+    };
+    nodes.push(n);
+    nodeMap[id] = n;
+    if (parentId) edges.push({ from: parentId, to: id });
+    return id;
   }
 
-  // 데이터베이스 하위 페이지 목록 조회
-  async function fetchDatabaseChildren(dbId) {
-    const pages = [];
-    let cursor = undefined;
-    do {
-      const url = `https://api.notion.com/v1/databases/${dbId}/query`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify(cursor ? { start_cursor: cursor } : {})
-      });
-      if (!response.ok) break;
-      const data = await response.json();
-      pages.push(...data.results);
-      cursor = data.has_more ? data.next_cursor : undefined;
-    } while (cursor);
-    return pages;
-  }
+  const rootId = addNode(rootTitle || '자기관리: 내면', 'root', '', null, '', 0);
+  const currentParents = { 0: rootId, 1: null, 2: null, 3: null, 4: null };
+  const lines = text.split('\n');
 
-  // 페이지 타이틀 추출
-  function extractPageTitle(pageData) {
-    const props = pageData.properties || {};
-    const titleProp = Object.values(props).find(p => p.type === 'title');
-    if (titleProp?.title?.length > 0) {
-      return titleProp.title.map(t => t.plain_text).join('');
-    }
-    // child_page 타입인 경우
-    if (pageData.child_page?.title) return pageData.child_page.title;
-    return '(제목 없음)';
-  }
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    if (!line || line.startsWith('---') || line.startsWith('![') || line.startsWith('<')) continue;
 
-  // 재귀 블록 읽기 (데이터베이스 하위 페이지 포함)
-  async function fetchBlocks(blockId, depth = 0) {
-    if (depth > 4) return ''; // 최대 깊이 제한
-    let markdown = '';
-    let cursor = undefined;
+    // ── 헤딩 파싱 (H1~H4)
+    const headerMatch = line.match(/^(#{1,4})\s+(.*)$/);
+    if (headerMatch) {
+      const depth = headerMatch[1].length;
+      let lbl = headerMatch[2].trim();
 
-    do {
-      const url = `https://api.notion.com/v1/blocks/${blockId}/children${cursor ? `?start_cursor=${cursor}` : ''}`;
-      const response = await fetch(url, { headers });
-      if (!response.ok) break;
-      const data = await response.json();
-
-      for (const block of data.results) {
-        if (!block?.type) continue;
-        try {
-          const type = block.type;
-
-          if (type === 'heading_1') {
-            markdown += '# ' + extractRichText(block.heading_1?.rich_text) + '\n';
-          } else if (type === 'heading_2') {
-            markdown += '## ' + extractRichText(block.heading_2?.rich_text) + '\n';
-          } else if (type === 'heading_3') {
-            markdown += '### ' + extractRichText(block.heading_3?.rich_text) + '\n';
-          } else if (type === 'heading_4') {
-            markdown += '#### ' + extractRichText(block.heading_4?.rich_text) + '\n';
-          } else if (type === 'paragraph') {
-            const text = extractRichText(block.paragraph?.rich_text);
-            if (text.trim()) markdown += text + '\n';
-          } else if (type === 'bulleted_list_item') {
-            markdown += '- ' + extractRichText(block.bulleted_list_item?.rich_text) + '\n';
-          } else if (type === 'numbered_list_item') {
-            markdown += '1. ' + extractRichText(block.numbered_list_item?.rich_text) + '\n';
-          } else if (type === 'quote') {
-            markdown += '> ' + extractRichText(block.quote?.rich_text) + '\n';
-          } else if (type === 'callout') {
-            const text = extractRichText(block.callout?.rich_text);
-            if (text.trim()) markdown += '> ' + text + '\n';
-          } else if (type === 'toggle') {
-            const title = extractRichText(block.toggle?.rich_text);
-            if (title.trim()) markdown += '#### ' + title + '\n';
-          } else if (type === 'child_page') {
-            // 하위 페이지 — 재귀적으로 읽기
-            const childTitle = block.child_page?.title || '하위 페이지';
-            markdown += `\n## ${childTitle}\n`;
-            if (block.has_children) {
-              markdown += await fetchBlocks(block.id, depth + 1);
-            }
-            continue;
-          } else if (type === 'child_database') {
-            // 하위 데이터베이스 — 각 레코드(페이지) 읽기
-            const dbTitle = block.child_database?.title || '데이터베이스';
-            markdown += `\n# ${dbTitle}\n`;
-            try {
-              const dbPages = await fetchDatabaseChildren(block.id);
-              for (const dbPage of dbPages) {
-                const pageTitle = extractPageTitle(dbPage);
-                markdown += `\n## ${pageTitle}\n`;
-                // 각 데이터베이스 페이지 내용 읽기
-                const pageContent = await fetchBlocks(dbPage.id, depth + 2);
-                if (pageContent.trim()) markdown += pageContent;
-              }
-            } catch (e) {
-              // 데이터베이스 접근 실패 시 스킵
-            }
-            continue;
-          }
-        } catch (e) {
-          // 블록 파싱 실패 시 스킵
-        }
-
-        // 일반 하위 블록 재귀
-        if (block.has_children && block.type !== 'child_page' && block.type !== 'child_database') {
-          markdown += await fetchBlocks(block.id, depth + 1);
-        }
+      let cat = 'sub';
+      if (depth === 1) {
+        if (lbl.includes('회상') || lbl.includes('경험')) cat = 'exp';
+        if (lbl.includes('가치관')) cat = 'value';
       }
 
-      cursor = data.has_more ? data.next_cursor : undefined;
-    } while (cursor);
+      let nDate = '';
+      const inlineDateMatch = lbl.match(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/);
+      if (inlineDateMatch) {
+        nDate = inlineDateMatch[1];
+        lbl = lbl.replace(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/, '');
+      }
 
-    return markdown;
-  }
+      let parentId = null;
+      for (let d = depth - 1; d >= 0; d--) {
+        if (currentParents[d]) { parentId = currentParents[d]; break; }
+      }
+      if (!parentId) parentId = rootId;
 
-  try {
-    const pageRes = await fetch(`https://api.notion.com/v1/pages/${pageId}`, { headers });
-    if (!pageRes.ok) {
-      const err = await pageRes.json();
-      return res.status(pageRes.status).json({ error: err.message || '페이지를 찾을 수 없어요. Integration이 해당 페이지에 연결되어 있는지 확인해주세요.' });
+      // 본문 설명 수집
+      let descLines = [];
+      let nextIdx = i + 1;
+      while (nextIdx < lines.length) {
+        let nextLine = lines[nextIdx].trim();
+        if (!nextLine) { nextIdx++; continue; }
+        if (nextLine.startsWith('#')) break;
+        // 날짜 라인 처리
+        const dateOnlyMatch = nextLine.match(/^-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-$/);
+        if (dateOnlyMatch) { nDate = nDate || dateOnlyMatch[1]; nextIdx++; continue; }
+        // 볼드 단독 라인이 다음 노드 제목이면 멈춤
+        if (/^\*\*[^*]{3,60}\*\*$/.test(nextLine) && descLines.length > 0) break;
+        descLines.push(nextLine);
+        nextIdx++;
+      }
+      const finalDesc = descLines.join('\n').substring(0, 500);
+
+      const curId = addNode(lbl, cat, finalDesc, parentId, nDate, depth);
+      if (curId) {
+        currentParents[depth] = curId;
+        for (let d = depth + 1; d <= 4; d++) currentParents[d] = null;
+      }
+      if (nextIdx > i + 1) i = nextIdx - 1;
+      continue;
     }
 
-    const pageData = await pageRes.json();
-    const pageTitle = extractPageTitle(pageData);
-    const markdown = await fetchBlocks(pageId);
+    // ── 볼드체 단독 라인: **텍스트** 또는 **텍스트** 내용...
+    const boldMatch = line.match(/^\*\*([^*]{2,80})\*\*(.*)$/);
+    if (boldMatch) {
+      let lbl = boldMatch[1].trim();
+      let inlineDesc = boldMatch[2].replace(/^[\s:：—→⇒]+/, '').trim();
 
-    res.status(200).json({ title: pageTitle, markdown });
-  } catch (e) {
-    res.status(500).json({ error: e.message || '서버 오류가 발생했어요' });
+      // 날짜 추출
+      let nDate = '';
+      const dateInLbl = lbl.match(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/);
+      if (dateInLbl) { nDate = dateInLbl[1]; lbl = lbl.replace(dateInLbl[0], ''); }
+
+      // 이어지는 본문 수집
+      let descLines = inlineDesc ? [inlineDesc] : [];
+      let nextIdx = i + 1;
+      while (nextIdx < lines.length) {
+        let nextLine = lines[nextIdx].trim();
+        if (!nextLine) { nextIdx++; continue; }
+        if (nextLine.startsWith('#')) break;
+        if (/^\*\*[^*]{2,}\*\*/.test(nextLine)) break;
+        const dateOnly = nextLine.match(/^-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-$/);
+        if (dateOnly) { nDate = nDate || dateOnly[1]; nextIdx++; continue; }
+        descLines.push(nextLine);
+        nextIdx++;
+      }
+      const finalDesc = descLines.join('\n').substring(0, 500);
+
+      let parentId = null;
+      for (let d = 4; d >= 0; d--) {
+        if (currentParents[d]) { parentId = currentParents[d]; break; }
+      }
+      if (!parentId) parentId = rootId;
+
+      const parentLevel = nodeMap[parentId]?.level || 0;
+      const curId = addNode(lbl, 'sub', finalDesc, parentId, nDate, parentLevel + 1);
+      // 볼드 노드는 현재 부모 레벨의 하위로 등록 (헤딩 스택 건드리지 않음)
+      if (curId && parentLevel + 1 <= 4) currentParents[parentLevel + 1] = curId;
+
+      if (nextIdx > i + 1) i = nextIdx - 1;
+      continue;
+    }
+  }
+
+  return { nodes, edges, nodeMap };
+}
+
+const MARKDOWN = `
+# [회상&경험]
+## [2026.05]
+#### [회고]_"5월 일기 정리"
+-2026.05.30-
+내시점 : 생각보다 나는 진짜 많은 생각들을 가지고 살아가더라. 오래 남은 흔적들로 인해 아파하기도 슬퍼하기도 나의 자부심이 되기도 했다. 나는 어느 순간 취업의 장벽에 막혀서 멈춰 있다는 생각이 들었는데, 나의 시간은 흐르고 있었다.
+나의 흔적들을 기록하면서, 잊고 있던 것들이 떠오르고, 잊기 싫은것을 작성하면서, 나라는 사람에 대해 좀 더 알아 갈 수 있었던 것 같다.
+다만, 나의 철학과 가치관이 단단하게 굳어버리는 것은 싫기에 항상 의심하고 디벨롭 하는 과정을 거쳐야 겠다는 생각이 들었다.
+#### [회상]_"대학 발표의 과정과 그 이후"
+-2026.05.30-
+대학교 캡스톤 발표를 성공적으로 진행하기 위해 많은 노력을 기울였다. 발표 약 6개월 전부터 기획과 준비를 이어왔고, 그 과정은 나에게 많은 경험과 변화를 남겼다.
+사람들에게 강한 인상을 남기는 에너지도 중요하지만, 상대가 받아들일 수 있는 형태로 변환하는 과정의 필요성을 느낌.
+#### [경험]_"영화 마이클잭슨 시청"
+-2026.05.16-
+영화 자체는 슬프지 않았다. 하지만 영화를 보는 2시간 17분 동안 나는 울었다.
+내가 반응한 부분은 단순한 성공 서사가 아니라, 가족 안의 긴장, 감정적으로 압박하는 아버지, 자기 삶보다 가족 구조를 먼저 감당해야 했던 아이, 그리고 그 구조를 벗어나 자기 삶을 찾으려는 부분이었다.
+## [2026.04]
+#### [경험]_"한림대&한국 병원 응급실"
+-2026.04.23-
+내과에서 횡문근 융해증과 함께 빈혈과 혈소판 감소 진단을 받아. 상급 병원 응급실로 갈 것을 권유 받았다. 아플 때, 치료를 바로 받을 수 있는 것도 행운이다. 이를 잊지 말아야 한다.
+#### [회상]_"느리지만, 따라가는건 빠른 나"
+-2026.04.07-
+남들과 비교하였을 때, 늦게 시작하는 경우가 많지만 빠르게 따라가거나 그 너머의 성과를 내는 경우가 있음.
+본인은 준비가 이루어 지지 않으면 쉽게 행동하지 않음. 준비가 이루어졌을 때, 겁을 내지 않고 실행하지만 준비가 이루어 지지 않았을 경우에 대해 겁을 냄.
+#### [경험]_"가게명) 유목민 몽골(종로)"
+-2026.04.16-
+처음으로 몽골 음식을 접했다. 향신료가 강하지 않고 재료 본연의 식감과 맛을 중요하게 여기는 인상이었다. 다른 나라 음식을 먹으며 그 나라의 기후와 문화까지 함께 떠올려본 경험이 많지 않았기에, 나름의 의미가 있었다.
+#### [경험]_"울트라 백화점 서울 Vol.2"
+-2026.04.16-
+정보 과도화 시대, 정보 접근에 있어서 인간의 체력적 한계가 있다. 별 볼일 없는 정보일지라도 눈을 사로 잡는 키워드 한 줄로 그 사람의 시간을 살 수 있다.
+#### [회상]_"일기의 시작"
+-2026.03.30-
+군대, 마트, 발표, 프로젝트의 경험을 미루어 보았을 때, 나는 기존의 틀에서 부족하다고 생각이 든 부분들을 그냥 넘어가지 못함. 노력을 해서라도 새로운 형식의 틀을 만들고, 설득하며 자리 잡아가는 과정을 즐김.
+# [가치관]
+## [관심 주제]
+#### "경험의 중요한 이유" : 모든 결과는 경험에서 시작된다
+#### "나이가 들면, 사람은 왜 고집이 강해질까"
+## [2026.05]
+#### [선의]_"두 명의 사람과 한덩이의 빵"
+-2026.05.24-
+사람 두 명과 하나의 빵이 있다면, 나는 먼저 그 빵을 쟁취한 뒤 스스로의 선택으로 절반을 나눌 것이다. 이익을 챙기면서 친절을 베풀 수 있는 방식은 분명 존재한다.
+#### [선의]_"본인의 같잖은 도덕적 우월감"
+-2026.05.24-
+도덕적 우월감은 우리 인생에서 가질 수 있는 우월감 중 유일하게 노력 없이 얻을 수 있다. 큰 틀의 문제를 비난하면서, 정작 자신의 작은 행동 속에서는 같은 방식을 무심코 반복하지 말아야 한다.
+#### [브랜딩]_"사람들이 원하는 흐름에 자리 잡아야 한다"
+-2026.05.18-
+타겟 유저에게 필요한 정보를 제공하고, 그들을 모아두는 환경을 조성한 후, 그 타겟 유저들과 내가 함께 이득을 취할 수 있는 시스템을 만드는 것의 중요성을 느낌. 개인 브랜딩, 운영, 미디어 제작 등 다양한 분야에서 활용 가능.
+#### [단정]_"단어로 압축된 사람들"
+-2026.05.17-
+나는 사람을 하나의 단어로 정의내리는 것을 싫어한다. 한 인간의 복잡한 맥락과 개별성을 지워버리는 기준이 되기도 한다.
+#### [존중]_"인생은 상대적인 것"
+-2026.05.17-
+서로 다른 삶을 살아온 이상, 각자의 결론에는 나름의 이유와 맥락이 존재하기 때문이다. 사람은 단순히 선과 악, 정답과 오답으로 나눌 수 없는 존재라는 생각이 든다.
+#### [열정]_"운전자는 멀미가 나지 않는다"
+-2026.05.12-
+자신이 어디로 가는 지 아는 운전자는 멀미가 나지 않는다. 목표가 어디인지 알고, 어디까지 왔는지 알기에, 마음이 준비를 한다.
+#### [관계]_"이해와 존중의 차이"
+-2026.05.10-
+꼭 타인을 이해해야 하는 것일까? 타인의 생각을 이해가 아닌 존중해준다면, 더 깊게 들어갈 필요가 없지 않을까?
+#### [생각]_"뭐 눈엔 뭐만 보인다고…"
+-2026.05.10-
+사람은 자신이 오래 바라본 것에 대해선 자연스럽게 언어가 생긴다. 하나의 분야를 오래 고민한 사람은 그 분야를 쉽게 설명하고, 자신을 오래 들여다본 사람은 쉽게 단정 짓지 않는다.
+#### [변화]_"인간은 변화할 수 있을까?"
+-2026.05.09-
+가재는 탈피를 통해 성장하는 동물이다. 끝내 껍질을 벗어내지 못하면 스스로의 껍질에 짓눌려 죽게 된다. 나와 소중한 것들을 지키기 위해서는 유연한 껍질을 만들어야 한다. 인간은 변화할 수 있다는 것에 한표를 던지고 싶다.
+#### [수용]_"창작물이 자기 자신과 너무 가까워질 때"
+-2026.05.09-
+결과물에 대한 비판이 내 존재의 부정은 아니기 때문에, 결과물과 나를 분리하는 객관적인 시선을 가지려는 태도가 필요하다.
+#### [사고]_결과론적 사고
+-2026.05.06-
+과정을 고려하지 않고 결과에 대해서만 판단함.
+#### [콘텐츠]_"콘텐츠 내에서의 이분법적 사고"
+-2026.05.06-
+이분법적 사고를 좋아하지는 않지만, 콘텐츠 시장에서는 필수적이다. 타겟층에 따른 수요를 맞추는 것에는 이분법적 사고가 필요하다.
+#### [콘텐츠]_"릴스 시대가 저물고, 이미지 포스팅 시대가 오고 있다"
+-2026.04.28-
+동영상을 시청하는데에 느껴지는 피로감과 비직관적인 정보력으로 인해, 잘 정리된 이미지 포스팅을 찾고 있다.
+#### [성 정체성]_"성 정체성이 전체가 되는 자"
+-2026.04.28-
+30대에 접어들면서 까지도 본인의 성별이 인생의 가장 중요한 사람은 본인에게 더욱 중요한 정체성을 잃고 사는 사람일 것.
+`;
+
+let nodes=[], edges=[], nodeMap={};
+let drag=null, hoveredNode=null;
+let isPanning=false, panStartX=0, panStartY=0, panStartOffsetX=0, panStartOffsetY=0;
+
+// 계층별 순차 등장 — 얽힘 방지
+// level 0 → 1 → 2 → 3 → 4 순서로 딜레이를 두고 활성화
+// ── Vercel API 호출 → 그래프 시작 ──
+let _savedToken = ''; // 토큰 재사용을 위해 저장
+let _addedPageIds = new Set(); // 중복 방지
+
+async function startGraph() {
+  const token = document.getElementById('input-token').value.trim();
+  const pageId = document.getElementById('input-page-id').value.trim().replace(/-/g, '');
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+
+  if (!token || !pageId) {
+    errEl.textContent = 'Token과 Page ID를 모두 입력해주세요';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, pageId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
+
+    _savedToken = token;
+    _addedPageIds.add(pageId);
+
+    document.getElementById('login-screen').style.display = 'none';
+
+    window._NOTION_TITLE = data.title || '노션 페이지';
+    window._NOTION_MARKDOWN = data.markdown || '';
+
+    buildGraph();
+    loop();
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '그래프 생성하기';
   }
 }
+
+// ── 페이지 추가 ──
+async function addPage() {
+  const pageId = document.getElementById('add-page-id').value.trim().replace(/-/g, '');
+  const errEl = document.getElementById('add-page-error');
+  const btn = document.getElementById('add-page-btn');
+
+  if (!pageId) { errEl.textContent = 'Page ID를 입력해주세요'; errEl.style.display = 'block'; return; }
+  if (_addedPageIds.has(pageId)) { errEl.textContent = '이미 추가된 페이지예요'; errEl.style.display = 'block'; return; }
+  if (!_savedToken) { errEl.textContent = '토큰 정보가 없어요. 새로고침 후 다시 시도해주세요'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _savedToken, pageId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
+
+    _addedPageIds.add(pageId);
+
+    // 기존 그래프에 새 페이지 노드 추가
+    mergeGraph(data.title || '추가 페이지', data.markdown || '');
+
+    // 추가된 페이지 목록 표시
+    const list = document.getElementById('added-pages-list');
+    const item = document.createElement('div');
+    item.className = 'added-page-item';
+    item.dataset.pageId = pageId;
+    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="added-page-remove" onclick="removePage('${pageId}', this.parentElement)">✕</button>`;
+    list.appendChild(item);
+
+    document.getElementById('add-page-id').value = '';
+    btn.disabled = false;
+    btn.textContent = '+ 노드 불러오기';
+    isStable = false;
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '+ 노드 불러오기';
+  }
+}
+
+// 추가된 페이지 제거
+function removePage(pageId, el) {
+  _addedPageIds.delete(pageId);
+  el.remove();
+  // 해당 페이지의 노드들 제거 후 재빌드
+  nodes = nodes.filter(n => n.sourcePageId !== pageId);
+  edges = edges.filter(e => nodeMap[e.from] && nodeMap[e.to]);
+  const newMap = {};
+  nodes.forEach(n => { newMap[n.id] = n; });
+  Object.assign(nodeMap, newMap);
+  isStable = false;
+}
+
+// 기존 그래프에 새 페이지 노드 병합
+function mergeGraph(title, markdown) {
+  const result = parseMarkdown(markdown, title);
+  const offset = nodes.length;
+  const idMap = {};
+
+  // 새 노드들 — pageId 태그 붙여서 추적
+  result.nodes.forEach(n => {
+    const newId = 'n' + (nodes.length);
+    idMap[n.id] = newId;
+    n.id = newId;
+    n.sourcePageId = title; // 나중에 제거 시 식별용
+    // 루트 노드가 아니면 위치 랜덤
+    if (n.level > 0) {
+      n.x = W/2 + (Math.random()-0.5)*400;
+      n.y = H/2 + (Math.random()-0.5)*400;
+    }
+    nodes.push(n);
+    nodeMap[newId] = n;
+  });
+
+  // 새 엣지들 ID 매핑
+  result.edges.forEach(e => {
+    const newFrom = idMap[e.from];
+    const newTo = idMap[e.to];
+    if (newFrom && newTo) {
+      edges.push({ from: newFrom, to: newTo });
+    }
+  });
+
+  // 새 루트 노드를 기존 그래프 루트에 연결
+  const existingRoot = nodes.find(n => n.level === 0 && !n.sourcePageId);
+  const newRoot = result.nodes.find(n => n.level === 0);
+  if (existingRoot && newRoot) {
+    edges.push({ from: existingRoot.id, to: idMap[newRoot.id] });
+  }
+}
+
+function buildGraph() {
+  const markdown = window._NOTION_MARKDOWN || MARKDOWN;
+  const title = window._NOTION_TITLE || '자기관리: 내면';
+  const r = parseMarkdown(markdown, title);
+  nodes = r.nodes; edges = r.edges; nodeMap = r.nodeMap;
+
+  // 루트는 중앙 고정
+  const root = nodes.find(n => n.level === 0);
+  if (root) { root.x = W/2; root.y = H/2; }
+
+  // 처음엔 루트만 보이게, 나머지는 비활성
+  nodes.forEach(n => { n.visible = n.level === 0; });
+
+  isStable = false;
+
+  // 각 레벨을 순서대로 300ms 간격으로 활성화
+  const maxLevel = Math.max(...nodes.map(n => n.level));
+  for (let lv = 1; lv <= maxLevel; lv++) {
+    const delay = lv * 320;
+    setTimeout(() => {
+      nodes.forEach(n => { if (n.level === lv) n.visible = true; });
+      isStable = false;
+    }, delay);
+  }
+}
+
+function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
+
+function simulate() {
+  if (isStable && !drag) return;
+  const repulsion = CONFIG.repulsion;
+  const damping = 0.82;
+  const centerForce = CONFIG.gravity;
+  let totalVelocity = 0;
+
+  nodes.forEach(n => {
+    if(!n.visible || n.fixed || n === drag) return;
+    let fx = 0, fy = 0;
+
+    nodes.forEach(m => {
+      if(m === n || !m.visible) return;
+      const dx = n.x - m.x, dy = n.y - m.y;
+      const d = Math.max(dist(n,m), 1);
+      const limit = (n.level >= 3 && m.level >= 3) ? 160 : 260;
+      if(d < limit) {
+        const f = repulsion / (d*d);
+        fx += dx/d*f; fy += dy/d*f;
+      }
+    });
+
+    edges.forEach(e => {
+      if(e.from !== n.id && e.to !== n.id) return;
+      const other = nodeMap[e.from === n.id ? e.to : e.from];
+      if(!other) return;
+      const dx = other.x - n.x, dy = other.y - n.y;
+      const d = Math.max(dist(n,other), 1);
+      let natural = CONFIG.linkDistance;
+      if(n.level===1||other.level===1) natural *= 0.8;
+      if(n.level>=3||other.level>=3) natural *= 0.9;
+      const f = (d - natural) * 0.028;
+      fx += dx/d*f; fy += dy/d*f;
+    });
+
+    fx += (W/2 - n.x) * centerForce;
+    fy += (H/2 - n.y) * centerForce;
+
+    n.vx = (n.vx + fx) * damping;
+    n.vy = (n.vy + fy) * damping;
+    n.x += n.vx; n.y += n.vy;
+    totalVelocity += Math.abs(n.vx) + Math.abs(n.vy);
+  });
+
+  if (totalVelocity < 0.25 && !drag) isStable = true;
+}
+
+function screenToWorld(sx, sy) {
+  return { x:(sx-W/2-panX)/scale+W/2, y:(sy-H/2-panY)/scale+H/2 };
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0c0d12';
+  ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  ctx.translate(W/2+panX, H/2+panY);
+  ctx.scale(scale, scale);
+  ctx.translate(-W/2, -H/2);
+
+  const hasSearch = searchKeyword.length > 0;
+
+  edges.forEach(e => {
+    const na=nodeMap[e.from], nb=nodeMap[e.to];
+    if(!na||!nb||!na.visible||!nb.visible) return;
+    const isHov = hoveredNode&&(hoveredNode.id===e.from||hoveredNode.id===e.to);
+    const bothMatch = hasSearch&&searchMatches.has(e.from)&&searchMatches.has(e.to);
+    const eitherMatch = hasSearch&&(searchMatches.has(e.from)||searchMatches.has(e.to));
+
+    let alpha, width;
+    if(hasSearch){ alpha=bothMatch?0.85:eitherMatch?0.25:0.02; width=bothMatch?2.0:0.6; }
+    else { alpha=isHov?0.85:0.55; width=isHov?2.2:0.8; }
+
+    ctx.strokeStyle=rgbStr(hexToRgb(getColor(na.cat)), alpha);
+    ctx.lineWidth=width/scale;
+    ctx.beginPath(); ctx.moveTo(na.x,na.y); ctx.lineTo(nb.x,nb.y); ctx.stroke();
+  });
+
+  nodes.forEach(n => {
+    if(!n.visible) return;
+    const isHov=hoveredNode===n;
+    const isMatch=searchMatches.has(n.id);
+    const isDim=hasSearch&&!isMatch;
+    const r = nodeR(n.level);
+
+    if(isHov||isMatch) {
+      ctx.beginPath(); ctx.arc(n.x,n.y,r+12,0,Math.PI*2);
+      const col=isMatch?'#ffffff':getColor(n.cat);
+      const rgb=hexToRgb(col);
+      const g=ctx.createRadialGradient(n.x,n.y,r,n.x,n.y,r+12);
+      g.addColorStop(0,rgbStr(rgb,0.3)); g.addColorStop(1,rgbStr(rgb,0));
+      ctx.fillStyle=g; ctx.fill();
+    }
+
+    ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
+    if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; }
+    else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; }
+    else {
+      const rgb=hexToRgb(getColor(n.cat));
+      ctx.fillStyle=isDim?rgbStr(rgb,0.1):rgbStr(rgb,0.9);
+      ctx.strokeStyle=isDim?rgbStr(rgb,0.02):rgbStr(rgb,1);
+    }
+    ctx.lineWidth=isHov?2/scale:1/scale;
+    ctx.fill(); ctx.stroke();
+
+    let lbl = n.label;
+    if(n.level>=2 && lbl.length>14) lbl = lbl.substring(0,13)+'…';
+    let fontSize = 10;
+    if(n.level===0||n.level===1) fontSize=12;
+    else if(n.level===2) fontSize=11;
+
+    ctx.font=(n.level<=1)?`bold ${fontSize}px 'Noto Sans KR',sans-serif`:`500 ${fontSize}px 'Noto Sans KR',sans-serif`;
+    ctx.fillStyle=isMatch?'#ffffff':`rgba(215,220,230,${isDim?0.12:0.85})`;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(lbl, n.x, n.y+r+5);
+  });
+
+  ctx.restore();
+}
+
+function getNodeAt(sx, sy) {
+  const w = screenToWorld(sx, sy);
+  return nodes.find(n => n.visible && dist(n,w) <= nodeR(n.level)+5) || null;
+}
+
+// 우측 디테일 패널
+const detailPanel = document.getElementById('detail-panel');
+const detailTitle = document.getElementById('detail-title');
+const detailDate = document.getElementById('detail-date');
+const detailContent = document.getElementById('detail-content');
+const detailCatInline = document.getElementById('detail-cat-inline');
+
+const CAT_LABELS = { root:'루트', exp:'회상·경험', value:'가치관·철학', sub:'세부 항목' };
+
+function openPanel(n) {
+  const rightArea = document.getElementById('right-area');
+  const detailBody = document.getElementById('detail-body');
+  if (rightArea && detailBody) {
+    const h = rightArea.getBoundingClientRect().bottom + 12;
+    detailBody.style.marginTop = h + 'px';
+    detailBody.style.borderTop = '2px solid rgba(255,159,67,0.6)';
+    detailBody.style.borderRadius = '10px 10px 0 0';
+  }
+
+  if(detailTitle) detailTitle.textContent = n.label;
+
+  if(detailCatInline) {
+    const catLabel = CAT_LABELS[n.cat] || n.cat;
+    const catColor = getColor(n.cat);
+    detailCatInline.textContent = catLabel;
+    detailCatInline.style.display = 'inline-block';
+    detailCatInline.style.color = catColor;
+    detailCatInline.style.borderColor = catColor + '44';
+  }
+
+  if(detailDate) {
+    if(n.date) {
+      detailDate.style.display = 'inline';
+      detailDate.textContent = n.date;
+    } else {
+      detailDate.style.display = 'none';
+    }
+  }
+
+  const rawDesc = n.desc || '(내용 없음)';
+  if(detailContent) detailContent.innerHTML = rawDesc.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  detailPanel.classList.add('open');
+  statusEl.classList.add('panel-open');
+}
+
+function closePanel() {
+  detailPanel.classList.remove('open');
+  statusEl.classList.remove('panel-open');
+}
+
+function doSearch(kw) {
+  searchKeyword = kw.trim().toLowerCase();
+  searchMatches.clear();
+  if(searchKeyword) {
+    nodes.forEach(n => {
+      const lt = n.label.toLowerCase(), dt = n.desc.toLowerCase();
+      if(lt.includes(searchKeyword)||dt.includes(searchKeyword)) searchMatches.add(n.id);
+    });
+    searchResultEl.style.display='block';
+    searchResultEl.textContent=`${searchMatches.size}개 결과`;
+    clearBtn.style.display='block';
+    document.getElementById('wheel-hint').style.display='none';
+  } else {
+    searchResultEl.style.display='none';
+    clearBtn.style.display='none';
+    document.getElementById('wheel-hint').style.display='block';
+  }
+  isStable = false;
+}
+
+searchInput.addEventListener('input', e=>doSearch(e.target.value));
+searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(e.target.value); });
+document.getElementById('search-btn').addEventListener('click', ()=>doSearch(searchInput.value));
+clearBtn.addEventListener('click', ()=>{ searchInput.value=''; doSearch(''); });
+
+// 마우스 이동 — 미니 툴팁 (이름만 표시)
+let mouseDownNode = null;
+let mouseDownTime = 0;
+
+canvas.addEventListener('mousemove', e => {
+  if(drag) {
+    const w=screenToWorld(e.clientX, e.clientY);
+    drag.x=w.x; drag.y=w.y; return;
+  }
+  if(isPanning) {
+    panX=panStartOffsetX+(e.clientX-panStartX);
+    panY=panStartOffsetY+(e.clientY-panStartY);
+    return;
+  }
+  const n = getNodeAt(e.clientX, e.clientY);
+  hoveredNode = n;
+  canvas.style.cursor = n ? 'pointer' : 'default';
+
+  if(n && n.level > 0) {
+    tooltip.textContent = n.label;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX+14) + 'px';
+    tooltip.style.top = (e.clientY-32) + 'px';
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+canvas.addEventListener('mousedown', e => {
+  mouseDownTime = Date.now();
+  const n = getNodeAt(e.clientX, e.clientY);
+  mouseDownNode = n;
+  if(n && !n.fixed) { drag=n; isStable=false; }
+  else { isPanning=true; panStartX=e.clientX; panStartY=e.clientY; panStartOffsetX=panX; panStartOffsetY=panY; canvas.style.cursor='grab'; }
+});
+
+canvas.addEventListener('mouseup', e => {
+  const elapsed = Date.now() - mouseDownTime;
+  const n = getNodeAt(e.clientX, e.clientY);
+  // 클릭(드래그 아님)으로 판단 — 150ms 이내 + 같은 노드
+  if(elapsed < 150 && n && n === mouseDownNode && n.level > 0) {
+    openPanel(n);
+  }
+  drag=null; isPanning=false; canvas.style.cursor='default';
+});
+
+canvas.addEventListener('mouseleave', ()=>{ tooltip.style.display='none'; hoveredNode=null; drag=null; isPanning=false; });
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.06 : 0.94;
+  const mx=e.clientX, my=e.clientY;
+  const wx=(mx-W/2-panX)/scale, wy=(my-H/2-panY)/scale;
+  scale = Math.max(0.15, Math.min(4, scale*factor));
+  panX = mx-W/2-wx*scale;
+  panY = my-H/2-wy*scale;
+  statusEl.textContent=`확대: ${Math.round(scale*100)}%`;
+  clearTimeout(canvas._st);
+  canvas._st=setTimeout(()=>{ statusEl.textContent=''; }, 1200);
+}, {passive:false});
+
+window.addEventListener('resize', ()=>{
+  W=window.innerWidth; H=window.innerHeight;
+  canvas.width=W; canvas.height=H;
+  const root=nodes.find(n=>n.level===0);
+  if(root){ root.x=W/2; root.y=H/2; }
+  isStable=false;
+});
+
+// 입력 화면에서 startGraph() 호출 시 buildGraph + loop 시작
+updateConfig();
+function loop(){ simulate(); draw(); requestAnimationFrame(loop); }
+
+</script>
+</body>
+</html>
