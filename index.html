@@ -500,6 +500,8 @@ const SEMANTIC_DICTIONARY = {
   '인간': ['사람', '관계', '타인', '존중', '이해', '맥락', '개별성', 'mbti']
 };
 
+let _firstRootFixed = false; // 전역: 첫 번째 루트만 고정
+
 function parseMarkdown(text, rootTitle) {
   const nodes = [], edges = [], nodeMap = {};
   let nid = 0;
@@ -517,13 +519,16 @@ function parseMarkdown(text, rootTitle) {
     let r = level === 0 ? 0 : (level === 1 ? 140 : (level === 2 ? 240 : 360));
     r += (Math.random() - 0.5) * 40;
 
-    const isFirstRoot = (level === 0 && nodes.length === 0);
+    // 첫 번째 루트만 고정
+    const shouldFix = (level === 0 && !_firstRootFixed);
+    if (shouldFix) _firstRootFixed = true;
+
     const n = {
       id, label, cat: finalCat, desc: cleanDesc(desc), date,
       x: W/2 + Math.cos(angle)*r,
       y: H/2 + Math.sin(angle)*r,
       vx: 0, vy: 0,
-      level, fixed: isFirstRoot
+      level, fixed: shouldFix
     };
     nodes.push(n);
     nodeMap[id] = n;
@@ -767,7 +772,7 @@ async function startGraph() {
     const item = document.createElement('div');
     item.className = 'added-page-item';
     item.dataset.pageId = pageId;
-    item.innerHTML = `<span>🏠 ${data.title || pageId}</span><button class="added-page-remove" onclick="reloadWithoutPage('${pageId}', this.parentElement)">✕</button>`;
+    item.innerHTML = `<span>🏠 ${data.title || pageId}</span><button class="added-page-remove" onclick="reloadWithoutPage('${pageId}', this.closest('.added-page-item'))">✕</button>`;
     list.appendChild(item);
   } catch(e) {
     errEl.textContent = e.message;
@@ -810,7 +815,7 @@ async function addPage() {
     const item = document.createElement('div');
     item.className = 'added-page-item';
     item.dataset.pageId = pageId;
-    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="added-page-remove" onclick="removePage('${pageId}', this.parentElement)">✕</button>`;
+    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="added-page-remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button>`;
     list.appendChild(item);
 
     document.getElementById('add-page-id').value = '';
@@ -842,13 +847,16 @@ function reloadWithoutPage(pageId, el) {
 // 추가된 페이지 제거
 function removePage(pageId, el) {
   _addedPageIds.delete(pageId);
-  el.remove();
-  // 해당 페이지의 노드들 제거 후 재빌드
-  nodes = nodes.filter(n => n.sourcePageId !== pageId);
-  edges = edges.filter(e => nodeMap[e.from] && nodeMap[e.to]);
-  const newMap = {};
-  nodes.forEach(n => { newMap[n.id] = n; });
-  Object.assign(nodeMap, newMap);
+  // DOM에서 항목 제거
+  if (el) el.remove();
+  // 해당 sourcePageId를 가진 노드 ID 수집
+  const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
+  // 노드 제거
+  nodes = nodes.filter(n => !removeIds.has(n.id));
+  // 엣지 제거 (양쪽 중 하나라도 제거 대상이면 삭제)
+  edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
+  // nodeMap 재구성
+  Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
   isStable = false;
 }
 
@@ -893,6 +901,7 @@ function mergeGraph(title, markdown) {
 }
 
 function buildGraph() {
+  _firstRootFixed = false; // 리셋 — 첫 루트만 고정
   const markdown = window._NOTION_MARKDOWN || MARKDOWN;
   const title = window._NOTION_TITLE || '자기관리: 내면';
   const r = parseMarkdown(markdown, title);
