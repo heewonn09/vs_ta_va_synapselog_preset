@@ -832,16 +832,16 @@ function removePage(pageId, el) {
 // 기존 그래프에 새 페이지 노드 병합
 function mergeGraph(title, markdown) {
   const result = parseMarkdown(markdown, title);
-  const offset = nodes.length;
   const idMap = {};
 
-  // 새 노드들 — pageId 태그 붙여서 추적
+  // 1단계: 모든 노드에 새 ID 부여 (기존 ID와 충돌 방지)
   result.nodes.forEach(n => {
-    const newId = 'n' + (nodes.length);
-    idMap[n.id] = newId;
+    const oldId = n.id;
+    const newId = 'p' + Date.now() + '_' + oldId; // 고유 prefix
+    idMap[oldId] = newId;
     n.id = newId;
-    n.sourcePageId = title; // 나중에 제거 시 식별용
-    // 루트 노드가 아니면 위치 랜덤
+    n.sourcePageId = title;
+    n.visible = true;
     if (n.level > 0) {
       n.x = W/2 + (Math.random()-0.5)*400;
       n.y = H/2 + (Math.random()-0.5)*400;
@@ -850,21 +850,23 @@ function mergeGraph(title, markdown) {
     nodeMap[newId] = n;
   });
 
-  // 새 엣지들 ID 매핑
+  // 2단계: 엣지 ID 매핑
   result.edges.forEach(e => {
     const newFrom = idMap[e.from];
     const newTo = idMap[e.to];
-    if (newFrom && newTo) {
+    if (newFrom && newTo && nodeMap[newFrom] && nodeMap[newTo]) {
       edges.push({ from: newFrom, to: newTo });
     }
   });
 
-  // 새 루트 노드를 기존 그래프 루트에 연결
+  // 3단계: 새 루트를 기존 루트에 연결
   const existingRoot = nodes.find(n => n.level === 0 && !n.sourcePageId);
-  const newRoot = result.nodes.find(n => n.level === 0);
-  if (existingRoot && newRoot) {
-    edges.push({ from: existingRoot.id, to: idMap[newRoot.id] });
+  const newRootOldId = result.nodes.find(n => n.level === 0)?.id;
+  if (existingRoot && newRootOldId) {
+    edges.push({ from: existingRoot.id, to: newRootOldId });
   }
+
+  isStable = false;
 }
 
 function buildGraph() {
