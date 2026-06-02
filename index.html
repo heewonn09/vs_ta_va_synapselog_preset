@@ -380,6 +380,14 @@ canvas { display: block; }
     <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
     <div id="add-page-error"></div>
     <div id="added-pages-list"></div>
+    <div class="login-help" style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-size:10px;">
+      <b style="color:rgba(255,159,67,0.7)">Page ID 찾는 방법</b><br>
+      노션 페이지 URL에서 마지막 32자리<br>
+      예) notion.so/My-Page-<b style="color:#ff9f43">abc123def456...</b><br><br>
+      <b style="color:rgba(255,159,67,0.7)">연결 안 될 때</b><br>
+      노션 페이지 우측 상단 ···<br>
+      → Connect to → integration 연결
+    </div>
   </div>
 </div>
 
@@ -451,19 +459,34 @@ cfgRep.addEventListener('input', updateConfig);
 cfgGrav.addEventListener('input', updateConfig);
 cfgDist.addEventListener('input', updateConfig);
 
-const CAT_COLORS = {
-  root: '#ffffff',
-  exp:  '#00d2d3',
-  value:'#a29bfe',
-  sub:  '#74b9ff'
-};
+// 눈에 띄는 색상 팔레트 — H1 노드에 순서대로 할당
+const COLOR_PALETTE = [
+  '#00d2d3', '#a29bfe', '#fd79a8', '#55efc4', '#fdcb6e',
+  '#e17055', '#74b9ff', '#00b894', '#e84393', '#6c5ce7',
+  '#f9ca24', '#45aaf2', '#ff6b81', '#2ecc71', '#fd9644',
+  '#a55eea', '#26de81', '#fc5c65', '#45b7d1', '#f7b731'
+];
+let _colorIndex = 0; // 색상 순환 인덱스
+const _catColorMap = {}; // H1 라벨 → 색상 매핑 (같은 카테고리는 같은 색)
+
+function getH1Color(label) {
+  if (!_catColorMap[label]) {
+    _catColorMap[label] = COLOR_PALETTE[_colorIndex % COLOR_PALETTE.length];
+    _colorIndex++;
+  }
+  return _catColorMap[label];
+}
 
 function hexToRgb(hex) {
   if (!hex || hex[0] !== '#') return [150,150,150];
   return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
 }
 function rgbStr(rgb, a=1) { return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
-function getColor(cat) { return CAT_COLORS[cat] || CAT_COLORS.sub; }
+function getColor(cat, label) {
+  if (cat === 'root') return '#ffffff';
+  if (label && _catColorMap[label]) return _catColorMap[label];
+  return '#74b9ff';
+}
 
 // 마크다운 정리 — 볼드 **, 대괄호 [], 해시 # 등 제거
 function cleanLabel(str) {
@@ -512,15 +535,22 @@ function parseMarkdown(text, rootTitle) {
     let finalCat = cat;
     if (parentNode && parentNode.level > 0) finalCat = parentNode.cat;
 
-    const id = 'n' + (nid++);
+    // H1 노드에 팔레트 색상 할당 — 라벨 기준으로 일관성 유지
+    let color = null;
+    if (level === 1) {
+      color = getH1Color(label);
+    } else if (parentNode?.color) {
+      color = parentNode.color; // 부모 색상 상속
+    }
 
+    const id = 'n' + (nid++);
     const n = {
       id, label, cat: finalCat, desc: cleanDesc(desc), date,
       x: W/2 + (Math.random()-0.5)*60,
       y: H/2 + (Math.random()-0.5)*60,
       vx: 0, vy: 0,
-      level,
-      fixed: false // 모든 노드 움직임 허용
+      level, fixed: false,
+      color // 노드별 색상
     };
     nodes.push(n);
     nodeMap[id] = n;
@@ -782,23 +812,28 @@ function mergeGraph(title, markdown, pageId) {
 }
 
 function buildGraph() {
-  _firstRootFixed = false; // 리셋 — 첫 루트만 고정
+  _firstRootFixed = false;
+  _colorIndex = 0; // 색상 인덱스 리셋
   const markdown = window._NOTION_MARKDOWN || MARKDOWN;
-  const title = window._NOTION_TITLE || '자기관리: 내면';
+
+  // 빈 마크다운이면 빈 그래프 (루트 노드도 안 만듦)
+  if (!markdown || !markdown.trim()) {
+    nodes = []; edges = []; Object.keys(nodeMap).forEach(k => delete nodeMap[k]);
+    isStable = false;
+    return;
+  }
+
+  const title = window._NOTION_TITLE || '노션 페이지';
   const r = parseMarkdown(markdown, title);
   nodes = r.nodes; edges = r.edges; nodeMap = r.nodeMap;
 
-  // 루트는 중앙 고정
   const root = nodes.find(n => n.level === 0);
   if (root) { root.x = W/2; root.y = H/2; }
 
-  // 처음엔 루트만 보이게, 나머지는 비활성
   nodes.forEach(n => { n.visible = n.level === 0; });
-
   isStable = false;
 
-  // 각 레벨을 순서대로 300ms 간격으로 활성화
-  const maxLevel = Math.max(...nodes.map(n => n.level));
+  const maxLevel = Math.max(...nodes.map(n => n.level), 0);
   for (let lv = 1; lv <= maxLevel; lv++) {
     const delay = lv * 320;
     setTimeout(() => {
@@ -892,12 +927,12 @@ function draw() {
     else { alpha=isHov?0.85:0.55; width=isHov?2.2:0.8; }
 
     if(e.weakLink) {
-      // 루트 간 연결 — 오렌지 점선, 얇고 반투명
       ctx.strokeStyle = `rgba(255,159,67,${isHov?0.6:0.25})`;
       ctx.lineWidth = 1/scale;
       ctx.setLineDash([6,6]);
     } else {
-      ctx.strokeStyle=rgbStr(hexToRgb(getColor(na.cat)), alpha);
+      const nodeColor = na.color || '#74b9ff';
+      ctx.strokeStyle=rgbStr(hexToRgb(nodeColor), alpha);
       ctx.lineWidth=width/scale;
       ctx.setLineDash([]);
     }
@@ -911,10 +946,11 @@ function draw() {
     const isMatch=searchMatches.has(n.id);
     const isDim=hasSearch&&!isMatch;
     const r = nodeR(n.level);
+    const nodeColor = n.level===0 ? '#ffffff' : (n.color || '#74b9ff');
 
     if(isHov||isMatch) {
       ctx.beginPath(); ctx.arc(n.x,n.y,r+12,0,Math.PI*2);
-      const col=isMatch?'#ffffff':getColor(n.cat);
+      const col=isMatch?'#ffffff':nodeColor;
       const rgb=hexToRgb(col);
       const g=ctx.createRadialGradient(n.x,n.y,r,n.x,n.y,r+12);
       g.addColorStop(0,rgbStr(rgb,0.3)); g.addColorStop(1,rgbStr(rgb,0));
@@ -925,7 +961,7 @@ function draw() {
     if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; }
     else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; }
     else {
-      const rgb=hexToRgb(getColor(n.cat));
+      const rgb=hexToRgb(nodeColor);
       ctx.fillStyle=isDim?rgbStr(rgb,0.1):rgbStr(rgb,0.9);
       ctx.strokeStyle=isDim?rgbStr(rgb,0.02):rgbStr(rgb,1);
     }
