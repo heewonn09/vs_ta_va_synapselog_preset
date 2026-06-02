@@ -323,11 +323,7 @@ canvas { display: block; }
       <label>Notion API Token</label>
       <input type="password" id="input-token" placeholder="secret_xxxxxxxxxxxxxx" />
     </div>
-    <div class="login-field">
-      <label>Page ID</label>
-      <input type="text" id="input-page-id" placeholder="32자리 페이지 ID" />
-    </div>
-    <button id="login-btn" onclick="startGraph()">그래프 생성하기</button>
+    <button id="login-btn" onclick="startGraph()">시작하기</button>
     <div id="login-error"></div>
     <div class="login-help">
       <b style="color:rgba(255,255,255,0.4)">토큰 발급 방법</b><br>
@@ -641,60 +637,29 @@ let nodes=[], edges=[], nodeMap={};
 let drag=null, hoveredNode=null;
 let isPanning=false, panStartX=0, panStartY=0, panStartOffsetX=0, panStartOffsetY=0;
 
-// 계층별 순차 등장 — 얽힘 방지
-// level 0 → 1 → 2 → 3 → 4 순서로 딜레이를 두고 활성화
-// ── Vercel API 호출 → 그래프 시작 ──
-let _savedToken = ''; // 토큰 재사용을 위해 저장
-let _addedPageIds = new Set(); // 중복 방지
+// ── 전역 변수 ──
+let _savedToken = '';
+let _addedPageIds = new Set();
 
+// ── 토큰만 입력 → 그래프 화면 진입 ──
 async function startGraph() {
   const token = document.getElementById('input-token').value.trim();
-  const pageId = document.getElementById('input-page-id').value.trim().replace(/-/g, '');
   const errEl = document.getElementById('login-error');
   const btn = document.getElementById('login-btn');
 
-  if (!token || !pageId) {
-    errEl.textContent = 'Token과 Page ID를 모두 입력해주세요';
+  if (!token) {
+    errEl.textContent = 'Notion API Token을 입력해주세요';
+    errEl.style.display = 'block'; return;
+  }
+  if (!token.startsWith('secret_') && !token.startsWith('ntn_')) {
+    errEl.textContent = '올바른 토큰 형식이 아니에요 (secret_ 또는 ntn_ 으로 시작)';
     errEl.style.display = 'block'; return;
   }
 
-  btn.disabled = true;
-  btn.textContent = '불러오는 중...';
-  errEl.style.display = 'none';
-
-  try {
-    const res = await fetch('/api/notion', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, pageId })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
-
-    _savedToken = token;
-    _addedPageIds.add(pageId);
-
-    document.getElementById('login-screen').style.display = 'none';
-
-    window._NOTION_TITLE = data.title || '노션 페이지';
-    window._NOTION_MARKDOWN = data.markdown || '';
-
-    buildGraph();
-    loop();
-
-    // 첫 페이지도 목록에 표시
-    const list = document.getElementById('added-pages-list');
-    const item = document.createElement('div');
-    item.className = 'added-page-item';
-    item.dataset.pageId = pageId;
-    item.innerHTML = `<span>🏠 ${data.title || pageId}</span><button class="added-page-remove" onclick="reloadWithoutPage('${pageId}', this.closest('.added-page-item'))">✕</button>`;
-    list.appendChild(item);
-  } catch(e) {
-    errEl.textContent = e.message;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '그래프 생성하기';
-  }
+  _savedToken = token;
+  document.getElementById('login-screen').style.display = 'none';
+  buildGraph();
+  loop();
 }
 
 // ── 페이지 추가 ──
@@ -745,32 +710,13 @@ async function addPage() {
   }
 }
 
-// 첫 페이지 제거 — 전체 초기화
-function reloadWithoutPage(pageId, el) {
-  if (!confirm('첫 페이지를 제거하면 그래프 전체가 초기화돼요. 계속할까요?')) return;
-  _addedPageIds.clear();
-  _savedToken = '';
-  nodes = []; edges = []; Object.keys(nodeMap).forEach(k => delete nodeMap[k]);
-  document.getElementById('added-pages-list').innerHTML = '';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('input-token').value = '';
-  document.getElementById('input-page-id').value = '';
-  document.getElementById('login-btn').disabled = false;
-  document.getElementById('login-btn').textContent = '그래프 생성하기';
-}
-
-// 추가된 페이지 제거
+// ── 페이지 제거 — 모든 페이지 동등하게 노드만 제거 ──
 function removePage(pageId, el) {
   _addedPageIds.delete(pageId);
-  // DOM에서 항목 제거
   if (el) el.remove();
-  // 해당 sourcePageId를 가진 노드 ID 수집
   const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
-  // 노드 제거
   nodes = nodes.filter(n => !removeIds.has(n.id));
-  // 엣지 제거 (양쪽 중 하나라도 제거 대상이면 삭제)
   edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
-  // nodeMap 재구성
   Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
   isStable = false;
 }
