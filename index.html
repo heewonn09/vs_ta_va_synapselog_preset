@@ -70,38 +70,61 @@ canvas { display: block; }
 .login-help a { color: rgba(255,159,67,0.6); text-decoration: none; }
 .login-help a:hover { color: #ff9f43; }
 
-/* ── 검색창 ── */
-#search-container {
-  position: fixed; top: 18px; left: 50%; transform: translateX(-60%);
-  z-index: 200;
-}
-#search-bar {
-  display: flex; align-items: center; gap: 10px;
+/* ── 검색 패널 (right-area 안) ── */
+#search-panel {
   background: rgba(14,16,24,0.9);
   border: 1px solid rgba(255,255,255,0.09);
-  border-top: none;
-  /* 하단만 오렌지 구분선 */
-  border-bottom: 2px solid rgba(255,159,67,0.6);
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-top: 2px solid rgba(255,159,67,0.6);
+  border-radius: 12px; padding: 10px 14px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.4);
   backdrop-filter: blur(10px);
-  min-width: 240px;
+}
+#search-panel .panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #ff9f43; margin-bottom: 8px;
+}
+#search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 7px 10px;
 }
 #search-bar input {
-  border: none; outline: none; font-size: 13px; font-family: inherit;
-  background: transparent; width: 200px; color: #fff; flex: 1;
+  border: none; outline: none; font-size: 11px; font-family: inherit;
+  background: transparent; color: #fff; flex: 1; width: 0;
 }
-#search-bar input::placeholder { color: rgba(255,255,255,0.3); }
+#search-bar input::placeholder { color: rgba(255,255,255,0.25); }
 #search-btn {
   background: none; border: none; cursor: pointer; padding: 0;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-#search-btn svg { width: 16px; height: 16px; }
+#search-btn svg { width: 14px; height: 14px; }
 #clear-btn {
   background: none; border: none; cursor: pointer;
   font-size: 11px; color: rgba(255,255,255,0.3); padding: 0; display: none; flex-shrink: 0;
 }
+#search-result-count {
+  font-size: 10px; color: rgba(255,159,67,0.7);
+  margin-top: 5px; display: none;
+}
+/* 검색 기록 */
+#search-history {
+  margin-top: 6px; display: flex; flex-direction: column; gap: 3px;
+}
+.search-history-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.03); border-radius: 4px;
+  padding: 3px 8px; cursor: pointer;
+  transition: background 0.15s;
+}
+.search-history-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.search-history-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-history-del {
+  background: none; border: none; color: rgba(255,255,255,0.2);
+  cursor: pointer; font-size: 11px; flex-shrink: 0; padding: 0 2px;
+}
+.search-history-del:hover { color: #ff6b6b; }
 
 /* ── 호버 툴팁 ── */
 #tooltip {
@@ -209,16 +232,14 @@ canvas { display: block; }
   box-shadow: 0 0 7px rgba(255,159,67,0.6);
 }
 
-/* ── 우측 디테일 패널 ── */
+/* ── 우측 디테일 패널 — right-area 너비/위치와 통일 ── */
 #detail-panel {
-  position: fixed; top: 0; right: -300px; width: 278px; height: 100vh;
-  background: rgba(12,13,20,0.98);
-  border-left: 1px solid rgba(255,255,255,0.08);
-  z-index: 180; display: flex; flex-direction: column;
+  position: fixed; top: 0; right: -296px; width: 260px; height: 100vh;
+  background: transparent;
+  z-index: 170; display: flex; flex-direction: column;
   transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: -8px 0 32px rgba(0,0,0,0.5);
 }
-#detail-panel.open { right: 0; }
+#detail-panel.open { right: 18px; }
 
 #detail-close {
   background: rgba(255,255,255,0.1); border: none; color: #ddd; font-size: 14px;
@@ -232,17 +253,16 @@ canvas { display: block; }
 #detail-header { display: none; }
 #detail-cat-badge { display: none; }
 
-/* 2. 상세 UI — add-page-panel과 통일감 */
+/* 상세 UI — add-page-panel, left-panel과 동일한 스타일 */
 #detail-body {
   flex: 1; overflow-y: auto;
-  margin: 0 12px;
   background: rgba(14,16,24,0.9);
   border: 1px solid rgba(255,255,255,0.09);
   border-top: 2px solid rgba(255,159,67,0.6);
   border-radius: 12px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.4);
   backdrop-filter: blur(10px);
-  padding: 16px 16px 20px;
+  padding: 14px 14px 18px;
 }
 #detail-body::-webkit-scrollbar { width: 3px; }
 #detail-body::-webkit-scrollbar-track { background: transparent; }
@@ -297,16 +317,11 @@ canvas { display: block; }
 }
 #status.panel-open { right: 294px; }
 
-/* 노드클릭/휠 힌트 — 검색창 중앙 기준 정렬 */
+/* 하단 힌트 */
 #wheel-hint {
-  position: fixed; top: 70px; left: 50%; transform: translateX(-60%);
-  color: rgba(255,255,255,0.55); font-size: 11px; letter-spacing: 0.04em; pointer-events: none;
-}
-#search-result-count {
-  position: fixed; top: 70px; left: 50%; transform: translateX(-60%);
-  background: rgba(52,73,94,0.9); color: #ddd; border-radius: 12px;
-  padding: 4px 14px; font-size: 11px; display: none;
-  border: 1px solid rgba(255,255,255,0.1);
+  position: fixed; bottom: 52px; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.3); font-size: 11px; pointer-events: none;
 }
 </style>
 </head>
@@ -323,36 +338,38 @@ canvas { display: block; }
     <button id="login-btn" onclick="startGraph()">시작하기</button>
     <div id="login-error"></div>
     <div class="login-help">
-      <b style="color:rgba(255,255,255,0.4)">토큰 발급 방법</b><br>
+      <b>토큰 발급 방법</b><br>
       1. <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> 접속<br>
       2. New integration → 이름 입력 → Submit<br>
       3. Internal Integration Token 복사<br>
-      4. 노션 페이지 우측 상단 ··· → Connect to → 방금 만든 integration 연결<br><br>
-      <b style="color:rgba(255,255,255,0.4)">Page ID 찾는 방법</b><br>
-      페이지 URL에서 마지막 32자리 (하이픈 제외)
+      4. 노션 페이지 우측 상단 ··· → Connect to → 방금 만든 integration 연결
     </div>
   </div>
 </div>
 
 <canvas id="c"></canvas>
 
-<div id="search-container">
-  <div id="search-bar">
-    <input type="text" id="search-input" placeholder="키워드 검색" />
-    <button id="clear-btn">✕</button>
-    <button id="search-btn" aria-label="검색">
-      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6.5" cy="6.5" r="4.5" stroke="#ff9f43" stroke-width="1.6"/>
-        <line x1="10" y1="10" x2="14" y2="14" stroke="#ff9f43" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-    </button>
-  </div>
-</div>
-
-<!-- 우측 상단: 로고 + 슬라이더 패널 -->
+<!-- 우측 패널 전체 -->
 <div id="right-area">
   <div id="logo">
     <div id="logo-text">Synapse<span class="accent">Log</span></div>
+  </div>
+  <!-- 검색 패널 -->
+  <div id="search-panel">
+    <div class="panel-title">키워드 검색</div>
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="키워드 검색" />
+      <button id="clear-btn">✕</button>
+      <button id="search-btn" aria-label="검색">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6.5" cy="6.5" r="4.5" stroke="#ff9f43" stroke-width="1.6"/>
+          <line x1="10" y1="10" x2="14" y2="14" stroke="#ff9f43" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div id="search-result-count"></div>
+    <!-- 검색 기록 -->
+    <div id="search-history"></div>
   </div>
   <!-- 슬라이더 패널 -->
   <div id="left-panel">
@@ -378,12 +395,9 @@ canvas { display: block; }
     <div id="add-page-error"></div>
     <div id="added-pages-list"></div>
     <div class="login-help" style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-size:10px;">
-      <b style="color:rgba(255,159,67,0.7)">Page ID 찾는 방법</b><br>
+      <b>Page ID 찾는 방법</b><br>
       노션 페이지 URL에서 마지막 32자리<br>
-      예) notion.so/My-Page-<b style="color:#ff9f43">abc123def456...</b><br><br>
-      <b style="color:rgba(255,159,67,0.7)">연결 안 될 때</b><br>
-      노션 페이지 우측 상단 ···<br>
-      → Connect to → integration 연결
+      예) notion.so/My-Page-<span style="color:#ff9f43">abc123def456...</span>
     </div>
   </div>
 </div>
@@ -506,15 +520,6 @@ function cleanDesc(str) {
     .replace(/\{[^}]*\}/g, '')
     .trim();
 }
-
-const SEMANTIC_DICTIONARY = {
-  '일기': ['회상', '기억', '경험', '생각', '하루', '5월', '4월', '3월', '정리'],
-  '성장': ['변화', '가재', '탈피', '결핍', '껍질', '인간', '발전', '노력', '갑옷'],
-  '마이클잭슨': ['영화', '가족', '감정', '압박', '아버지', '시청', '눈물'],
-  '도덕': ['선의', '우월감', '친절', '이익', '올바름', '행동'],
-  '브랜딩': ['콘텐츠', 'sns', '릴스', '캐러셀', '미디어', '유저', '흐름', '시스템'],
-  '인간': ['사람', '관계', '타인', '존중', '이해', '맥락', '개별성', 'mbti']
-};
 
 let _firstRootFixed = false;
 
@@ -958,11 +963,19 @@ function draw() {
     if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; }
     else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; }
     else {
-      const rgb=hexToRgb(nodeColor);
-      // 계층별 채도(투명도) 차이: level1=1.0, level2=0.75, level3=0.55, level4=0.4
-      const levelAlpha = [1, 1, 0.75, 0.55, 0.4][Math.min(n.level, 4)];
-      ctx.fillStyle=isDim?rgbStr(rgb,0.08):rgbStr(rgb,levelAlpha);
-      ctx.strokeStyle=isDim?rgbStr(rgb,0.02):rgbStr(rgb,Math.min(levelAlpha+0.1,1));
+      const rgb = hexToRgb(nodeColor);
+      // 계층별 채도 차이 — 배경색(#0c0d12 ≈ rgb(12,13,18))과 믹싱해서 채도를 낮춤
+      // level1=100%, level2=72%, level3=50%, level4=35%
+      const satRatio = [1, 1, 0.72, 0.50, 0.35][Math.min(n.level, 4)];
+      const bg = [12, 13, 18];
+      const mixed = rgb.map((c, i) => Math.round(c * satRatio + bg[i] * (1 - satRatio)));
+      if(isDim) {
+        ctx.fillStyle = rgbStr(mixed, 0.15);
+        ctx.strokeStyle = rgbStr(mixed, 0.06);
+      } else {
+        ctx.fillStyle = rgbStr(mixed, 1);
+        ctx.strokeStyle = rgbStr(mixed, 1);
+      }
     }
     ctx.lineWidth=isHov?2/scale:1/scale;
     ctx.fill(); ctx.stroke();
@@ -1047,30 +1060,70 @@ function closePanel() {
   statusEl.classList.remove('panel-open');
 }
 
+// ── 검색 기록 ──
+const _searchHistory = [];
+const MAX_HISTORY = 8;
+
+function renderSearchHistory() {
+  const container = document.getElementById('search-history');
+  if (!container) return;
+  container.innerHTML = '';
+  _searchHistory.forEach((kw, idx) => {
+    const item = document.createElement('div');
+    item.className = 'search-history-item';
+    item.innerHTML = `<span>${kw}</span><button class="search-history-del" onclick="deleteHistory(${idx}, event)">✕</button>`;
+    item.addEventListener('click', () => { searchInput.value = kw; doSearch(kw); });
+    container.appendChild(item);
+  });
+}
+
+function addHistory(kw) {
+  if (!kw || kw.length < 1) return;
+  const idx = _searchHistory.indexOf(kw);
+  if (idx !== -1) _searchHistory.splice(idx, 1);
+  _searchHistory.unshift(kw);
+  if (_searchHistory.length > MAX_HISTORY) _searchHistory.pop();
+  renderSearchHistory();
+}
+
+function deleteHistory(idx, e) {
+  e.stopPropagation();
+  _searchHistory.splice(idx, 1);
+  renderSearchHistory();
+}
+
 function doSearch(kw) {
   searchKeyword = kw.trim().toLowerCase();
   searchMatches.clear();
+  const resultEl = document.getElementById('search-result-count');
   if(searchKeyword) {
     nodes.forEach(n => {
       const lt = n.label.toLowerCase(), dt = n.desc.toLowerCase();
       if(lt.includes(searchKeyword)||dt.includes(searchKeyword)) searchMatches.add(n.id);
     });
-    searchResultEl.style.display='block';
-    searchResultEl.textContent=`${searchMatches.size}개 결과`;
+    if(resultEl) { resultEl.style.display='block'; resultEl.textContent=`${searchMatches.size}개 결과`; }
     clearBtn.style.display='block';
-    document.getElementById('wheel-hint').style.display='none';
   } else {
-    searchResultEl.style.display='none';
+    if(resultEl) resultEl.style.display='none';
     clearBtn.style.display='none';
-    document.getElementById('wheel-hint').style.display='block';
   }
   isStable = false;
 }
 
-searchInput.addEventListener('input', e=>doSearch(e.target.value));
-searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(e.target.value); });
-document.getElementById('search-btn').addEventListener('click', ()=>doSearch(searchInput.value));
-clearBtn.addEventListener('click', ()=>{ searchInput.value=''; doSearch(''); });
+searchInput.addEventListener('input', e => doSearch(e.target.value));
+searchInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter') {
+    const kw = searchInput.value.trim();
+    if(kw) addHistory(kw);
+    doSearch(kw);
+  }
+});
+document.getElementById('search-btn').addEventListener('click', () => {
+  const kw = searchInput.value.trim();
+  if(kw) addHistory(kw);
+  doSearch(kw);
+});
+clearBtn.addEventListener('click', () => { searchInput.value = ''; doSearch(''); });
 
 // 마우스 이동 — 미니 툴팁 (이름만 표시)
 let mouseDownNode = null;
