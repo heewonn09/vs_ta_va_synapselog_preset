@@ -425,7 +425,7 @@ let searchKeyword = '';
 let searchMatches = new Set();
 let isStable = false;
 
-let CONFIG = { repulsion: 3000, gravity: 0.0001, linkDistance: 150 };
+let CONFIG = { repulsion: 1500, gravity: 0.0001, linkDistance: 120 };
 
 function updateConfig() {
   CONFIG.repulsion = parseFloat(cfgRep.value);
@@ -968,7 +968,7 @@ function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
 function simulate() {
   if (isStable && !drag) return;
   const repulsion = CONFIG.repulsion;
-  const damping = 0.85;
+  const damping = 0.92;  // 높을수록 빨리 멈춤
   const centerForce = CONFIG.gravity;
   let totalVelocity = 0;
 
@@ -996,7 +996,7 @@ function simulate() {
       const dx = other.x - n.x, dy = other.y - n.y;
       const d = Math.max(dist(n,other), 1);
       let natural = CONFIG.linkDistance;
-      let strength = 0.008;
+      let strength = 0.005;
       if(e.weakLink) {
         natural = 600;
         strength = 0.001;
@@ -1015,8 +1015,8 @@ function simulate() {
     fy += (H/2 - n.y) * centerForce;
 
     // 속도 클램핑 — 한 프레임에 너무 많이 이동 방지
-    n.vx = Math.max(-8, Math.min(8, (n.vx + fx) * damping));
-    n.vy = Math.max(-8, Math.min(8, (n.vy + fy) * damping));
+    n.vx = Math.max(-3, Math.min(3, (n.vx + fx) * damping));
+    n.vy = Math.max(-3, Math.min(3, (n.vy + fy) * damping));
     n.x += n.vx; n.y += n.vy;
     totalVelocity += Math.abs(n.vx) + Math.abs(n.vy);
   });
