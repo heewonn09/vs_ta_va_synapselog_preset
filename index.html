@@ -1001,9 +1001,6 @@ function simulate() {
         natural = 600;
         strength = 0.001;
       } else {
-        const childCount = edges.filter(ce => ce.from === n.id && !ce.weakLink).length;
-        if(childCount >= 5) natural *= 1.8;
-        else if(childCount >= 3) natural *= 1.4;
         if(n.level===1||other.level===1) natural *= 1.2;
         if(n.level>=3||other.level>=3) natural *= 0.9;
       }
@@ -1055,22 +1052,6 @@ function draw() {
       ctx.strokeStyle = `rgba(255,159,67,${isHov?0.6:0.25})`;
       ctx.lineWidth = 1/scale;
       ctx.setLineDash([6,6]);
-    } else if(hasSearch) {
-      // 검색 시 — 모든 실선을 점선으로
-      const nodeColor = na.color || '#74b9ff';
-      if(bothMatch) {
-        ctx.strokeStyle = rgbStr(hexToRgb(nodeColor), 0.85);
-        ctx.lineWidth = 1.8/scale;
-        ctx.setLineDash([5,4]);
-      } else if(eitherMatch) {
-        ctx.strokeStyle = rgbStr(hexToRgb(nodeColor), 0.4);
-        ctx.lineWidth = 1/scale;
-        ctx.setLineDash([4,5]);
-      } else {
-        ctx.strokeStyle = rgbStr(hexToRgb(nodeColor), 0.06);
-        ctx.lineWidth = 0.5/scale;
-        ctx.setLineDash([3,6]);
-      }
     } else {
       const nodeColor = na.color || '#74b9ff';
       ctx.strokeStyle=rgbStr(hexToRgb(nodeColor), alpha);
@@ -1340,14 +1321,6 @@ searchInput.addEventListener('keydown', e => {
     const kw = searchInput.value.trim();
     if(kw) addHistory(kw);
     doSearch(kw);
-  }
-});
-document.getElementById('add-page-id').addEventListener('input', function() {
-  const val = this.value.trim();
-  const match = val.match(/([0-9a-f]{32})(?:[^0-9a-f]|$)/i) ||
-                val.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-  if(match && val.includes('notion')) {
-    this.value = match[1].replace(/-/g, '');
   }
 });
 document.getElementById('search-btn').addEventListener('click', () => {
