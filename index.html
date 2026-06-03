@@ -873,14 +873,7 @@ function mergeGraph(title, markdown, pageId) {
   }
 
   isStable = false;
-  setTimeout(() => {
-    let waited = 0;
-    function waitAndFit() {
-      if (isStable || waited > 2000) { fitGraph(); }
-      else { waited += 100; setTimeout(waitAndFit, 100); }
-    }
-    waitAndFit();
-  }, 600);
+  setTimeout(fitGraph, 500);
 }
 
 // 그래프 전체를 화면에 맞게 자동 조정 — 부드러운 애니메이션
@@ -965,16 +958,9 @@ function buildGraph() {
       isStable = false;
     }, delay);
   }
-  // 모든 레벨 등장 후 시뮬레이션 안정 대기 → 화면 맞춤
-  const fitDelay = maxLevel * 320 + 300;
-  setTimeout(() => {
-    let waited = 0;
-    function waitAndFit() {
-      if (isStable || waited > 2000) { fitGraph(); }
-      else { waited += 100; setTimeout(waitAndFit, 100); }
-    }
-    waitAndFit();
-  }, fitDelay);
+  // 레벨 등장 완료 후 0.5초 뒤 바로 fitGraph 실행
+  const fitDelay = maxLevel * 320 + 500;
+  setTimeout(fitGraph, fitDelay);
 }
 
 function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
@@ -1093,35 +1079,42 @@ function draw() {
       return path;
     }
 
-    // 매칭 노드들의 경로를 모아서 중복 제거 후 연결선 그리기
+    // 매칭 노드들의 경로를 따라 흰색 점선만 그리기
     const drawnPairs = new Set();
     ctx.setLineDash([4, 6]);
-    ctx.lineWidth = 1.0 / scale;
+    ctx.lineWidth = 1.2 / scale;
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
 
     matchArr.forEach(n => {
+      // 직접 매칭 노드에서 루트까지 경로 선 그리기
       const path = getPath(n);
-      // 경로를 따라 선 그리기 (흰색 반투명)
       for(let i = 0; i < path.length - 1; i++) {
         const a = path[i], b = path[i+1];
         if(!a.visible || !b.visible) continue;
+        // 2. #(level=1)끼리 연결하는 선은 제외 — 둘 다 level=1이면 스킵
+        if(a.level === 1 && b.level === 1) continue;
         const key = [a.id, b.id].sort().join('|');
         if(drawnPairs.has(key)) continue;
         drawnPairs.add(key);
-        ctx.strokeStyle = searchMatches.has(b.id)
-          ? 'rgba(255,255,255,0.7)'
-          : 'rgba(255,255,255,0.25)';
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
     });
 
-    // 활성화된 H1(level=1) 노드끼리 연결
-    const activeH1s = matchArr.filter(n => n.level === 1);
-    if(activeH1s.length > 1) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-      ctx.lineWidth = 1.4 / scale;
+    // 4. 페이지간 연결 — 매칭 노드가 있는 페이지의 루트(level=0)끼리 연결
+    const matchedRoots = new Set();
+    matchArr.forEach(n => {
+      const path = getPath(n);
+      const rootNode = path.find(p => p.level === 0);
+      if(rootNode) matchedRoots.add(rootNode);
+    });
+    const rootArr = [...matchedRoots];
+    if(rootArr.length > 1) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 1.5 / scale;
       ctx.setLineDash([6, 5]);
-      for(let i = 0; i < activeH1s.length - 1; i++) {
-        const a = activeH1s[i], b = activeH1s[i+1];
+      for(let i = 0; i < rootArr.length - 1; i++) {
+        const a = rootArr[i], b = rootArr[i+1];
+        if(!a.visible || !b.visible) continue;
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
     }
