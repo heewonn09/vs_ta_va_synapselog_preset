@@ -968,7 +968,7 @@ function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
 function simulate() {
   if (isStable && !drag) return;
   const repulsion = CONFIG.repulsion;
-  const damping = 0.82;
+  const damping = 0.72; // 0.82 → 0.72 빠르게 안정
   const centerForce = CONFIG.gravity;
   let totalVelocity = 0;
 
@@ -1019,7 +1019,7 @@ function simulate() {
     totalVelocity += Math.abs(n.vx) + Math.abs(n.vy);
   });
 
-  if (totalVelocity < 0.25 && !drag) isStable = true;
+  if (totalVelocity < 1.5 && !drag) isStable = true;
 }
 
 function screenToWorld(sx, sy) {
