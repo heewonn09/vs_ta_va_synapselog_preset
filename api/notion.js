@@ -126,7 +126,9 @@ export default async function handler(req, res) {
                 const results = await Promise.all(batch.map(async dbPage => {
                   const pageTitle = extractPageTitle(dbPage);
                   const pageContent = await fetchBlocks(dbPage.id, depth + 2).catch(() => '');
-                  return `\n## ${pageTitle}\n${pageContent}`;
+                  // [DB_PAGE] 구분자로 하위 페이지 제목 표시
+                  // parseMarkdown에서 이를 인식해 현재 # 노드의 자식으로 연결
+                  return `\n[DB_PAGE] ${pageTitle}\n${pageContent}`;
                 }));
                 markdown += results.join('');
               }
