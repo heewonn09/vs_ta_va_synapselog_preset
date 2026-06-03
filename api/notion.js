@@ -63,9 +63,10 @@ export default async function handler(req, res) {
 
   // 재귀 블록 읽기 (데이터베이스 하위 페이지 포함)
   async function fetchBlocks(blockId, depth = 0) {
-    if (depth > 4) return ''; // 최대 깊이 제한
+    if (depth > 4) return '';
     let markdown = '';
     let cursor = undefined;
+    let listCounter = 0; // 번호 목록 카운터
 
     do {
       const url = `https://api.notion.com/v1/blocks/${blockId}/children${cursor ? `?start_cursor=${cursor}` : ''}`;
@@ -92,7 +93,10 @@ export default async function handler(req, res) {
           } else if (type === 'bulleted_list_item') {
             markdown += '- ' + extractRichText(block.bulleted_list_item?.rich_text) + '\n';
           } else if (type === 'numbered_list_item') {
-            markdown += '1. ' + extractRichText(block.numbered_list_item?.rich_text) + '\n';
+            listCounter++;
+            markdown += `${listCounter}. ` + extractRichText(block.numbered_list_item?.rich_text) + '\n';
+          } else {
+            listCounter = 0; // 번호 목록 끊기면 리셋
           } else if (type === 'quote') {
             markdown += '> ' + extractRichText(block.quote?.rich_text) + '\n';
           } else if (type === 'callout') {
