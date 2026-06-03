@@ -116,17 +116,20 @@ export default async function handler(req, res) {
             }
             continue;
           } else if (type === 'child_database') {
-            // 하위 데이터베이스 — 각 레코드(페이지) 읽기
             const dbTitle = block.child_database?.title || '데이터베이스';
             markdown += `\n# ${dbTitle}\n`;
             try {
               const dbPages = await fetchDatabaseChildren(block.id);
-              for (const dbPage of dbPages) {
-                const pageTitle = extractPageTitle(dbPage);
-                markdown += `\n## ${pageTitle}\n`;
-                // 각 데이터베이스 페이지 내용 읽기
-                const pageContent = await fetchBlocks(dbPage.id, depth + 2);
-                if (pageContent.trim()) markdown += pageContent;
+              // 병렬로 읽기 (최대 5개씩)
+              const BATCH = 5;
+              for (let i = 0; i < dbPages.length; i += BATCH) {
+                const batch = dbPages.slice(i, i + BATCH);
+                const results = await Promise.all(batch.map(async dbPage => {
+                  const pageTitle = extractPageTitle(dbPage);
+                  const pageContent = await fetchBlocks(dbPage.id, depth + 2).catch(() => '');
+                  return `\n## ${pageTitle}\n${pageContent}`;
+                }));
+                markdown += results.join('');
               }
             } catch (e) {
               // 데이터베이스 접근 실패 시 스킵
