@@ -159,21 +159,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 #add-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 #add-page-error { font-size: 10px; color: #ff6b6b; margin-top: 4px; display: none; }
 #added-pages-list { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
-.added-page-item { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.04); border-radius: 4px; padding: 3px 7px; }
-.added-page-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
-.added-page-remove { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 11px; flex-shrink: 0; padding: 0 2px; }
-.added-page-remove:hover { color: #ff6b6b; }
-
-/* ── 동기화/전체 버튼 ── */
-.page-action-btn {
-  background: none; border: none; cursor: pointer; padding: 0 3px;
-  font-size: 12px; opacity: 0.5; transition: opacity 0.2s;
-  line-height: 1;
-}
-.page-action-btn:hover { opacity: 1; }
-.page-action-btn.sync { color: #ff9f43; }
-.page-action-btn.remove { color: rgba(255,255,255,0.5); }
-.page-action-btn.remove:hover { color: #ff6b6b; }
+.added-page-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.04); border-radius: 4px; padding: 4px 7px; }
+.added-page-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.added-page-item .btn-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.btn-sync { background: none; border: none; cursor: pointer; font-size: 12px; color: rgba(255,255,255,0.4); padding: 1px 3px; line-height: 1; transition: color 0.2s; }
+.btn-sync:hover { color: rgba(255,255,255,0.8); }
+.btn-remove { background: none; border: none; cursor: pointer; font-size: 11px; color: #ff9f43; padding: 1px 3px; line-height: 1; transition: color 0.2s; }
+.btn-remove:hover { color: #ffbe76; }
 
 #bulk-actions {
   display: flex; gap: 6px; margin-top: 8px; padding-top: 8px;
@@ -706,7 +698,7 @@ async function addPage() {
     const item = document.createElement('div');
     item.className = 'added-page-item';
     item.dataset.pageId = pageId;
-    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="page-action-btn sync" title="동기화" onclick="syncPage('${pageId}')">↻</button><button class="page-action-btn remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button>`;
+    item.innerHTML = `<span>📄 ${data.title || pageId}</span><div class="btn-group"><button class="btn-sync" title="동기화" onclick="syncPage('${pageId}')">↻</button><button class="btn-remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button></div>`;
     list.appendChild(item);
     updateBulkActionsVisibility();
 
@@ -881,13 +873,14 @@ function mergeGraph(title, markdown, pageId) {
   }
 
   isStable = false;
-  // 시뮬레이션 안정 후 화면 맞춤
   setTimeout(() => {
+    let waited = 0;
     function waitAndFit() {
-      if (!isStable) { setTimeout(waitAndFit, 200); } else { fitGraph(); }
+      if (isStable || waited > 5000) { fitGraph(); }
+      else { waited += 200; setTimeout(waitAndFit, 200); }
     }
     waitAndFit();
-  }, 1200);
+  }, 1000);
 }
 
 // 그래프 전체를 화면에 맞게 자동 조정 — 부드러운 애니메이션
@@ -972,15 +965,16 @@ function buildGraph() {
       isStable = false;
     }, delay);
   }
-  // 모든 레벨 등장 후 시뮬레이션이 안정될 때까지 기다렸다가 화면 맞춤
-  const fitDelay = maxLevel * 320 + 1800;
+  // 모든 레벨 등장 후 시뮬레이션 안정 대기 → 화면 맞춤
+  const fitDelay = maxLevel * 320 + 800;
   setTimeout(() => {
-    // 시뮬레이션이 아직 안 끝났으면 조금 더 기다림
+    let waited = 0;
     function waitAndFit() {
-      if (!isStable) {
-        setTimeout(waitAndFit, 200);
-      } else {
+      if (isStable || waited > 5000) {
         fitGraph();
+      } else {
+        waited += 200;
+        setTimeout(waitAndFit, 200);
       }
     }
     waitAndFit();
@@ -1084,18 +1078,58 @@ function draw() {
     ctx.setLineDash([]);
   });
 
-  // 1. 검색 매칭 노드끼리 흰색 점선 연결
-  if(hasSearch && searchMatches.size > 1) {
+  // 3. 검색 매칭 연결선 — 계층 타고 올라가 공통 조상 경유 단일 경로
+  if(hasSearch && searchMatches.size > 0) {
     const matchArr = [...searchMatches].map(id => nodeMap[id]).filter(n => n && n.visible);
-    ctx.setLineDash([5, 6]);
-    ctx.lineWidth = 1.2 / scale;
-    for(let i = 0; i < matchArr.length; i++) {
-      for(let j = i+1; j < matchArr.length; j++) {
-        const na = matchArr[i], nb = matchArr[j];
-        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-        ctx.beginPath(); ctx.moveTo(na.x, na.y); ctx.lineTo(nb.x, nb.y); ctx.stroke();
+
+    // 각 매칭 노드에서 루트까지 경로(부모 체인) 구하기
+    function getPath(node) {
+      const path = [node];
+      let cur = node;
+      for(let depth = 0; depth < 10; depth++) {
+        const parentEdge = edges.find(e => e.to === cur.id && !e.weakLink);
+        if(!parentEdge) break;
+        const parent = nodeMap[parentEdge.from];
+        if(!parent) break;
+        path.unshift(parent);
+        cur = parent;
+      }
+      return path;
+    }
+
+    // 매칭 노드들의 경로를 모아서 중복 제거 후 연결선 그리기
+    const drawnPairs = new Set();
+    ctx.setLineDash([4, 6]);
+    ctx.lineWidth = 1.0 / scale;
+
+    matchArr.forEach(n => {
+      const path = getPath(n);
+      // 경로를 따라 선 그리기 (흰색 반투명)
+      for(let i = 0; i < path.length - 1; i++) {
+        const a = path[i], b = path[i+1];
+        if(!a.visible || !b.visible) continue;
+        const key = [a.id, b.id].sort().join('|');
+        if(drawnPairs.has(key)) continue;
+        drawnPairs.add(key);
+        ctx.strokeStyle = searchMatches.has(b.id)
+          ? 'rgba(255,255,255,0.7)'
+          : 'rgba(255,255,255,0.25)';
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+    });
+
+    // 활성화된 H1(level=1) 노드끼리 연결
+    const activeH1s = matchArr.filter(n => n.level === 1);
+    if(activeH1s.length > 1) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 1.4 / scale;
+      ctx.setLineDash([6, 5]);
+      for(let i = 0; i < activeH1s.length - 1; i++) {
+        const a = activeH1s[i], b = activeH1s[i+1];
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
     }
+
     ctx.setLineDash([]);
   }
 
