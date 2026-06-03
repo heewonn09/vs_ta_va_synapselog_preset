@@ -595,15 +595,20 @@ function parseMarkdown(text, rootTitle) {
       const lbl = cleanLabel(line.replace('[DB_PAGE] ', '').trim());
       if (!lbl) continue;
 
-      // 현재 # 노드(level=1) 아래에 붙임 — 없으면 루트 아래
-      const parentId = currentParents[1] || currentParents[0] || rootId;
-      const parentLevel = nodeMap[parentId]?.level || 0;
-      const curId = addNode(lbl, 'sub', '', parentId, '', parentLevel + 1);
+      // 현재 # 노드(level=1) 아래에 붙임
+      const parentId = currentParents[1] || rootId;
+      const parentNode = nodeMap[parentId];
+      const parentLevel = parentNode?.level ?? 0;
+      const dbLevel = parentLevel + 1;
+
+      const curId = addNode(lbl, 'sub', '', parentId, '', dbLevel);
 
       if (curId) {
-        // 이 DB_PAGE 노드를 새 기준점으로 — 이후 #,##,###,#### 은 여기 아래에서 시작
-        currentParents[parentLevel + 1] = curId;
-        for (let d = parentLevel + 2; d <= 4; d++) currentParents[d] = null;
+        // currentParents를 완전히 리셋하고 DB_PAGE를 새 기준점으로 설정
+        // 이후 오는 #,##,###,#### 헤딩이 이 노드 아래에서 시작
+        for (let d = 0; d <= 4; d++) currentParents[d] = null;
+        currentParents[0] = rootId;
+        currentParents[dbLevel] = curId;
       }
       continue;
     }
