@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>시냅스 다이어리 — 내면의 신경망</title>
+<title>SynapseLog</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #0c0d12; overflow: hidden; font-family: 'Noto Sans KR', sans-serif; }
@@ -55,7 +55,7 @@ canvas { display: block; }
 
 /* ── 좌측 사이드바 ── */
 #sidebar {
-  position: fixed; top: 0; left: 0; width: 230px; height: 100vh;
+  position: fixed; top: 0; left: 0; width: 380px; height: 100vh;
   z-index: 200; display: flex; flex-direction: column;
   background: rgba(10,11,18,0.96);
   border-right: 1px solid rgba(255,255,255,0.07);
@@ -65,7 +65,7 @@ canvas { display: block; }
 }
 #sidebar::-webkit-scrollbar { width: 3px; }
 #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-#sidebar.collapsed { transform: translateX(-230px); }
+#sidebar.collapsed { transform: translateX(-380px); }
 
 /* 사이드바 안 로고 */
 #sidebar-logo {
@@ -73,7 +73,7 @@ canvas { display: block; }
   border-bottom: 1px solid rgba(255,255,255,0.07);
   flex-shrink: 0;
   text-align: center;
-  font-size: 17px; font-weight: 700; color: #fff; letter-spacing: 0.02em;
+  font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 0.02em;
 }
 #sidebar-logo .accent { color: #ff9f43; }
 
@@ -85,7 +85,7 @@ canvas { display: block; }
 
 /* ── 사이드바 토글 버튼 ── */
 #sidebar-toggle {
-  position: fixed; top: 16px; left: 240px; z-index: 300;
+  position: fixed; top: 16px; left: 394px; z-index: 300;
   width: 28px; height: 28px; border-radius: 7px;
   background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.12);
   color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px;
@@ -93,7 +93,7 @@ canvas { display: block; }
   backdrop-filter: blur(8px);
   transition: background 0.2s, left 0.28s cubic-bezier(0.4,0,0.2,1);
 }
-#sidebar-toggle.sidebar-open { left: 240px; }
+#sidebar-toggle.sidebar-open { left: 394px; }
 #sidebar.collapsed ~ * #sidebar-toggle,
 #sidebar-toggle:not(.sidebar-open) { left: 12px; }
 #sidebar-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; }
@@ -164,7 +164,59 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .added-page-remove { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 11px; flex-shrink: 0; padding: 0 2px; }
 .added-page-remove:hover { color: #ff6b6b; }
 
-/* ── 호버 툴팁 ── */
+/* ── 동기화/전체 버튼 ── */
+.page-action-btn {
+  background: none; border: none; cursor: pointer; padding: 0 3px;
+  font-size: 12px; opacity: 0.5; transition: opacity 0.2s;
+  line-height: 1;
+}
+.page-action-btn:hover { opacity: 1; }
+.page-action-btn.sync { color: #ff9f43; }
+.page-action-btn.remove { color: rgba(255,255,255,0.5); }
+.page-action-btn.remove:hover { color: #ff6b6b; }
+
+#bulk-actions {
+  display: flex; gap: 6px; margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.bulk-btn {
+  flex: 1; font-size: 9px; font-weight: 700; font-family: inherit;
+  padding: 5px 4px; border-radius: 5px; cursor: pointer;
+  letter-spacing: 0.04em; transition: background 0.2s;
+}
+.bulk-btn.sync-all {
+  background: rgba(255,159,67,0.1); border: 1px solid rgba(255,159,67,0.3); color: #ff9f43;
+}
+.bulk-btn.sync-all:hover { background: rgba(255,159,67,0.2); }
+.bulk-btn.close-all {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6);
+}
+.bulk-btn.close-all:hover { background: rgba(255,100,100,0.15); border-color: rgba(255,100,100,0.3); color: #ff6b6b; }
+
+/* 확인 모달 */
+#confirm-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+#confirm-modal.open { display: flex; }
+#confirm-box {
+  background: rgba(14,16,24,0.98); border: 1px solid rgba(255,255,255,0.12);
+  border-top: 2px solid rgba(255,159,67,0.6);
+  border-radius: 12px; padding: 24px 22px; width: 300px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+}
+#confirm-box .confirm-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+#confirm-box .confirm-msg { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 20px; }
+#confirm-box .confirm-btns { display: flex; gap: 8px; }
+#confirm-box .confirm-btns button {
+  flex: 1; padding: 9px; border-radius: 7px; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+}
+#confirm-cancel { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #aaa; }
+#confirm-cancel:hover { background: rgba(255,255,255,0.12); }
+#confirm-ok { background: rgba(255,159,67,0.15); border: 1px solid rgba(255,159,67,0.4); color: #ff9f43; }
+#confirm-ok:hover { background: rgba(255,159,67,0.25); }
 #tooltip {
   position: fixed; background: rgba(14,16,24,0.95);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
@@ -260,6 +312,18 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 
 <canvas id="c"></canvas>
 
+<!-- 확인 모달 -->
+<div id="confirm-modal">
+  <div id="confirm-box">
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button id="confirm-cancel" onclick="closeConfirm()">취소</button>
+      <button id="confirm-ok">확인</button>
+    </div>
+  </div>
+</div>
+
 <!-- 사이드바 토글 버튼 -->
 <button id="sidebar-toggle" class="sidebar-open" onclick="toggleSidebar()">☰</button>
 
@@ -274,6 +338,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
       <div id="add-page-error"></div>
       <div id="added-pages-list"></div>
+      <div id="bulk-actions" style="display:none">
+        <button class="bulk-btn sync-all" onclick="confirmBulkSync()">↻ 전체 동기화</button>
+        <button class="bulk-btn close-all" onclick="confirmBulkClose()">✕ 전체 닫기</button>
+      </div>
       <div class="login-help" style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); font-size:10px;">
         <b>Page ID 찾는 방법</b><br>
         URL 마지막 32자리<br>
@@ -300,8 +368,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
     <div id="left-panel" class="panel-box">
       <div class="panel-title">그래프 설정</div>
       <div class="ctrl-group">
-        <div class="ctrl-label-row"><span>노드 반발력 (Repulsion)</span><span class="val" id="v-rep">3000</span></div>
-        <input type="range" id="cfg-rep" min="1000" max="25000" step="500" value="3000">
+        <div class="ctrl-label-row"><span>노드 반발력 (Repulsion)</span><span class="val" id="v-rep">500</span></div>
+        <input type="range" id="cfg-rep" min="100" max="2000" step="50" value="500">
       </div>
       <div class="ctrl-group">
         <div class="ctrl-label-row"><span>중력 (Gravity)</span><span class="val" id="v-grav">0.0001</span></div>
@@ -638,8 +706,9 @@ async function addPage() {
     const item = document.createElement('div');
     item.className = 'added-page-item';
     item.dataset.pageId = pageId;
-    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="added-page-remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button>`;
+    item.innerHTML = `<span>📄 ${data.title || pageId}</span><button class="page-action-btn sync" title="동기화" onclick="syncPage('${pageId}')">↻</button><button class="page-action-btn remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button>`;
     list.appendChild(item);
+    updateBulkActionsVisibility();
 
     document.getElementById('add-page-id').value = '';
     btn.disabled = false;
@@ -653,6 +722,76 @@ async function addPage() {
   }
 }
 
+// ── 확인 모달 ──
+let _confirmCallback = null;
+function showConfirm(title, msg, onOk) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-modal').classList.add('open');
+  _confirmCallback = onOk;
+  document.getElementById('confirm-ok').onclick = () => { closeConfirm(); onOk(); };
+}
+function closeConfirm() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  _confirmCallback = null;
+}
+
+// 전체 동기화
+function confirmBulkSync() {
+  showConfirm('전체 동기화', '모든 페이지의 노션 데이터를 새로 불러옵니다. 계속할까요?', bulkSync);
+}
+async function bulkSync() {
+  const ids = [..._addedPageIds];
+  for (const pid of ids) {
+    await syncPage(pid);
+  }
+}
+
+// 전체 닫기
+function confirmBulkClose() {
+  showConfirm('전체 닫기', '추가된 모든 페이지 노드를 제거합니다. 계속할까요?', () => {
+    const ids = [..._addedPageIds];
+    ids.forEach(pid => {
+      const el = document.querySelector(`[data-page-id="${pid}"]`);
+      removePage(pid, el);
+    });
+    document.getElementById('bulk-actions').style.display = 'none';
+  });
+}
+
+// 단일 페이지 동기화
+async function syncPage(pageId) {
+  const item = document.querySelector(`[data-page-id="${pageId}"]`);
+  const syncBtn = item?.querySelector('.page-action-btn.sync');
+  if (syncBtn) syncBtn.textContent = '⟳';
+
+  try {
+    const res = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _savedToken, pageId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    // 기존 노드 제거 후 새로 병합
+    const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
+    nodes = nodes.filter(n => !removeIds.has(n.id));
+    edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
+    Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
+
+    mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
+    if (syncBtn) syncBtn.textContent = '↻';
+  } catch(e) {
+    if (syncBtn) syncBtn.textContent = '↻';
+  }
+}
+
+function updateBulkActionsVisibility() {
+  const bulk = document.getElementById('bulk-actions');
+  if (bulk) bulk.style.display = _addedPageIds.size > 0 ? 'flex' : 'none';
+}
+
 // ── 페이지 제거 — 모든 페이지 동등하게 노드만 제거 ──
 function removePage(pageId, el) {
   _addedPageIds.delete(pageId);
@@ -662,6 +801,7 @@ function removePage(pageId, el) {
   edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
   Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
   isStable = false;
+  updateBulkActionsVisibility();
 }
 
 // 기존 그래프에 새 페이지 노드 병합
@@ -758,7 +898,7 @@ function fitGraph() {
   const visibleNodes = nodes.filter(n => n.visible);
   if (visibleNodes.length === 0) return;
 
-  const sidebarWidth = document.getElementById('sidebar').classList.contains('collapsed') ? 0 : 230;
+  const sidebarWidth = document.getElementById('sidebar').classList.contains('collapsed') ? 0 : 380;
   const detailWidth = document.getElementById('detail-panel').classList.contains('open') ? 400 : 0;
   const availW = W - sidebarWidth - detailWidth - 40;
   const availH = H - 40;
@@ -1042,7 +1182,7 @@ function toggleSidebar() {
   const btn = document.getElementById('sidebar-toggle');
   const collapsed = sidebar.classList.toggle('collapsed');
   btn.textContent = collapsed ? '☰' : '✕';
-  btn.style.left = collapsed ? '12px' : '240px';
+  btn.style.left = collapsed ? '12px' : '394px';
 }
 
 function openPanel(n) {
