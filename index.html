@@ -589,6 +589,24 @@ function parseMarkdown(text, rootTitle) {
 
     // 볼드 텍스트(**텍스트**)는 노드로 만들지 않음 — 헤딩(#~####)만 노드로 처리
     // 볼드 강조 문구는 상위 노드의 desc에 자동 포함되어 상세 패널에서 주황색으로 표시됨
+
+    // ── [DB_PAGE] 데이터베이스 하위 페이지 제목 처리 ──
+    if (line.startsWith('[DB_PAGE] ')) {
+      const lbl = cleanLabel(line.replace('[DB_PAGE] ', '').trim());
+      if (!lbl) continue;
+
+      // 현재 # 노드(level=1) 아래에 붙임 — 없으면 루트 아래
+      const parentId = currentParents[1] || currentParents[0] || rootId;
+      const parentLevel = nodeMap[parentId]?.level || 0;
+      const curId = addNode(lbl, 'sub', '', parentId, '', parentLevel + 1);
+
+      if (curId) {
+        // 이 DB_PAGE 노드를 새 기준점으로 — 이후 #,##,###,#### 은 여기 아래에서 시작
+        currentParents[parentLevel + 1] = curId;
+        for (let d = parentLevel + 2; d <= 4; d++) currentParents[d] = null;
+      }
+      continue;
+    }
   }
 
   // ── 원형 초기 배치 — 노드 수에 따라 반경 동적 계산 ──
