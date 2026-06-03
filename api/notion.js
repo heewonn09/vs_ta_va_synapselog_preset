@@ -91,18 +91,20 @@ export default async function handler(req, res) {
             const text = extractRichText(block.paragraph?.rich_text);
             if (text.trim()) markdown += text + '\n';
           } else if (type === 'bulleted_list_item') {
+            listCounter = 0;
             markdown += '- ' + extractRichText(block.bulleted_list_item?.rich_text) + '\n';
           } else if (type === 'numbered_list_item') {
             listCounter++;
             markdown += `${listCounter}. ` + extractRichText(block.numbered_list_item?.rich_text) + '\n';
-          } else {
-            listCounter = 0; // 번호 목록 끊기면 리셋
           } else if (type === 'quote') {
+            listCounter = 0;
             markdown += '> ' + extractRichText(block.quote?.rich_text) + '\n';
           } else if (type === 'callout') {
+            listCounter = 0;
             const text = extractRichText(block.callout?.rich_text);
             if (text.trim()) markdown += '> ' + text + '\n';
           } else if (type === 'toggle') {
+            listCounter = 0;
             const title = extractHeadingText(block.toggle?.rich_text);
             if (title.trim()) markdown += '#### ' + title + '\n';
           } else if (type === 'child_page') {
