@@ -1169,11 +1169,6 @@ function draw() {
     ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
     if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; }
     else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; }
-    else if(n.level===2 && !n.color) {
-      // 데이터베이스 하위 페이지 제목 — 흰색에 가까운 밝은 색
-      const c = isDim ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.85)';
-      ctx.fillStyle = c; ctx.strokeStyle = c;
-    }
     else {
       const rgb = hexToRgb(nodeColor);
       // 계층별 채도 차이 — 배경색(#0c0d12 ≈ rgb(12,13,18))과 믹싱해서 채도를 낮춤
