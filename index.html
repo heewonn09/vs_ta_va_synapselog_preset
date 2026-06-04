@@ -453,7 +453,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 <!-- 클릭 시 우측 디테일 패널 -->
 <div id="detail-panel">
   <div id="detail-tabs-bar">
-    <button id="detail-panel-toggle" onclick="toggleDetailTabs()" title="접기/펼치기">▾</button>
     <div id="detail-tabs"></div>
     <button id="tab-overflow-btn" onclick="toggleOverflowMenu(event)">···</button>
     <button id="detail-panel-close" onclick="closePanel()" title="전체 닫기">✕</button>
@@ -1370,20 +1369,11 @@ function toggleDetailPanel() {
   const btn = document.getElementById('detail-panel-sidebar-toggle');
   if (_detailPanelCollapsed) {
     panel.classList.add('panel-collapsed');
-    if (btn) { btn.textContent = '›'; btn.classList.add('collapsed'); }
+    if (btn) { btn.textContent = '☰'; btn.classList.add('collapsed'); }
   } else {
     panel.classList.remove('panel-collapsed');
-    if (btn) { btn.textContent = '‹'; btn.classList.remove('collapsed'); }
+    if (btn) { btn.textContent = '✕'; btn.classList.remove('collapsed'); }
   }
-}
-
-let _tabsCollapsed = false;
-function toggleDetailTabs() {
-  _tabsCollapsed = !_tabsCollapsed;
-  const body = document.getElementById('detail-body');
-  const btn = document.getElementById('detail-panel-toggle');
-  if (body) body.style.display = _tabsCollapsed ? 'none' : '';
-  if (btn) btn.textContent = _tabsCollapsed ? '▸' : '▾';
 }
 
 // ── 탭 기반 디테일 패널 ──
@@ -1497,7 +1487,7 @@ function openPanel(n) {
   detailPanel.classList.remove('panel-collapsed');
   statusEl.classList.add('panel-open');
   const toggleBtn = document.getElementById('detail-panel-sidebar-toggle');
-  if (toggleBtn) { toggleBtn.classList.add('visible'); toggleBtn.classList.remove('collapsed'); toggleBtn.textContent = '‹'; }
+  if (toggleBtn) { toggleBtn.classList.add('visible'); toggleBtn.classList.remove('collapsed'); toggleBtn.textContent = '✕'; }
 }
 
 function closePanel() {
