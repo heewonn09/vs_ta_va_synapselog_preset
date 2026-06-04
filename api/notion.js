@@ -124,8 +124,6 @@ export default async function handler(req, res) {
             }
             continue;
           } else if (type === 'child_database') {
-            const dbTitle = block.child_database?.title || '데이터베이스';
-            markdown += `\n# ${dbTitle}\n`;
             try {
               const dbPages = await fetchDatabaseChildren(block.id);
               const BATCH = 5;
@@ -134,8 +132,6 @@ export default async function handler(req, res) {
                 const results = await Promise.all(batch.map(async dbPage => {
                   const pageTitle = extractPageTitle(dbPage);
                   const pageContent = await fetchBlocks(dbPage.id, depth + 2).catch(() => '');
-                  // 하위 페이지 제목을 ## 헤딩으로 — 내부 헤딩은 자동으로 한 단계 낮아짐
-                  // # → ##, ## → ###, ### → ####, #### → #### (유지)
                   const shifted = pageContent
                     .replace(/^(\s*)#### /gm, '$1§§§§ ')
                     .replace(/^(\s*)### /gm, '$1#### ')
