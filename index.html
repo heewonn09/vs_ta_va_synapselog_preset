@@ -1073,6 +1073,17 @@ function fitGraph() {
   _fitAnimId = requestAnimationFrame(animate);
 }
 
+function placeChildrenAroundParent(parentNode, children, radius) {
+  if (!children.length) return;
+  const cx = parentNode.x, cy = parentNode.y;
+  children.forEach((n, i) => {
+    const angle = (2 * Math.PI / children.length) * i - Math.PI / 2;
+    n.x = cx + Math.cos(angle) * radius;
+    n.y = cy + Math.sin(angle) * radius;
+    n.vx = 0; n.vy = 0;
+  });
+}
+
 function buildGraph() {
   _hueIndex = 0;
   const markdown = window._NOTION_MARKDOWN || MARKDOWN;
@@ -1087,23 +1098,45 @@ function buildGraph() {
   const r = parseMarkdown(markdown, title);
   nodes = r.nodes; edges = r.edges; nodeMap = r.nodeMap;
 
+  // 루트만 중앙에, 나머지 모두 숨김
   const root = nodes.find(n => n.level === 0);
-  if (root) { root.x = W/2; root.y = H/2; }
-
+  if (root) { root.x = W/2; root.y = H/2; root.vx = 0; root.vy = 0; }
   nodes.forEach(n => { n.visible = n.level === 0; });
   isStable = false;
 
+  const LEVEL_DELAY = 500; // 레벨 간 딜레이 ms
+  const RADII = [0, 160, 110, 75, 50]; // 각 레벨별 배치 반경
+
   const maxLevel = Math.max(...nodes.map(n => n.level), 0);
+
   for (let lv = 1; lv <= maxLevel; lv++) {
-    const delay = lv * 320;
+    const delay = lv * LEVEL_DELAY;
     setTimeout(() => {
-      nodes.forEach(n => { if (n.level === lv) n.visible = true; });
+      // 이 레벨 노드들을 부모 위치 기준으로 원형 배치
+      const levelNodes = nodes.filter(n => n.level === lv);
+      const radius = RADII[Math.min(lv, RADII.length - 1)];
+
+      // 부모별로 그룹핑해서 각 부모 주변에 배치
+      const byParent = new Map();
+      levelNodes.forEach(n => {
+        const parentEdge = edges.find(e => e.to === n.id && !e.weakLink);
+        const parentId = parentEdge ? parentEdge.from : null;
+        const parentNode = parentId ? nodeMap[parentId] : root;
+        if (!byParent.has(parentId)) byParent.set(parentId, { parent: parentNode, children: [] });
+        byParent.get(parentId).children.push(n);
+      });
+
+      byParent.forEach(({ parent, children }) => {
+        if (parent) placeChildrenAroundParent(parent, children, radius);
+      });
+
+      levelNodes.forEach(n => { n.visible = true; });
       isStable = false;
     }, delay);
   }
-  // 레벨 등장 완료 후 0.5초 뒤 바로 fitGraph 실행
-  const fitDelay = maxLevel * 320 + 500;
-  setTimeout(fitGraph, fitDelay);
+
+  // 모든 레벨 등장 후 fitGraph
+  setTimeout(fitGraph, maxLevel * LEVEL_DELAY + 600);
 }
 
 function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
