@@ -1059,7 +1059,7 @@ function buildGraph() {
   nodes.forEach(n => { n.visible = n.level === 0; });
   isStable = false;
 
-  const LEVEL_DELAY = 500; // 레벨 간 딜레이 ms
+  const LEVEL_DELAY = 2000; // 레벨 간 딜레이 ms
   const RADII = [0, 160, 110, 75, 50]; // 각 레벨별 배치 반경
 
   const maxLevel = Math.max(...nodes.map(n => n.level), 0);
