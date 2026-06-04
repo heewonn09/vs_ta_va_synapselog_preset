@@ -142,7 +142,7 @@ export default async function handler(req, res) {
                     .replace(/^(\s*)## /gm, '$1### ')
                     .replace(/^(\s*)# /gm, '$1## ')
                     .replace(/^(\s*)§§§§ /gm, '$1#### ');
-                  return `\n## ${pageTitle}\n${shifted}`;
+                  return `\n# ${pageTitle}\n${shifted}`;
                 }));
                 markdown += results.join('');
               }
