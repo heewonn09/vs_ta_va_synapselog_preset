@@ -724,51 +724,6 @@ function parseMarkdown(text, rootTitle) {
     // 볼드 텍스트(**텍스트**)는 노드로 만들지 않음 — 헤딩(#~####)만 노드로 처리
   }
 
-  // ── 원형 초기 배치 — 노드 수에 따라 반경 동적 계산 ──
-  const root = nodes.find(n => n.level === 0);
-  if (root) {
-    root.x = W/2; root.y = H/2;
-
-    const h1s = nodes.filter(n => n.level === 1);
-    const h1Radius = Math.max(120, h1s.length * 35);
-
-    h1s.forEach((n, i) => {
-      const angle = (2 * Math.PI / h1s.length) * i - Math.PI/2;
-      n.x = W/2 + Math.cos(angle) * h1Radius;
-      n.y = H/2 + Math.sin(angle) * h1Radius;
-
-      const h2s = nodes.filter(m =>
-        edges.some(e => e.from === n.id && e.to === m.id) && m.level === 2
-      );
-      const h2Radius = Math.max(80, h2s.length * 25);
-      const spread = Math.min(Math.PI * 1.2, (h2s.length / Math.max(h1s.length, 1)) * Math.PI * 1.5 + 0.6);
-
-      h2s.forEach((m, j) => {
-        const baseAngle = angle - spread/2 + (spread / Math.max(h2s.length - 1, 1)) * j;
-        m.x = n.x + Math.cos(baseAngle) * h2Radius;
-        m.y = n.y + Math.sin(baseAngle) * h2Radius;
-
-        const h3s = nodes.filter(k =>
-          edges.some(e => e.from === m.id && e.to === k.id)
-        );
-        const h3Radius = Math.max(55, h3s.length * 18);
-        h3s.forEach((k, l) => {
-          const a3 = baseAngle + (l - (h3s.length - 1) / 2) * Math.max(0.35, 1.2 / Math.max(h3s.length, 1));
-          k.x = m.x + Math.cos(a3) * h3Radius;
-          k.y = m.y + Math.sin(a3) * h3Radius;
-
-          const h4s = nodes.filter(p => edges.some(e => e.from === k.id && e.to === p.id));
-          const h4Radius = Math.max(40, h4s.length * 14);
-          h4s.forEach((p, q) => {
-            const a4 = a3 + (q - (h4s.length - 1) / 2) * Math.max(0.3, 1.0 / Math.max(h4s.length, 1));
-            p.x = k.x + Math.cos(a4) * h4Radius;
-            p.y = k.y + Math.sin(a4) * h4Radius;
-          });
-        });
-      });
-    });
-  }
-
   return { nodes, edges, nodeMap };
 }
 
