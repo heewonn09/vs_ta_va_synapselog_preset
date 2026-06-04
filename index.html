@@ -209,6 +209,30 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 #confirm-cancel:hover { background: rgba(255,255,255,0.12); }
 #confirm-ok { background: rgba(255,159,67,0.15); border: 1px solid rgba(255,159,67,0.4); color: #ff9f43; }
 #confirm-ok:hover { background: rgba(255,159,67,0.25); }
+
+/* ── 디테일 패널 탭 바 ── */
+#detail-tabs-bar {
+  width: 100%; background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+}
+#detail-tabs-bar::-webkit-scrollbar { display: none; }
+#detail-tabs { display: flex; align-items: stretch; min-height: 36px; white-space: nowrap; }
+.detail-tab {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0 8px 0 12px; font-size: 10px; font-weight: 600;
+  color: rgba(255,255,255,0.4); cursor: pointer;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.detail-tab span.tab-label { overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+.detail-tab:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
+.detail-tab.active { background: rgba(255,255,255,0.08); color: #fff; border-bottom: 2px solid #ff9f43; }
+.detail-tab .tab-close { font-size: 9px; color: rgba(255,255,255,0.3); padding: 1px 3px; border-radius: 3px; }
+.detail-tab .tab-close:hover { color: #ff6b6b; background: rgba(255,100,100,0.15); }
+#detail-panel { display: flex; flex-direction: column; }
+#detail-body { flex: 1; overflow-y: auto; }
 #tooltip {
   position: fixed; background: rgba(14,16,24,0.95);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
@@ -380,6 +404,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 
 <!-- 클릭 시 우측 디테일 패널 -->
 <div id="detail-panel">
+  <!-- 탭 바 -->
+  <div id="detail-tabs-bar">
+    <div id="detail-tabs"></div>
+  </div>
   <div id="detail-body">
     <div id="detail-title-row">
       <div id="detail-title"></div>
@@ -1284,9 +1312,45 @@ function toggleSidebar() {
   btn.style.left = collapsed ? '12px' : '394px';
 }
 
-function openPanel(n) {
-  if(detailTitle) detailTitle.textContent = n.label;
+// ── 탭 기반 디테일 패널 ──
+let _tabs = []; // { nodeId, label, node }
+let _activeTabId = null;
 
+function renderTabs() {
+  const tabsEl = document.getElementById('detail-tabs');
+  if (!tabsEl) return;
+  tabsEl.innerHTML = '';
+  _tabs.forEach(tab => {
+    const el = document.createElement('div');
+    el.className = 'detail-tab' + (tab.nodeId === _activeTabId ? ' active' : '');
+    el.innerHTML = `<span class="tab-label">${tab.label}</span><span class="tab-close">✕</span>`;
+    el.querySelector('.tab-label').onclick = () => switchTab(tab.nodeId);
+    el.querySelector('.tab-close').onclick = (e) => { e.stopPropagation(); closeTab(tab.nodeId); };
+    tabsEl.appendChild(el);
+  });
+}
+
+function switchTab(nodeId) {
+  _activeTabId = nodeId;
+  const tab = _tabs.find(t => t.nodeId === nodeId);
+  if (tab) renderPanelContent(tab.node);
+  renderTabs();
+}
+
+function closeTab(nodeId) {
+  const idx = _tabs.findIndex(t => t.nodeId === nodeId);
+  _tabs = _tabs.filter(t => t.nodeId !== nodeId);
+  if (_tabs.length === 0) {
+    closePanel();
+  } else {
+    const next = _tabs[Math.min(idx, _tabs.length - 1)];
+    switchTab(next.nodeId);
+  }
+  renderTabs();
+}
+
+function renderPanelContent(n) {
+  if(detailTitle) detailTitle.textContent = n.label;
   if(detailCatInline) {
     const catLabel = CAT_LABELS[n.cat] || n.cat;
     const catColor = getColor(n.cat);
@@ -1295,25 +1359,34 @@ function openPanel(n) {
     detailCatInline.style.color = catColor;
     detailCatInline.style.borderColor = catColor + '44';
   }
-
   if(detailDate) {
-    if(n.date) {
-      detailDate.style.display = 'inline';
-      detailDate.textContent = n.date;
-    } else {
-      detailDate.style.display = 'none';
-    }
+    if(n.date) { detailDate.style.display = 'inline'; detailDate.textContent = n.date; }
+    else { detailDate.style.display = 'none'; }
   }
-
   const rawDesc = n.desc || '(내용 없음)';
   if(detailContent) detailContent.innerHTML = rawDesc.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+
+function openPanel(n) {
+  const existing = _tabs.find(t => t.nodeId === n.id);
+  if (existing) {
+    switchTab(n.id);
+  } else {
+    _tabs.push({ nodeId: n.id, label: n.label, node: n });
+    _activeTabId = n.id;
+    renderPanelContent(n);
+    renderTabs();
+  }
   detailPanel.classList.add('open');
   statusEl.classList.add('panel-open');
 }
 
 function closePanel() {
+  _tabs = [];
+  _activeTabId = null;
   detailPanel.classList.remove('open');
   statusEl.classList.remove('panel-open');
+  renderTabs();
 }
 
 // ── 검색 기록 ──
