@@ -131,9 +131,15 @@ export default async function handler(req, res) {
                 const results = await Promise.all(batch.map(async dbPage => {
                   const pageTitle = extractPageTitle(dbPage);
                   const pageContent = await fetchBlocks(dbPage.id, depth + 2).catch(() => '');
-                  // [DB_PAGE] 구분자로 하위 페이지 제목 표시
-                  // parseMarkdown에서 이를 인식해 현재 # 노드의 자식으로 연결
-                  return `\n[DB_PAGE] ${pageTitle}\n${pageContent}`;
+                  // 하위 페이지 제목을 ## 헤딩으로 — 내부 헤딩은 자동으로 한 단계 낮아짐
+                  // # → ##, ## → ###, ### → ####, #### → #### (유지)
+                  const shifted = pageContent
+                    .replace(/^#### /gm, '§§§§ ')
+                    .replace(/^### /gm, '#### ')
+                    .replace(/^## /gm, '### ')
+                    .replace(/^# /gm, '## ')
+                    .replace(/^§§§§ /gm, '#### ');
+                  return `\n## ${pageTitle}\n${shifted}`;
                 }));
                 markdown += results.join('');
               }
