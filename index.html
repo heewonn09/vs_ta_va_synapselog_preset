@@ -506,10 +506,10 @@ function parseMarkdown(text, rootTitle) {
 
     // H1 노드에 팔레트 색상 할당 — 라벨 기준으로 일관성 유지
     let color = null;
-    if (level === 1) {
+    if (level === 1 || level === 2) {
       color = getH1Color(label);
     } else if (parentNode?.color) {
-      color = parentNode.color; // 부모 색상 상속
+      color = parentNode.color;
     }
 
     const id = 'n' + (nid++);
@@ -562,18 +562,21 @@ function parseMarkdown(text, rootTitle) {
       }
       if (!parentId) parentId = rootId;
 
-      // 본문 설명 수집
+      // 본문 설명 수집 — 다음 헤딩 전까지만
       let descLines = [];
       let nextIdx = i + 1;
       while (nextIdx < lines.length) {
         let nextLine = lines[nextIdx].trim();
         if (!nextLine) { nextIdx++; continue; }
         if (nextLine.startsWith('#')) break;
+        if (nextLine.startsWith('[DB_PAGE]')) break;
         // 날짜 라인 처리
         const dateOnlyMatch = nextLine.match(/^-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-$/);
         if (dateOnlyMatch) { nDate = nDate || dateOnlyMatch[1]; nextIdx++; continue; }
         // 볼드 단독 라인이 다음 노드 제목이면 멈춤
         if (/^\*\*[^*]{3,60}\*\*$/.test(nextLine) && descLines.length > 0) break;
+        // 콜아웃(>)은 desc에 포함하되 길이 제한
+        if (descLines.join('\n').length > 300) { nextIdx++; continue; }
         descLines.push(nextLine);
         nextIdx++;
       }
