@@ -137,11 +137,11 @@ export default async function handler(req, res) {
                   // 하위 페이지 제목을 ## 헤딩으로 — 내부 헤딩은 자동으로 한 단계 낮아짐
                   // # → ##, ## → ###, ### → ####, #### → #### (유지)
                   const shifted = pageContent
-                    .replace(/^#### /gm, '§§§§ ')
-                    .replace(/^### /gm, '#### ')
-                    .replace(/^## /gm, '### ')
-                    .replace(/^# /gm, '## ')
-                    .replace(/^§§§§ /gm, '#### ');
+                    .replace(/^(\s*)#### /gm, '$1§§§§ ')
+                    .replace(/^(\s*)### /gm, '$1#### ')
+                    .replace(/^(\s*)## /gm, '$1### ')
+                    .replace(/^(\s*)# /gm, '$1## ')
+                    .replace(/^(\s*)§§§§ /gm, '$1#### ');
                   return `\n## ${pageTitle}\n${shifted}`;
                 }));
                 markdown += results.join('');
