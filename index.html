@@ -740,7 +740,9 @@ async function addPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: _savedToken, pageId })
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해줘'); }
     if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
 
     _addedPageIds.add(pageId);
@@ -818,7 +820,9 @@ async function syncPage(pageId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: _savedToken, pageId })
     });
-    const data = await res.json();
+    const text2 = await res.text();
+    let data;
+    try { data = JSON.parse(text2); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해줘'); }
     if (!res.ok) throw new Error(data.error);
 
     // 기존 노드 제거 후 새로 병합
