@@ -215,9 +215,18 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   width: 100%; background: rgba(0,0,0,0.3);
   border-bottom: 1px solid rgba(255,255,255,0.07);
   overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+  display: flex; align-items: stretch;
 }
 #detail-tabs-bar::-webkit-scrollbar { display: none; }
-#detail-tabs { display: flex; align-items: stretch; min-height: 36px; white-space: nowrap; }
+#detail-panel-toggle, #detail-panel-close {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.4); font-size: 11px;
+  padding: 0 10px; flex-shrink: 0; transition: color 0.2s;
+  display: flex; align-items: center;
+}
+#detail-panel-toggle:hover, #detail-panel-close:hover { color: #fff; }
+#detail-panel-close { border-left: 1px solid rgba(255,255,255,0.06); }
+#detail-tabs { display: flex; align-items: stretch; flex: 1; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
 .detail-tab {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 0 8px 0 12px; font-size: 10px; font-weight: 600;
@@ -406,12 +415,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 <div id="detail-panel">
   <!-- 탭 바 -->
   <div id="detail-tabs-bar">
+    <button id="detail-panel-toggle" onclick="toggleDetailTabs()" title="탭 접기/펼치기">▾</button>
     <div id="detail-tabs"></div>
+    <button id="detail-panel-close" onclick="closePanel()" title="전체 닫기">✕</button>
   </div>
   <div id="detail-body">
     <div id="detail-title-row">
       <div id="detail-title"></div>
-      <button id="detail-close" onclick="closePanel()">✕</button>
     </div>
     <div id="detail-meta-row">
       <span id="detail-date"></span>
@@ -1310,6 +1320,15 @@ function toggleSidebar() {
   const collapsed = sidebar.classList.toggle('collapsed');
   btn.textContent = collapsed ? '☰' : '✕';
   btn.style.left = collapsed ? '12px' : '394px';
+}
+
+let _tabsCollapsed = false;
+function toggleDetailTabs() {
+  _tabsCollapsed = !_tabsCollapsed;
+  const body = document.getElementById('detail-body');
+  const btn = document.getElementById('detail-panel-toggle');
+  if (body) body.style.display = _tabsCollapsed ? 'none' : '';
+  if (btn) btn.textContent = _tabsCollapsed ? '▸' : '▾';
 }
 
 // ── 탭 기반 디테일 패널 ──
