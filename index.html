@@ -1107,7 +1107,7 @@ function simulate() {
     if(!n.visible || n.fixed || n === drag) return;
     let fx = 0, fy = 0;
 
-    // 반발력 — 거리 제한 완화
+    // 반발력
     nodes.forEach(m => {
       if(m === n || !m.visible) return;
       const dx = n.x - m.x, dy = n.y - m.y;
