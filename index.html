@@ -440,22 +440,44 @@ cfgRep.addEventListener('input', updateConfig);
 cfgGrav.addEventListener('input', updateConfig);
 cfgDist.addEventListener('input', updateConfig);
 
-// 눈에 띄는 색상 팔레트 — H1 노드에 순서대로 할당
-const COLOR_PALETTE = [
-  '#00d2d3', '#a29bfe', '#fd79a8', '#55efc4', '#fdcb6e',
-  '#e17055', '#74b9ff', '#00b894', '#e84393', '#6c5ce7',
-  '#f9ca24', '#45aaf2', '#ff6b81', '#2ecc71', '#fd9644',
-  '#a55eea', '#26de81', '#fc5c65', '#45b7d1', '#f7b731'
-];
-let _colorIndex = 0; // 색상 순환 인덱스
-const _catColorMap = {}; // H1 라벨 → 색상 매핑 (같은 카테고리는 같은 색)
+// HSL 기반 색상 시스템
+// level=1 노드: hue를 황금비로 순환 배분, lightness=65%
+// level=2: 부모 hue 유지, lightness=55%
+// level=3: 부모 hue 유지, lightness=42%
+// level=4(####): 부모 hue 유지, lightness=32%
+// 단, 같은 부모에서 갈라지는 형제들은 hue를 나눠 가짐
+
+let _hueIndex = 0;
+const _labelHueMap = {}; // level=1 라벨 → hue 매핑
+
+function getBaseHue(label) {
+  if (_labelHueMap[label] === undefined) {
+    // 황금비 기반 hue 배분 — 겹치지 않게
+    _labelHueMap[label] = (_hueIndex * 137.508) % 360;
+    _hueIndex++;
+  }
+  return _labelHueMap[label];
+}
+
+function hslColor(h, s, l) {
+  return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`;
+}
 
 function getH1Color(label) {
-  if (!_catColorMap[label]) {
-    _catColorMap[label] = COLOR_PALETTE[_colorIndex % COLOR_PALETTE.length];
-    _colorIndex++;
-  }
-  return _catColorMap[label];
+  const hue = getBaseHue(label);
+  return hslColor(hue, 75, 65);
+}
+
+function extractHue(color) {
+  if (!color) return 0;
+  const m = color.match(/hsl\((\d+(?:\.\d+)?)/);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+function getSaturation(color) {
+  if (!color) return 70;
+  const m = color.match(/hsl\(\d+(?:\.\d+)?,\s*(\d+(?:\.\d+)?)%/);
+  return m ? parseFloat(m[1]) : 70;
 }
 
 function hexToRgb(hex) {
@@ -504,12 +526,36 @@ function parseMarkdown(text, rootTitle) {
     let finalCat = cat;
     if (parentNode && parentNode.level > 0) finalCat = parentNode.cat;
 
-    // H1 노드에 팔레트 색상 할당 — 라벨 기준으로 일관성 유지
     let color = null;
-    if (level === 1 || level === 2) {
+    if (level === 0) {
+      color = '#ffffff';
+    } else if (level === 1) {
+      // level=1: 새 hue 할당, lightness=65%
       color = getH1Color(label);
-    } else if (parentNode?.color) {
-      color = parentNode.color;
+    } else if (level === 2) {
+      // level=2: 형제끼리 hue 분산 (부모 hue에서 offset), lightness=55%
+      const parentColor = parentNode?.color;
+      if (parentColor) {
+        const parentHue = extractHue(parentColor);
+        // 같은 부모 아래 형제 수에 따라 hue 분산
+        const siblingCount = edges.filter(e => e.from === parentId).length;
+        const hueOffset = (siblingCount * 47) % 120 - 60; // ±60도 범위
+        color = hslColor((parentHue + hueOffset + 360) % 360, 70, 55);
+      } else {
+        color = getH1Color(label);
+        color = hslColor(extractHue(color), 70, 55);
+      }
+    } else if (level === 3) {
+      const parentColor = parentNode?.color;
+      if (parentColor) {
+        color = hslColor(extractHue(parentColor), 65, 42);
+      }
+    } else if (level === 4) {
+      const parentColor = parentNode?.color;
+      if (parentColor) {
+        // ####: 채도 변경 없이 명도만 낮춤
+        color = hslColor(extractHue(parentColor), getSaturation(parentColor), 32);
+      }
     }
 
     const id = 'n' + (nid++);
@@ -934,7 +980,7 @@ function fitGraph() {
 }
 
 function buildGraph() {
-  _colorIndex = 0;
+  _hueIndex = 0;
   const markdown = window._NOTION_MARKDOWN || MARKDOWN;
 
   if (!markdown || !markdown.trim()) {
