@@ -945,14 +945,17 @@ function mergeGraph(title, markdown, pageId) {
     const newId = prefix + oldId;
     idMap[oldId] = newId;
     n.id = newId;
-    n.sourcePageId = trackId; // pageId로 추적
-    n.visible = true;
-    // 원형 배치 위치에서 새 루트 기준으로 오프셋 이동
-    n.x += offsetX;
-    n.y += offsetY;
+    n.sourcePageId = trackId;
+    n.visible = false; // 처음엔 숨김
+    n.x = newRootX; n.y = newRootY; // 루트 위치에서 시작
+    n.vx = 0; n.vy = 0;
     nodes.push(n);
     nodeMap[newId] = n;
   });
+
+  // 루트 노드만 먼저 표시
+  const newRootNode = nodes.find(n => n.id === (newRoot ? idMap[newRoot.id] : null));
+  if (newRootNode) { newRootNode.visible = true; newRootNode.x = newRootX; newRootNode.y = newRootY; }
 
   // 2단계: 엣지 ID 매핑
   result.edges.forEach(e => {
@@ -963,15 +966,41 @@ function mergeGraph(title, markdown, pageId) {
     }
   });
 
-  // 3단계: 방법 B — 루트끼리 약한 연결 (자연거리 매우 길게)
+  // 3단계: 루트끼리 약한 연결
   const newRootId = newRoot ? idMap[newRoot.id] : null;
   const firstRoot = nodes.find(n => n.level === 0 && !n.sourcePageId);
   if (firstRoot && newRootId && firstRoot.id !== newRootId) {
     edges.push({ from: firstRoot.id, to: newRootId, weakLink: true });
   }
 
+  // 4단계: 레벨별 순차 등장
+  const LEVEL_DELAY = 2000;
+  const RADII = [0, 160, 110, 75, 50];
+  const newNodeIds = new Set(Object.values(idMap));
+  const maxLevel = Math.max(...nodes.filter(n => newNodeIds.has(n.id)).map(n => n.level), 0);
+
+  for (let lv = 1; lv <= maxLevel; lv++) {
+    setTimeout(() => {
+      const levelNodes = nodes.filter(n => newNodeIds.has(n.id) && n.level === lv);
+      const radius = RADII[Math.min(lv, RADII.length - 1)];
+      const byParent = new Map();
+      levelNodes.forEach(n => {
+        const parentEdge = edges.find(e => e.to === n.id && !e.weakLink);
+        const parentId = parentEdge ? parentEdge.from : null;
+        const parentNode = parentId ? nodeMap[parentId] : null;
+        if (!byParent.has(parentId)) byParent.set(parentId, { parent: parentNode, children: [] });
+        byParent.get(parentId).children.push(n);
+      });
+      byParent.forEach(({ parent, children }) => {
+        if (parent) placeChildrenAroundParent(parent, children, radius);
+      });
+      levelNodes.forEach(n => { n.visible = true; });
+      isStable = false;
+    }, lv * LEVEL_DELAY);
+  }
+
   isStable = false;
-  setTimeout(fitGraph, 500);
+  setTimeout(fitGraph, maxLevel * LEVEL_DELAY + 600);
 }
 
 // 그래프 전체를 화면에 맞게 자동 조정 — 부드러운 애니메이션
