@@ -449,7 +449,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   <div class="spinner"></div>
   <div id="loading-text">불러오는 중...</div>
 </div>
-<button id="focus-mode-btn" onclick="toggleFocusMode()">● 포커스 모드</button>
 <canvas id="c"></canvas>
 
 <!-- 확인 모달 -->
@@ -524,9 +523,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">노드 제목 (Node Title)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()">
-          <span class="toggle-track">
-            <span class="toggle-thumb"></span>
-          </span>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-size:13px; color:rgba(255,255,255,0.75);">포커스 모드 (Focus Mode)</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
         </label>
       </div>
     </div>
@@ -1514,14 +1518,13 @@ let _focusMode = false;
 let _focusNodeId = null;
 
 function toggleFocusMode() {
-  _focusMode = !_focusMode;
-  const btn = document.getElementById('focus-mode-btn');
+  const cb = document.getElementById('focus-toggle-input');
+  _focusMode = cb ? cb.checked : !_focusMode;
   if (!_focusMode) {
     _focusNodeId = null;
     nodes.forEach(n => { n.dimmed = false; });
-    if (btn) btn.classList.remove('active');
-  } else {
-    if (btn) btn.classList.add('active');
+  } else if (_focusNodeId) {
+    applyFocusMode(_focusNodeId);
   }
   isStable = false;
 }
@@ -1695,9 +1698,6 @@ function openPanel(n) {
   statusEl.classList.add('panel-open');
   const toggleBtn = document.getElementById('detail-panel-sidebar-toggle');
   if (toggleBtn) { toggleBtn.classList.add('visible'); toggleBtn.classList.remove('collapsed'); toggleBtn.innerHTML = PANEL_SVG_RIGHT; }
-  // 포커스 모드 버튼 표시
-  const focusBtn = document.getElementById('focus-mode-btn');
-  if (focusBtn) focusBtn.classList.add('visible');
   // 포커스 모드 적용
   if (_focusMode) applyFocusMode(n.id);
 }
