@@ -380,6 +380,35 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   shape-rendering: crispEdges;
   display: block;
 }
+/* ── 로딩 스피너 ── */
+#loading-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(10,12,20,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 14px;
+}
+#loading-overlay.visible { display: flex; }
+.spinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid rgba(255,159,67,0.2);
+  border-top-color: #ff9f43;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-text { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+/* ── 포커스 모드 ── */
+#focus-mode-btn {
+  position: fixed; bottom: 50px; right: 16px; z-index: 300;
+  background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.5); border-radius: 8px;
+  padding: 6px 12px; font-size: 11px; font-weight: 600;
+  cursor: pointer; display: none; font-family: inherit;
+  backdrop-filter: blur(8px); transition: all 0.2s;
+}
+#focus-mode-btn.visible { display: block; }
+#focus-mode-btn.active { border-color: #ff9f43; color: #ff9f43; background: rgba(255,159,67,0.1); }
+
 /* ── 하단 상태 표시 ── */
 #status {
   position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -416,6 +445,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   </div>
 </div>
 
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div id="loading-text">불러오는 중...</div>
+</div>
+<button id="focus-mode-btn" onclick="toggleFocusMode()">● 포커스 모드</button>
 <canvas id="c"></canvas>
 
 <!-- 확인 모달 -->
@@ -813,7 +847,8 @@ async function startGraph() {
 
 // ── 페이지 추가 ──
 async function addPage() {
-  const pageId = document.getElementById('add-page-id').value.trim().replace(/-/g, '');
+  const raw = document.getElementById('add-page-id').value.trim();
+  const pageId = (raw.match(/([a-f0-9]{32})/i)?.[1] || raw.replace(/-/g, '')).toLowerCase();
   const errEl = document.getElementById('add-page-error');
   const btn = document.getElementById('add-page-btn');
 
@@ -824,29 +859,43 @@ async function addPage() {
   btn.disabled = true;
   btn.textContent = '불러오는 중...';
   errEl.style.display = 'none';
+  showLoading('노션 페이지 불러오는 중...');
 
   try {
-    const res = await fetch('/api/notion', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: _savedToken, pageId })
-    });
-    const text = await res.text();
+    // localStorage 캐시 확인
+    const cacheKey = `snlog_${pageId}`;
+    const cached = localStorage.getItem(cacheKey);
     let data;
-    try { data = JSON.parse(text); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해 주세요'); }
-    if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
+
+    if (cached) {
+      try {
+        data = JSON.parse(cached);
+        setLoadingText('캐시에서 불러오는 중...');
+      } catch(e) { data = null; }
+    }
+
+    if (!data) {
+      const res = await fetch('/api/notion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: _savedToken, pageId })
+      });
+      const text = await res.text();
+      try { data = JSON.parse(text); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해 주세요'); }
+      if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
+      // 캐시 저장
+      try { localStorage.setItem(cacheKey, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
+    }
 
     _addedPageIds.add(pageId);
-
-    // 기존 그래프에 새 페이지 노드 추가
     mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
 
-    // 추가된 페이지 목록 표시
     const list = document.getElementById('added-pages-list');
     const item = document.createElement('div');
     item.className = 'added-page-item';
     item.dataset.pageId = pageId;
-    item.innerHTML = `<span>📄 ${data.title || pageId}</span><div class="btn-group"><button class="btn-sync" title="동기화" onclick="syncPage('${pageId}')">↻</button><button class="btn-remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button></div>`;
+    const isCached = !!cached;
+    item.innerHTML = `<span>📄 ${data.title || pageId}${isCached ? ' <span style="color:rgba(255,159,67,0.5);font-size:9px;">캐시</span>' : ''}</span><div class="btn-group"><button class="btn-sync" title="동기화" onclick="syncPage('${pageId}')">↻</button><button class="btn-remove" onclick="removePage('${pageId}', this.closest('.added-page-item'))">✕</button></div>`;
     list.appendChild(item);
     updateBulkActionsVisibility();
 
@@ -859,6 +908,8 @@ async function addPage() {
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.textContent = '+ 노드 불러오기';
+  } finally {
+    hideLoading();
   }
 }
 
@@ -904,6 +955,7 @@ async function syncPage(pageId) {
   const item = document.querySelector(`[data-page-id="${pageId}"]`);
   const syncBtn = item?.querySelector('.page-action-btn.sync');
   if (syncBtn) syncBtn.textContent = '⟳';
+  showLoading('동기화 중...');
 
   try {
     const res = await fetch('/api/notion', {
@@ -915,6 +967,8 @@ async function syncPage(pageId) {
     let data;
     try { data = JSON.parse(text2); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해 주세요'); }
     if (!res.ok) throw new Error(data.error);
+    // 캐시 갱신
+    try { localStorage.setItem(`snlog_${pageId}`, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
 
     // 기존 노드 제거 후 새로 병합
     const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
@@ -926,6 +980,8 @@ async function syncPage(pageId) {
     if (syncBtn) syncBtn.textContent = '↻';
   } catch(e) {
     if (syncBtn) syncBtn.textContent = '↻';
+  } finally {
+    hideLoading();
   }
 }
 
@@ -1356,7 +1412,7 @@ function draw() {
     if(!n.visible) return;
     const isHov=hoveredNode===n;
     const isMatch=searchMatches.has(n.id);
-    const isDim=hasSearch&&!isMatch;
+    const isDim = (hasSearch && !isMatch) || (_focusMode && n.dimmed);
     const r = nodeR(n.level);
     const nodeColor = n.level===0 ? '#ffffff' : (n.color || '#74b9ff');
 
@@ -1435,6 +1491,51 @@ let _showLabels = true;
 function toggleLabels() {
   const cb = document.getElementById('label-toggle-input');
   _showLabels = cb ? cb.checked : !_showLabels;
+}
+
+// ── 로딩 스피너 ──
+function showLoading(text = '불러오는 중...') {
+  const el = document.getElementById('loading-overlay');
+  const txt = document.getElementById('loading-text');
+  if (el) el.classList.add('visible');
+  if (txt) txt.textContent = text;
+}
+function setLoadingText(text) {
+  const txt = document.getElementById('loading-text');
+  if (txt) txt.textContent = text;
+}
+function hideLoading() {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.classList.remove('visible');
+}
+
+// ── 포커스 모드 ──
+let _focusMode = false;
+let _focusNodeId = null;
+
+function toggleFocusMode() {
+  _focusMode = !_focusMode;
+  const btn = document.getElementById('focus-mode-btn');
+  if (!_focusMode) {
+    _focusNodeId = null;
+    nodes.forEach(n => { n.dimmed = false; });
+    if (btn) btn.classList.remove('active');
+  } else {
+    if (btn) btn.classList.add('active');
+  }
+  isStable = false;
+}
+
+function applyFocusMode(nodeId) {
+  if (!_focusMode) return;
+  _focusNodeId = nodeId;
+  const connectedIds = new Set([nodeId]);
+  edges.forEach(e => {
+    if (e.from === nodeId) connectedIds.add(e.to);
+    if (e.to === nodeId) connectedIds.add(e.from);
+  });
+  nodes.forEach(n => { n.dimmed = !connectedIds.has(n.id); });
+  isStable = false;
 }
 
 function toggleSidebar() {
@@ -1555,6 +1656,25 @@ function renderPanelContent(n) {
     if(n.date) { detailDate.style.display = 'inline'; detailDate.textContent = n.date; }
     else { detailDate.style.display = 'none'; }
   }
+  // 노션 링크 버튼
+  let notionLinkEl = document.getElementById('detail-notion-link');
+  if (!notionLinkEl) {
+    notionLinkEl = document.createElement('a');
+    notionLinkEl.id = 'detail-notion-link';
+    notionLinkEl.target = '_blank';
+    notionLinkEl.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#ff9f43;text-decoration:none;margin-left:8px;opacity:0.8;';
+    notionLinkEl.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Notion에서 보기`;
+    if (detailTitle) detailTitle.parentElement.appendChild(notionLinkEl);
+  }
+  // 노드의 sourcePageId로 노션 URL 생성
+  const pid = n.sourcePageId || '';
+  if (pid) {
+    notionLinkEl.href = `https://notion.so/${pid.replace(/-/g,'')}`;
+    notionLinkEl.style.display = 'inline-flex';
+  } else {
+    notionLinkEl.style.display = 'none';
+  }
+
   const rawDesc = n.desc || '(내용 없음)';
   if(detailContent) detailContent.innerHTML = rawDesc.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 }
@@ -1575,6 +1695,11 @@ function openPanel(n) {
   statusEl.classList.add('panel-open');
   const toggleBtn = document.getElementById('detail-panel-sidebar-toggle');
   if (toggleBtn) { toggleBtn.classList.add('visible'); toggleBtn.classList.remove('collapsed'); toggleBtn.innerHTML = PANEL_SVG_RIGHT; }
+  // 포커스 모드 버튼 표시
+  const focusBtn = document.getElementById('focus-mode-btn');
+  if (focusBtn) focusBtn.classList.add('visible');
+  // 포커스 모드 적용
+  if (_focusMode) applyFocusMode(n.id);
 }
 
 function closePanel() {
