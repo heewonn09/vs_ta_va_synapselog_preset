@@ -343,15 +343,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-track {
   display: flex; align-items: center;
-  width: 48px; height: 26px; border-radius: 13px;
+  width: 52px; height: 28px; border-radius: 14px;
   border: 1.5px solid rgba(255,159,67,0.5);
   background: rgba(255,255,255,0.05);
   transition: background 0.25s, border-color 0.25s;
   position: relative;
 }
 .toggle-thumb {
-  position: absolute; left: 3px;
-  width: 20px; height: 20px; border-radius: 50%;
+  position: absolute; left: 2px;
+  width: 24px; height: 24px; border-radius: 50%;
   background: rgba(255,159,67,0.5);
   border: 1.5px solid rgba(255,159,67,0.7);
   transition: left 0.25s, background 0.25s;
@@ -361,7 +361,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   border-color: #ff9f43;
 }
 .toggle-switch input:checked + .toggle-track .toggle-thumb {
-  left: 23px;
+  left: 24px;
   background: #ff9f43;
   border-color: #ff9f43;
 }
@@ -468,7 +468,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <input type="range" id="cfg-grav" min="0.0001" max="0.0030" step="0.0001" value="0.0001">
       </div>
       <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
-        <span>노드 제목 표시</span>
+        <span style="font-size:13px; color:rgba(255,255,255,0.75);">노드 제목 표시</span>
         <label class="toggle-switch">
           <input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()">
           <span class="toggle-track">
