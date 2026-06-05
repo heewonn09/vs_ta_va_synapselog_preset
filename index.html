@@ -343,14 +343,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-track {
   display: flex; align-items: center;
-  width: 52px; height: 28px; border-radius: 14px;
+  width: 44px; height: 26px; border-radius: 13px;
   border: 1.5px solid rgba(255,159,67,0.5);
   background: rgba(255,255,255,0.05);
   transition: background 0.25s, border-color 0.25s;
   position: relative;
 }
 .toggle-thumb {
-  position: absolute; left: 2px;
+  position: absolute; left: 1px;
   width: 24px; height: 24px; border-radius: 50%;
   background: rgba(255,159,67,0.5);
   border: 1.5px solid rgba(255,159,67,0.7);
@@ -361,7 +361,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   border-color: #ff9f43;
 }
 .toggle-switch input:checked + .toggle-track .toggle-thumb {
-  left: 24px;
+  left: 17px;
   background: #ff9f43;
   border-color: #ff9f43;
 }
