@@ -485,10 +485,8 @@ const clearBtn = document.getElementById('clear-btn');
 
 const cfgRep = document.getElementById('cfg-rep');
 const cfgGrav = document.getElementById('cfg-grav');
-const cfgDist = document.getElementById('cfg-dist');
 const vRep = document.getElementById('v-rep');
 const vGrav = document.getElementById('v-grav');
-const vDist = document.getElementById('v-dist');
 
 let W = window.innerWidth, H = window.innerHeight;
 canvas.width = W; canvas.height = H;
@@ -514,7 +512,6 @@ function updateConfig() {
 }
 cfgRep.addEventListener('input', updateConfig);
 cfgGrav.addEventListener('input', updateConfig);
-cfgDist.addEventListener('input', updateConfig);
 
 // HSL 기반 색상 시스템
 // level=1 노드: hue를 황금비로 순환 배분, lightness=65%
