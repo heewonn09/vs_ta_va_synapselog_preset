@@ -223,7 +223,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   display: flex; align-items: center;
 }
 #detail-panel-toggle:hover, #detail-panel-close:hover { color: #fff; }
-#detail-panel-close { border-left: 1px solid rgba(255,255,255,0.06); }
+#detail-panel-close { border-left: 1px solid rgba(255,255,255,0.06); color: #ff9f43 !important; }
 #detail-tabs { display: flex; align-items: stretch; flex: 1; overflow: hidden; }
 .detail-tab {
   display: inline-flex; align-items: center; gap: 6px;
@@ -365,7 +365,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   background: #ff9f43;
   border-color: #ff9f43;
 }
-
 /* ── 하단 상태 표시 ── */
 #status {
   position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -417,7 +416,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 </div>
 
 <!-- 사이드바 토글 버튼 -->
-<button id="sidebar-toggle" class="sidebar-open" onclick="toggleSidebar()">☰</button>
+<button id="sidebar-toggle" class="sidebar-open" onclick="toggleSidebar()">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/>
+  </svg>
+</button>
 
 <!-- 좌측 사이드바 -->
 <div id="sidebar">
@@ -426,11 +430,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
     <!-- 페이지 추가 패널 -->
     <div id="add-page-panel" class="panel-box">
       <div class="panel-title">페이지 추가</div>
-      <div style="position:relative; display:flex; align-items:center; gap:0;">
-        <span style="position:absolute; left:9px; color:rgba(255,255,255,0.35); font-size:13px; pointer-events:none;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <div style="position:relative; display:flex; align-items:center;">
+        <input type="text" id="add-page-id" placeholder="노션 페이지 링크 붙여넣기" style="padding-right:32px; flex:1;" />
+        <span style="position:absolute; right:9px; color:#ff9f43; font-size:13px; pointer-events:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         </span>
-        <input type="text" id="add-page-id" placeholder="노션 페이지 링크 붙여넣기" style="padding-left:28px; flex:1;" />
       </div>
       <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
       <div id="add-page-error"></div>
@@ -503,7 +507,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
   </div>
 </div>
 <div id="tab-overflow-menu"></div>
-<button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기">‹</button>
+<button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/>
+  </svg>
+</button>
 
 <div id="status"></div>
 <div id="search-result-count"></div>
@@ -1415,7 +1424,9 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const btn = document.getElementById('sidebar-toggle');
   const collapsed = sidebar.classList.toggle('collapsed');
-  btn.textContent = collapsed ? '☰' : '✕';
+  btn.innerHTML = collapsed
+    ? `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`;
   btn.style.left = collapsed ? '12px' : '394px';
 }
 
