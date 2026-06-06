@@ -351,21 +351,18 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-track { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
 .toggle-thumb { display: none; }
-/* OFF: 바깥 링 1개 + 안쪽 선 원 2개 + 중앙 빈 원 */
-.toggle-switch .r-off-outer  { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: block; }
-.toggle-switch .r-off-mid1   { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
-.toggle-switch .r-off-mid2   { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
-.toggle-switch .r-off-center { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
-/* ON: 바깥 링 1개 + 중앙 채워진 원 */
-.toggle-switch .r-on-outer   { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: none; }
-.toggle-switch .r-on-center  { fill: #ff9f43; stroke: none; display: none; }
-/* ON 상태 전환 */
+/* OFF: 바깥 링 + 안쪽 선 원 2개 */
+.toggle-switch .r-off-outer { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: block; }
+.toggle-switch .r-off-mid1  { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+.toggle-switch .r-off-mid2  { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+/* ON: 바깥 링 + 채워진 원 */
+.toggle-switch .r-on-outer  { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: none; }
+.toggle-switch .r-on-center { fill: #ff9f43; stroke: none; display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-off-outer,
 .toggle-switch input:checked ~ .toggle-track .r-off-mid1,
-.toggle-switch input:checked ~ .toggle-track .r-off-mid2,
-.toggle-switch input:checked ~ .toggle-track .r-off-center { display: none; }
+.toggle-switch input:checked ~ .toggle-track .r-off-mid2 { display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-on-outer,
-.toggle-switch input:checked ~ .toggle-track .r-on-center  { display: block; }
+.toggle-switch input:checked ~ .toggle-track .r-on-center { display: block; }
 
 /* SVG 버튼 픽셀 선명하게 */
 #sidebar-toggle svg, #detail-panel-sidebar-toggle svg {
@@ -505,12 +502,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <label class="toggle-switch">
           <input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()">
           <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="13" cy="13" r="12"  class="r-off-outer"/>
-  <circle cx="13" cy="13" r="8"   class="r-off-mid1"/>
-  <circle cx="13" cy="13" r="5"   class="r-off-mid2"/>
-  <circle cx="13" cy="13" r="2.5" class="r-off-center"/>
-  <circle cx="13" cy="13" r="12"  class="r-on-outer"/>
-  <circle cx="13" cy="13" r="7"   class="r-on-center"/>
+  <circle cx="13" cy="13" r="12" class="r-off-outer"/>
+  <circle cx="13" cy="13" r="8"  class="r-off-mid1"/>
+  <circle cx="13" cy="13" r="5"  class="r-off-mid2"/>
+  <circle cx="13" cy="13" r="12" class="r-on-outer"/>
+  <circle cx="13" cy="13" r="7"  class="r-on-center"/>
 </svg></span>
         </label>
       </div>
@@ -519,12 +515,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <label class="toggle-switch">
           <input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()">
           <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="13" cy="13" r="12"  class="r-off-outer"/>
-  <circle cx="13" cy="13" r="8"   class="r-off-mid1"/>
-  <circle cx="13" cy="13" r="5"   class="r-off-mid2"/>
-  <circle cx="13" cy="13" r="2.5" class="r-off-center"/>
-  <circle cx="13" cy="13" r="12"  class="r-on-outer"/>
-  <circle cx="13" cy="13" r="7"   class="r-on-center"/>
+  <circle cx="13" cy="13" r="12" class="r-off-outer"/>
+  <circle cx="13" cy="13" r="8"  class="r-off-mid1"/>
+  <circle cx="13" cy="13" r="5"  class="r-off-mid2"/>
+  <circle cx="13" cy="13" r="12" class="r-on-outer"/>
+  <circle cx="13" cy="13" r="7"  class="r-on-center"/>
 </svg></span>
         </label>
       </div>
@@ -533,12 +528,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <label class="toggle-switch">
           <input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()">
           <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="13" cy="13" r="12"  class="r-off-outer"/>
-  <circle cx="13" cy="13" r="8"   class="r-off-mid1"/>
-  <circle cx="13" cy="13" r="5"   class="r-off-mid2"/>
-  <circle cx="13" cy="13" r="2.5" class="r-off-center"/>
-  <circle cx="13" cy="13" r="12"  class="r-on-outer"/>
-  <circle cx="13" cy="13" r="7"   class="r-on-center"/>
+  <circle cx="13" cy="13" r="12" class="r-off-outer"/>
+  <circle cx="13" cy="13" r="8"  class="r-off-mid1"/>
+  <circle cx="13" cy="13" r="5"  class="r-off-mid2"/>
+  <circle cx="13" cy="13" r="12" class="r-on-outer"/>
+  <circle cx="13" cy="13" r="7"  class="r-on-center"/>
 </svg></span>
         </label>
       </div>
