@@ -1425,6 +1425,10 @@ function draw() {
     }
 
     // 매칭 노드들의 경로를 따라 컬러 점선 그리기
+    // 기존 실선 엣지 Set 구성 — 이미 실선으로 그린 구간은 점선 제외
+    const existingEdgeSet = new Set(
+      edges.filter(e => !e.weakLink).map(e => [e.from, e.to].sort().join('|'))
+    );
     const drawnPairs = new Set();
     ctx.setLineDash([4, 6]);
     ctx.lineWidth = 1.2 / scale;
@@ -1437,6 +1441,7 @@ function draw() {
         if(a.level === 1 && b.level === 1) continue;
         const key = [a.id, b.id].sort().join('|');
         if(drawnPairs.has(key)) continue;
+        if(existingEdgeSet.has(key)) continue; // 실선 엣지 구간 제외
         drawnPairs.add(key);
         const nodeColor = b.color || a.color || '#ff9f43';
         const rgb = hexToRgb(nodeColor);
