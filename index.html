@@ -1649,6 +1649,20 @@ function draw() {
       ctx.stroke();
       ctx.setLineDash([]);
     }
+    // 연결 모드 — 첫 번째 노드 선택 시 이미 수동 연결된 노드는 빨간 링
+    if (_connectMode && _connectFirstNode && !n.connectSelected) {
+      const alreadyLinked = edges.some(e =>
+        e.manualLink && ((e.from === _connectFirstNode.id && e.to === n.id) || (e.from === n.id && e.to === _connectFirstNode.id))
+      );
+      if (alreadyLinked) {
+        ctx.beginPath(); ctx.arc(n.x, n.y, r + 5/scale, 0, Math.PI*2);
+        ctx.strokeStyle = '#ff6b6b';
+        ctx.lineWidth = 2/scale;
+        ctx.setLineDash([4, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
 
     let lbl = n.label;
     if (_showLabels) {
@@ -1744,19 +1758,26 @@ function handleConnectClick(n) {
     _connectFirstNode = null;
     if (statusEl2) statusEl2.textContent = '연결 모드: 첫 번째 노드를 클릭하세요';
   } else {
-    // 두 번째 노드 → 연결 생성
+    // 두 번째 노드 → 이미 수동 연결 있으면 삭제, 없으면 생성
     const a = _connectFirstNode, b = n;
-    // 중복 체크
-    const exists = edges.some(e =>
-      (e.from === a.id && e.to === b.id) || (e.from === b.id && e.to === a.id)
+    const existingManual = edges.find(e =>
+      e.manualLink && ((e.from === a.id && e.to === b.id) || (e.from === b.id && e.to === a.id))
     );
-    if (!exists) {
+    if (existingManual) {
+      // 이미 연결됨 → 삭제
+      removeManualLink(a.id, b.id);
+      if (statusEl2) statusEl2.textContent = `"${a.label}" ↔ "${b.label}" 연결 삭제됨`;
+    } else {
+      // 새 연결 생성
+      const alreadyExists = edges.some(e =>
+        !e.manualLink && ((e.from === a.id && e.to === b.id) || (e.from === b.id && e.to === a.id))
+      );
       edges.push({ from: a.id, to: b.id, manualLink: true });
       saveManualLinks();
+      if (statusEl2) statusEl2.textContent = `"${a.label}" ↔ "${b.label}" 연결됨`;
     }
     a.connectSelected = false;
     _connectFirstNode = null;
-    if (statusEl2) statusEl2.textContent = `"${a.label}" ↔ "${b.label}" 연결됨`;
     setTimeout(() => { if (statusEl2) statusEl2.textContent = '연결 모드: 첫 번째 노드를 클릭하세요'; }, 2000);
   }
   isStable = false;
