@@ -778,11 +778,11 @@ function parseMarkdown(text, rootTitle) {
         // 볼드 단독 라인이 다음 노드 제목이면 멈춤
         if (/^\*\*[^*]{3,60}\*\*$/.test(nextLine) && descLines.length > 0) break;
         // 콜아웃(>)은 desc에 포함하되 길이 제한
-        if (descLines.join('\n').length > 300) { nextIdx++; continue; }
+        if (descLines.join('\n').length > 3000) { nextIdx++; continue; }
         descLines.push(nextLine);
         nextIdx++;
       }
-      const finalDesc = descLines.join('\n').substring(0, 500);
+      const finalDesc = descLines.join('\n').substring(0, 5000);
 
       const curId = addNode(lbl, cat, finalDesc, parentId, nDate, depth);
       if (curId) {
