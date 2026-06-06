@@ -347,33 +347,25 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 #detail-content strong { color: #ff9f43; font-weight: 700; }
 
 /* ── 동심원 ON/OFF 토글 ── */
-.toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 28px; height: 28px; flex-shrink: 0; }
+.toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 26px; height: 26px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-.toggle-track { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.toggle-track { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
 .toggle-thumb { display: none; }
-.toggle-switch svg { overflow: visible; }
-/* OFF: 바깥 두꺼운 링 + 안쪽 얇은 링 2개 + 중앙 원 테두리만 */
-.toggle-switch .r-off-outer { stroke: #ff9f43; fill: none; stroke-width: 2.5; }
-.toggle-switch .r-off-mid1  { stroke: #ff9f43; fill: none; stroke-width: 1; }
-.toggle-switch .r-off-mid2  { stroke: #ff9f43; fill: none; stroke-width: 1; }
-.toggle-switch .r-off-center{ stroke: #ff9f43; fill: none; stroke-width: 1.5; }
-/* ON: 바깥 두꺼운 링 + 안쪽 얇은 링 1개 + 중앙 원 꽉 채움 */
-.toggle-switch .r-on-outer  { stroke: #ff9f43; fill: none; stroke-width: 2.5; display: none; }
-.toggle-switch .r-on-inner  { stroke: #ff9f43; fill: none; stroke-width: 1; display: none; }
-.toggle-switch .r-on-center { fill: #ff9f43; display: none; }
-/* OFF일 때: off 요소 보임, on 요소 숨김 */
-.toggle-switch .r-off-outer,
-.toggle-switch .r-off-mid1,
-.toggle-switch .r-off-mid2,
-.toggle-switch .r-off-center { display: block; }
-/* ON일 때: off 요소 숨김, on 요소 보임 */
+/* OFF: 바깥 링 1개 + 안쪽 선 원 2개 + 중앙 빈 원 */
+.toggle-switch .r-off-outer  { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: block; }
+.toggle-switch .r-off-mid1   { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+.toggle-switch .r-off-mid2   { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+.toggle-switch .r-off-center { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+/* ON: 바깥 링 1개 + 중앙 채워진 원 */
+.toggle-switch .r-on-outer   { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: none; }
+.toggle-switch .r-on-center  { fill: #ff9f43; stroke: none; display: none; }
+/* ON 상태 전환 */
 .toggle-switch input:checked ~ .toggle-track .r-off-outer,
 .toggle-switch input:checked ~ .toggle-track .r-off-mid1,
 .toggle-switch input:checked ~ .toggle-track .r-off-mid2,
 .toggle-switch input:checked ~ .toggle-track .r-off-center { display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-on-outer,
-.toggle-switch input:checked ~ .toggle-track .r-on-inner,
-.toggle-switch input:checked ~ .toggle-track .r-on-center { display: block; }
+.toggle-switch input:checked ~ .toggle-track .r-on-center  { display: block; }
 
 /* SVG 버튼 픽셀 선명하게 */
 #sidebar-toggle svg, #detail-panel-sidebar-toggle svg {
@@ -512,16 +504,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">노드 제목 (Node Title)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()">
-          <span class="toggle-track"><svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-  <!-- OFF 요소 -->
-  <circle cx="14" cy="14" r="13" class="r-off-outer"/>
-  <circle cx="14" cy="14" r="9"  class="r-off-mid1"/>
-  <circle cx="14" cy="14" r="6"  class="r-off-mid2"/>
-  <circle cx="14" cy="14" r="3"  class="r-off-center"/>
-  <!-- ON 요소 -->
-  <circle cx="14" cy="14" r="13" class="r-on-outer"/>
-  <circle cx="14" cy="14" r="8"  class="r-on-inner"/>
-  <circle cx="14" cy="14" r="6"  class="r-on-center"/>
+          <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="13" cy="13" r="12"  class="r-off-outer"/>
+  <circle cx="13" cy="13" r="8"   class="r-off-mid1"/>
+  <circle cx="13" cy="13" r="5"   class="r-off-mid2"/>
+  <circle cx="13" cy="13" r="2.5" class="r-off-center"/>
+  <circle cx="13" cy="13" r="12"  class="r-on-outer"/>
+  <circle cx="13" cy="13" r="7"   class="r-on-center"/>
 </svg></span>
         </label>
       </div>
@@ -529,16 +518,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">포커스 모드 (Focus Mode)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()">
-          <span class="toggle-track"><svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-  <!-- OFF 요소 -->
-  <circle cx="14" cy="14" r="13" class="r-off-outer"/>
-  <circle cx="14" cy="14" r="9"  class="r-off-mid1"/>
-  <circle cx="14" cy="14" r="6"  class="r-off-mid2"/>
-  <circle cx="14" cy="14" r="3"  class="r-off-center"/>
-  <!-- ON 요소 -->
-  <circle cx="14" cy="14" r="13" class="r-on-outer"/>
-  <circle cx="14" cy="14" r="8"  class="r-on-inner"/>
-  <circle cx="14" cy="14" r="6"  class="r-on-center"/>
+          <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="13" cy="13" r="12"  class="r-off-outer"/>
+  <circle cx="13" cy="13" r="8"   class="r-off-mid1"/>
+  <circle cx="13" cy="13" r="5"   class="r-off-mid2"/>
+  <circle cx="13" cy="13" r="2.5" class="r-off-center"/>
+  <circle cx="13" cy="13" r="12"  class="r-on-outer"/>
+  <circle cx="13" cy="13" r="7"   class="r-on-center"/>
 </svg></span>
         </label>
       </div>
@@ -546,16 +532,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">연결 모드 (Connect Mode)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()">
-          <span class="toggle-track"><svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-  <!-- OFF 요소 -->
-  <circle cx="14" cy="14" r="13" class="r-off-outer"/>
-  <circle cx="14" cy="14" r="9"  class="r-off-mid1"/>
-  <circle cx="14" cy="14" r="6"  class="r-off-mid2"/>
-  <circle cx="14" cy="14" r="3"  class="r-off-center"/>
-  <!-- ON 요소 -->
-  <circle cx="14" cy="14" r="13" class="r-on-outer"/>
-  <circle cx="14" cy="14" r="8"  class="r-on-inner"/>
-  <circle cx="14" cy="14" r="6"  class="r-on-center"/>
+          <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="13" cy="13" r="12"  class="r-off-outer"/>
+  <circle cx="13" cy="13" r="8"   class="r-off-mid1"/>
+  <circle cx="13" cy="13" r="5"   class="r-off-mid2"/>
+  <circle cx="13" cy="13" r="2.5" class="r-off-center"/>
+  <circle cx="13" cy="13" r="12"  class="r-on-outer"/>
+  <circle cx="13" cy="13" r="7"   class="r-on-center"/>
 </svg></span>
         </label>
       </div>
