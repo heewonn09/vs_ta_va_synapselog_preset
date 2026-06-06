@@ -347,14 +347,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 #detail-content strong { color: #ff9f43; font-weight: 700; }
 
 /* ── 동심원 ON/OFF 토글 ── */
-.toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 40px; height: 40px; flex-shrink: 0; }
+.toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 32px; height: 32px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-.toggle-track { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.toggle-track { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
 .toggle-thumb { display: none; }
-/* SVG 안의 원들 색상 제어 */
-.toggle-switch .ring-outer { stroke: rgba(255,159,67,0.3); transition: stroke 0.2s; }
-.toggle-switch .ring-inner { stroke: rgba(255,159,67,0.2); transition: stroke 0.2s; }
-.toggle-switch .ring-center { fill: rgba(255,159,67,0.25); transition: fill 0.2s; }
+/* OFF 상태 — 링만, 중앙 비어있음 */
+.toggle-switch .ring-outer { stroke: #ff9f43; transition: stroke 0.15s; }
+.toggle-switch .ring-inner { stroke: #ff9f43; transition: stroke 0.15s; }
+.toggle-switch .ring-center { fill: none; transition: fill 0.15s; }
+/* ON 상태 — 중앙 원 채워짐 */
 .toggle-switch input:checked ~ .toggle-track .ring-outer { stroke: #ff9f43; }
 .toggle-switch input:checked ~ .toggle-track .ring-inner { stroke: #ff9f43; }
 .toggle-switch input:checked ~ .toggle-track .ring-center { fill: #ff9f43; }
@@ -496,21 +497,21 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">노드 제목 (Node Title)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()">
-          <span class="toggle-track"><svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="none" stroke-width="3" class="ring-outer"/><circle cx="20" cy="20" r="12" fill="none" stroke-width="2.5" class="ring-inner"/><circle cx="20" cy="20" r="7" class="ring-center"/></svg></span>
+          <span class="toggle-track"><svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="none" stroke-width="2.5" class="ring-outer"/><circle cx="16" cy="16" r="9" fill="none" stroke-width="2" class="ring-inner"/><circle cx="16" cy="16" r="5" class="ring-center"/></svg></span>
         </label>
       </div>
       <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">포커스 모드 (Focus Mode)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()">
-          <span class="toggle-track"><svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="none" stroke-width="3" class="ring-outer"/><circle cx="20" cy="20" r="12" fill="none" stroke-width="2.5" class="ring-inner"/><circle cx="20" cy="20" r="7" class="ring-center"/></svg></span>
+          <span class="toggle-track"><svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="none" stroke-width="2.5" class="ring-outer"/><circle cx="16" cy="16" r="9" fill="none" stroke-width="2" class="ring-inner"/><circle cx="16" cy="16" r="5" class="ring-center"/></svg></span>
         </label>
       </div>
       <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
         <span style="font-size:13px; color:rgba(255,255,255,0.75);">연결 모드 (Connect Mode)</span>
         <label class="toggle-switch">
           <input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()">
-          <span class="toggle-track"><svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="none" stroke-width="3" class="ring-outer"/><circle cx="20" cy="20" r="12" fill="none" stroke-width="2.5" class="ring-inner"/><circle cx="20" cy="20" r="7" class="ring-center"/></svg></span>
+          <span class="toggle-track"><svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="none" stroke-width="2.5" class="ring-outer"/><circle cx="16" cy="16" r="9" fill="none" stroke-width="2" class="ring-inner"/><circle cx="16" cy="16" r="5" class="ring-center"/></svg></span>
         </label>
       </div>
       <button onclick="exportGraph()" style="width:100%; margin-top:8px; background:rgba(255,159,67,0.12); border:1px solid rgba(255,159,67,0.4); color:#ff9f43; border-radius:7px; padding:8px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,159,67,0.22)'" onmouseout="this.style.background='rgba(255,159,67,0.12)'">↓ 그래프 이미지 저장</button>
