@@ -849,23 +849,96 @@ async function startGraph() {
 
 // ── 그래프 이미지 Export ──
 function exportGraph() {
-  const canvas = document.getElementById('c');
-  if (!canvas) return;
+  const SIZE = 1024;
+  const PADDING = 60;
 
-  // 오프스크린 캔버스에 배경 포함해서 그리기
+  // visible 노드 전체 bounding box 계산
+  const visibleNodes = nodes.filter(n => n.visible);
+  if (visibleNodes.length === 0) return;
+
+  const minX = Math.min(...visibleNodes.map(n => n.x));
+  const maxX = Math.max(...visibleNodes.map(n => n.x));
+  const minY = Math.min(...visibleNodes.map(n => n.y));
+  const maxY = Math.max(...visibleNodes.map(n => n.y));
+
+  const graphW = maxX - minX || 1;
+  const graphH = maxY - minY || 1;
+
+  // 정사각형 기준 스케일 계산 (종횡비 유지)
+  const exportScale = (SIZE - PADDING * 2) / Math.max(graphW, graphH);
+
+  // 오프스크린 캔버스
   const offscreen = document.createElement('canvas');
-  offscreen.width = canvas.width;
-  offscreen.height = canvas.height;
+  offscreen.width = SIZE;
+  offscreen.height = SIZE;
   const ctx2 = offscreen.getContext('2d');
 
-  // 배경 채우기
+  // 배경
   ctx2.fillStyle = '#0a0c14';
-  ctx2.fillRect(0, 0, offscreen.width, offscreen.height);
+  ctx2.fillRect(0, 0, SIZE, SIZE);
 
-  // 기존 캔버스 내용 복사
-  ctx2.drawImage(canvas, 0, 0);
+  // 그래프를 중앙에 배치할 오프셋
+  const offsetX = (SIZE - graphW * exportScale) / 2 - minX * exportScale;
+  const offsetY = (SIZE - graphH * exportScale) / 2 - minY * exportScale;
 
-  // PNG 다운로드
+  ctx2.save();
+  ctx2.translate(offsetX, offsetY);
+  ctx2.scale(exportScale, exportScale);
+
+  // 엣지 그리기
+  ctx2.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx2.lineWidth = 1 / exportScale;
+  edges.forEach(e => {
+    const a = nodeMap[e.from], b = nodeMap[e.to];
+    if (!a?.visible || !b?.visible) return;
+    if (e.weakLink) {
+      ctx2.setLineDash([6, 6]);
+      ctx2.strokeStyle = 'rgba(255,255,255,0.08)';
+    } else {
+      ctx2.setLineDash([]);
+      ctx2.strokeStyle = 'rgba(255,255,255,0.12)';
+    }
+    ctx2.beginPath();
+    ctx2.moveTo(a.x, a.y);
+    ctx2.lineTo(b.x, b.y);
+    ctx2.stroke();
+  });
+  ctx2.setLineDash([]);
+
+  // 노드 그리기
+  visibleNodes.forEach(n => {
+    const r = nodeR(n.level);
+    const rgb = hexToRgb(n.color || '#74b9ff');
+    ctx2.beginPath();
+    ctx2.arc(n.x, n.y, r, 0, Math.PI * 2);
+    ctx2.fillStyle = rgbStr(rgb, 1);
+    ctx2.fill();
+
+    // 라벨
+    if (_showLabels) {
+      let lbl = n.label;
+      if (n.level >= 2 && lbl.length > 14) lbl = lbl.substring(0, 13) + '…';
+      const fontSize = n.level <= 1 ? 12 : 10;
+      ctx2.font = n.level <= 1
+        ? `bold ${fontSize}px 'Noto Sans KR', sans-serif`
+        : `500 ${fontSize}px 'Noto Sans KR', sans-serif`;
+      ctx2.fillStyle = 'rgba(215,220,230,0.85)';
+      ctx2.textAlign = 'center';
+      ctx2.textBaseline = 'top';
+      ctx2.fillText(lbl, n.x, n.y + r + 4);
+    }
+  });
+
+  ctx2.restore();
+
+  // 워터마크
+  ctx2.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx2.font = 'bold 13px sans-serif';
+  ctx2.textAlign = 'right';
+  ctx2.textBaseline = 'bottom';
+  ctx2.fillText('SynapseLog', SIZE - 16, SIZE - 14);
+
+  // 다운로드
   const link = document.createElement('a');
   const timestamp = new Date().toISOString().slice(0, 10);
   link.download = `SynapseLog_${timestamp}.png`;
