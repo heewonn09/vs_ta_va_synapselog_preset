@@ -1577,12 +1577,40 @@ function handleConnectClick(n) {
   isStable=false;
 }
 
-function saveManualLinks() { const manual=edges.filter(e=>e.manualLink).map(e=>({from:e.from,to:e.to})); snSet('snlog_manual_links', JSON.stringify(manual), 'connect'); }
+function saveManualLinks() {
+  const manual = edges.filter(e => e.manualLink).map(e => {
+    const na = nodeMap[e.from], nb = nodeMap[e.to];
+    if (!na || !nb) return null;
+    return {
+      from: e.from, to: e.to,
+      fromKey: `${na.sourcePageId || ''}::${na.label}`,
+      toKey: `${nb.sourcePageId || ''}::${nb.label}`
+    };
+  }).filter(Boolean);
+  snSet('snlog_manual_links', JSON.stringify(manual), 'connect');
+}
 function loadManualLinks() {
-  const saved=snGet('snlog_manual_links', 'connect');
-  if(!saved) return;
-  let links; try{links=JSON.parse(saved);}catch(e){return;}
-  links.forEach(({from,to})=>{ if(nodeMap[from]&&nodeMap[to]){ const exists=edges.some(e=>(e.from===from&&e.to===to)||(e.from===to&&e.to===from)); if(!exists) edges.push({from,to,manualLink:true}); } });
+  const saved = snGet('snlog_manual_links', 'connect');
+  if (!saved) return;
+  let links; try { links = JSON.parse(saved); } catch(e) { return; }
+  links.forEach(link => {
+    // 신규 방식: fromKey/toKey 라벨 기반 매칭
+    if (link.fromKey && link.toKey) {
+      const na = nodes.find(n => `${n.sourcePageId || ''}::${n.label}` === link.fromKey);
+      const nb = nodes.find(n => `${n.sourcePageId || ''}::${n.label}` === link.toKey);
+      if (na && nb) {
+        const exists = edges.some(e => (e.from === na.id && e.to === nb.id) || (e.from === nb.id && e.to === na.id));
+        if (!exists) edges.push({ from: na.id, to: nb.id, manualLink: true });
+      }
+    } else if (link.from && link.to) {
+      // 구버전 호환: ID 기반
+      if (nodeMap[link.from] && nodeMap[link.to]) {
+        const exists = edges.some(e => (e.from === link.from && e.to === link.to) || (e.from === link.to && e.to === link.from));
+        if (!exists) edges.push({ from: link.from, to: link.to, manualLink: true });
+      }
+    }
+  });
+  isStable = false;
 }
 function removeManualLink(fromId,toId) { edges=edges.filter(e=>!(e.manualLink&&((e.from===fromId&&e.to===toId)||(e.from===toId&&e.to===fromId)))); saveManualLinks(); isStable=false; }
 
