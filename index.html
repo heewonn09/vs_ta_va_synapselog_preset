@@ -1969,11 +1969,15 @@ function onStorageToggle(el) {
   localStorage.setItem('snlog_use_local', _useLocalStorage);
   const warn = document.getElementById('s-local-warn');
   if (warn) warn.style.display = _useLocalStorage ? 'block' : 'none';
-  // 토큰 이관
-  if (_useLocalStorage && _savedToken) {
-    localStorage.setItem('snlog_token', _savedToken);
+
+  if (_useLocalStorage) {
+    // 세션 → 로컬: 토큰 이관
+    if (_savedToken) localStorage.setItem('snlog_token', _savedToken);
   } else {
-    localStorage.removeItem('snlog_token');
+    // 로컬 → 세션: 로컬에 저장된 snlog_ 키 전부 삭제
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('snlog_') && k !== 'snlog_use_local')
+      .forEach(k => localStorage.removeItem(k));
   }
 }
 
