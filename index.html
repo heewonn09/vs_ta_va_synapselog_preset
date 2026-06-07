@@ -645,11 +645,12 @@ async function syncPage(pageId) {
     if (!res.ok) throw new Error(data.error);
     try { sessionStorage.setItem(`snlog_${pageId}`, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
     const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId || n.id === 'ghost_' + pageId).map(n => n.id));
+    // mentionLink 엣지는 보존 (동기화 후 재연결)
+    const savedMentionEdges = edges.filter(e => e.mentionLink && (removeIds.has(e.from) || removeIds.has(e.to)));
     nodes = nodes.filter(n => !removeIds.has(n.id));
     edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
     Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
     mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
-    // ── [[]] mention 링크 자동 연결 (노드 배치 완료 후 실행) ──
     if (data.mentionPageIds?.length) {
       setTimeout(() => processMentionLinks(data.mentionPageIds, pageId), 800);
     }
@@ -1346,75 +1347,25 @@ window.addEventListener('resize',()=>{
   isStable=false;
 });
 
-// ── [[]] mention 링크 처리 ──
-async function processMentionLinks(mentionPageIds, sourcePageId) {
+// ── [[]] mention 링크 처리 — 이미 로드된 페이지끼리만 연결 ──
+function processMentionLinks(mentionPageIds, sourcePageId) {
   if (!mentionPageIds || mentionPageIds.length === 0) return;
-  if (!_savedToken) return;
-
+  const sourceRoot = nodes.find(n => n.sourcePageId === sourcePageId && n.level === 0);
+  if (!sourceRoot) return;
   for (const mId of mentionPageIds) {
-    const existingRoot = nodes.find(n => n.sourcePageId === mId && n.level === 0);
-    const sourceRoot = nodes.find(n => n.sourcePageId === sourcePageId && n.level === 0);
-    if (!sourceRoot) continue;
-
-    if (existingRoot) {
-      const alreadyLinked = edges.some(e =>
-        e.mentionLink && ((e.from === sourceRoot.id && e.to === existingRoot.id) ||
-        (e.from === existingRoot.id && e.to === sourceRoot.id))
-      );
-      if (!alreadyLinked) {
-        edges.push({ from: sourceRoot.id, to: existingRoot.id, mentionLink: true });
-        isStable = false;
-      }
-      continue;
-    }
-
-    try {
-      const res = await fetch('/api/notion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: _savedToken, pageId: mId })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        mergeGraph(data.title || mId, data.markdown || '', mId);
-        setTimeout(() => {
-          const newRoot = nodes.find(n => n.sourcePageId === mId && n.level === 0);
-          if (newRoot && sourceRoot) {
-            const alreadyLinked = edges.some(e =>
-              e.mentionLink && ((e.from === sourceRoot.id && e.to === newRoot.id) ||
-              (e.from === newRoot.id && e.to === sourceRoot.id))
-            );
-            if (!alreadyLinked) {
-              edges.push({ from: sourceRoot.id, to: newRoot.id, mentionLink: true });
-              isStable = false;
-            }
-          }
-          if (data.mentionPageIds?.length) processMentionLinks(data.mentionPageIds, mId);
-        }, 600);
-      } else {
-        addGhostNode(mId, sourceRoot);
-      }
-    } catch (e) {
-      addGhostNode(mId, sourceRoot);
+    const targetRoot = nodes.find(n => n.sourcePageId === mId && n.level === 0);
+    if (!targetRoot) continue;
+    const alreadyLinked = edges.some(e =>
+      e.mentionLink && (
+        (e.from === sourceRoot.id && e.to === targetRoot.id) ||
+        (e.from === targetRoot.id && e.to === sourceRoot.id)
+      )
+    );
+    if (!alreadyLinked) {
+      edges.push({ from: sourceRoot.id, to: targetRoot.id, mentionLink: true });
+      isStable = false;
     }
   }
-}
-
-function addGhostNode(ghostPageId, sourceRoot) {
-  if (nodes.find(n => n.sourcePageId === ghostPageId)) return;
-  const ghostId = 'ghost_' + ghostPageId;
-  const ghostNode = {
-    id: ghostId, label: '비공개 페이지', cat: 'ghost', desc: '', date: '',
-    x: sourceRoot ? sourceRoot.x + (Math.random()-0.5)*200 : W/2,
-    y: sourceRoot ? sourceRoot.y + (Math.random()-0.5)*200 : H/2,
-    vx: 0, vy: 0, level: 1, fixed: false,
-    color: 'rgba(255,255,255,0.2)',
-    ghostNode: true, sourcePageId: ghostPageId, visible: true
-  };
-  nodes.push(ghostNode);
-  nodeMap[ghostId] = ghostNode;
-  if (sourceRoot) edges.push({ from: sourceRoot.id, to: ghostId, mentionLink: true });
-  isStable = false;
 }
 
 updateConfig();
