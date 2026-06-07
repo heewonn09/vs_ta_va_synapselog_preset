@@ -6,13 +6,44 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { token, pageId } = req.body;
-  if (!token || !pageId) return res.status(400).json({ error: 'token과 pageId가 필요해요' });
+  const { token, pageId, action } = req.body;
+  if (!token) return res.status(400).json({ error: 'token이 필요해요' });
 
   const headers = {
     'Authorization': `Bearer ${token}`,
     'Notion-Version': '2022-06-28',
   };
+
+  // 페이지 목록 조회
+  if (action === 'list') {
+    try {
+      const pages = [];
+      let cursor = undefined;
+      do {
+        const body = { filter: { value: 'page', property: 'object' }, page_size: 100 };
+        if (cursor) body.start_cursor = cursor;
+        const res2 = await fetch('https://api.notion.com/v1/search', {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res2.ok) { const e = await res2.json(); throw new Error(e.message || '목록 조회 실패'); }
+        const data = await res2.json();
+        for (const p of data.results) {
+          const props = p.properties || {};
+          const titleProp = Object.values(props).find(v => v.type === 'title');
+          const title = titleProp?.title?.map(t => t.plain_text).join('') || p.child_page?.title || '(제목 없음)';
+          pages.push({ id: p.id.replace(/-/g, ''), title });
+        }
+        cursor = data.has_more ? data.next_cursor : undefined;
+      } while (cursor);
+      return res.status(200).json({ pages });
+    } catch(e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  if (!pageId) return res.status(400).json({ error: 'pageId가 필요해요' });
 
   // 텍스트 추출 함수 — 볼드 유지 (본문용)
   function extractRichText(richTextArr) {
