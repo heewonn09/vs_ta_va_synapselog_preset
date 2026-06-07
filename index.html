@@ -930,7 +930,8 @@ function exportGraph() {
   edges.forEach(e => {
     const a = nodeMap[e.from], b = nodeMap[e.to];
     if (!a?.visible || !b?.visible) return;
-    if (e.weakLink) { ctx2.setLineDash([6,6]); ctx2.strokeStyle = 'rgba(255,255,255,0.08)'; }
+    if (e.manualLink) { ctx2.setLineDash([5,6]); ctx2.strokeStyle = 'rgba(255,255,255,0.35)'; }
+    else if (e.weakLink) { ctx2.setLineDash([6,6]); ctx2.strokeStyle = 'rgba(255,255,255,0.08)'; }
     else { ctx2.setLineDash([]); ctx2.strokeStyle = 'rgba(255,255,255,0.12)'; }
     ctx2.lineWidth = 1/exportScale;
     ctx2.beginPath(); ctx2.moveTo(a.x,a.y); ctx2.lineTo(b.x,b.y); ctx2.stroke();
@@ -1575,9 +1576,9 @@ function handleConnectClick(n) {
   isStable=false;
 }
 
-function saveManualLinks() { const manual=edges.filter(e=>e.manualLink).map(e=>({from:e.from,to:e.to})); try{sessionStorage.setItem('snlog_manual_links',JSON.stringify(manual));}catch(e){} }
+function saveManualLinks() { const manual=edges.filter(e=>e.manualLink).map(e=>({from:e.from,to:e.to})); snSet('snlog_manual_links', JSON.stringify(manual), 'connect'); }
 function loadManualLinks() {
-  const saved=sessionStorage.getItem('snlog_manual_links');
+  const saved=snGet('snlog_manual_links', 'connect');
   if(!saved) return;
   let links; try{links=JSON.parse(saved);}catch(e){return;}
   links.forEach(({from,to})=>{ if(nodeMap[from]&&nodeMap[to]){ const exists=edges.some(e=>(e.from===from&&e.to===to)||(e.from===to&&e.to===from)); if(!exists) edges.push({from,to,manualLink:true}); } });
