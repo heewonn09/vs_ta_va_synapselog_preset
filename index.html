@@ -669,7 +669,7 @@ if (_savedToken) {
     buildGraph();
     loop();
     setTimeout(restorePageList, 500);
-    setTimeout(loadManualLinks, 800);
+    setTimeout(loadManualLinks, 2000);
     setTimeout(initSidebarPageList, 600);
     setTimeout(loadProfile, 400);
     setTimeout(restoreSlider, 200);
@@ -938,12 +938,11 @@ function exportGraph() {
   ctx2.setLineDash([]);
   visibleNodes.forEach(n => {
     const r = nodeR(n.level);
-    const rgb = hexToRgb(n.color || '#74b9ff');
-    const satRatio = [1,1,0.88,0.78,0.68][Math.min(n.level,4)];
-    const bg = [12,13,18];
-    const mixed = n.level === 0 ? [255,255,255] : rgb.map((c,i) => Math.round(c*satRatio + bg[i]*(1-satRatio)));
+    const nodeColor = n.level === 0 ? '#ffffff' : (n.color || '#74b9ff');
+    const rgb = hexToRgb(nodeColor);
+    // export에선 배경 혼합 없이 원본 색상 그대로
     ctx2.beginPath(); ctx2.arc(n.x, n.y, r, 0, Math.PI*2);
-    ctx2.fillStyle = rgbStr(mixed, 1);
+    ctx2.fillStyle = rgbStr(rgb, 1);
     ctx2.fill();
     if (_showLabels) {
       let lbl = n.label;
