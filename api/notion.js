@@ -14,20 +14,38 @@ export default async function handler(req, res) {
     'Notion-Version': '2022-06-28',
   };
 
-  // 텍스트 추출 함수 — 볼드 유지 (본문용)
+  // [[]] mention으로 참조된 페이지 ID 수집 (중복 제거)
+  const mentionPageIds = new Set();
+
+  // 텍스트 추출 함수 — 볼드 유지 (본문용), mention 수집
   function extractRichText(richTextArr) {
     if (!richTextArr) return '';
     return richTextArr.map(t => {
+      // mention 타입이면 page ID 수집
+      if (t.type === 'mention' && t.mention?.type === 'page') {
+        const mentionId = t.mention.page.id?.replace(/-/g, '');
+        if (mentionId && mentionId !== pageId.replace(/-/g, '')) {
+          mentionPageIds.add(mentionId);
+        }
+      }
       let str = t.plain_text || '';
       if (t.annotations?.bold) str = `**${str}**`;
       return str;
     }).join('');
   }
 
-  // 헤딩 텍스트 추출 — 볼드 무시 (헤딩 자체가 강조이므로)
+  // 헤딩 텍스트 추출 — 볼드 무시, mention 수집
   function extractHeadingText(richTextArr) {
     if (!richTextArr) return '';
-    return richTextArr.map(t => t.plain_text || '').join('');
+    return richTextArr.map(t => {
+      if (t.type === 'mention' && t.mention?.type === 'page') {
+        const mentionId = t.mention.page.id?.replace(/-/g, '');
+        if (mentionId && mentionId !== pageId.replace(/-/g, '')) {
+          mentionPageIds.add(mentionId);
+        }
+      }
+      return t.plain_text || '';
+    }).join('');
   }
 
   // 데이터베이스 하위 페이지 목록 조회
@@ -56,17 +74,16 @@ export default async function handler(req, res) {
     if (titleProp?.title?.length > 0) {
       return titleProp.title.map(t => t.plain_text).join('');
     }
-    // child_page 타입인 경우
     if (pageData.child_page?.title) return pageData.child_page.title;
     return '(제목 없음)';
   }
 
-  // 재귀 블록 읽기 (데이터베이스 하위 페이지 포함)
+  // 재귀 블록 읽기
   async function fetchBlocks(blockId, depth = 0) {
     if (depth > 8) return '';
     let markdown = '';
     let cursor = undefined;
-    let listCounter = 0; // 번호 목록 카운터
+    let listCounter = 0;
 
     do {
       const url = `https://api.notion.com/v1/blocks/${blockId}/children${cursor ? `?start_cursor=${cursor}` : ''}`;
@@ -119,7 +136,6 @@ export default async function handler(req, res) {
             if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
             continue;
           } else if (type === 'child_page') {
-            // 하위 페이지 — 재귀적으로 읽기
             const childTitle = block.child_page?.title || '하위 페이지';
             markdown += `\n## ${childTitle}\n`;
             if (block.has_children) {
@@ -170,7 +186,12 @@ export default async function handler(req, res) {
     const pageTitle = extractPageTitle(pageData);
     const markdown = await fetchBlocks(pageId);
 
-    res.status(200).json({ title: pageTitle, markdown });
+    // mentionPageIds: 현재 로드된 pageId 자신은 제외하고 반환
+    res.status(200).json({
+      title: pageTitle,
+      markdown,
+      mentionPageIds: [...mentionPageIds]
+    });
   } catch (e) {
     res.status(500).json({ error: e.message || '서버 오류가 발생했어요' });
   }
