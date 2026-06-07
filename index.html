@@ -8,20 +8,8 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #0c0d12; overflow: hidden; font-family: 'Noto Sans KR', sans-serif; }
 canvas { display: block; }
-
-/* ── 입력 화면 ── */
-#login-screen {
-  position: fixed; inset: 0; background: #0c0d12;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
-}
-#login-box {
-  background: rgba(14,16,24,0.95);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-top: 2px solid rgba(255,159,67,0.6);
-  border-radius: 14px; padding: 32px 28px;
-  width: 360px; box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-}
+#login-screen { position: fixed; inset: 0; background: #0c0d12; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+#login-box { background: rgba(14,16,24,0.95); border: 1px solid rgba(255,255,255,0.09); border-top: 2px solid rgba(255,159,67,0.6); border-radius: 14px; padding: 32px 28px; width: 360px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
 #login-box .login-title { font-size: 20px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 4px; }
 #login-box .login-title span { color: #ff9f43; }
 #login-box .login-sub { font-size: 11px; color: rgba(255,255,255,0.35); text-align: center; margin-bottom: 24px; }
@@ -38,132 +26,44 @@ canvas { display: block; }
 .login-help a { color: rgba(255,159,67,0.6); text-decoration: none; }
 .login-help a:hover { color: #ff9f43; }
 .login-help b { color: rgba(255,159,67,0.9); }
-
-/* ── 공통 패널 스타일 ── */
-.panel-box {
-  background: rgba(14,16,24,0.9);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-top: 2px solid rgba(255,159,67,0.6);
-  border-radius: 12px; padding: 12px 14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-}
-.panel-title {
-  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #ff9f43; margin-bottom: 10px;
-}
-
-/* ── 좌측 사이드바 ── */
-#sidebar {
-  position: fixed; top: 0; left: 0; width: 380px; height: 100vh;
-  z-index: 200; display: flex; flex-direction: column;
-  background: rgba(10,11,18,0.96);
-  border-right: 1px solid rgba(255,255,255,0.07);
-  backdrop-filter: blur(12px);
-  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-  overflow-y: auto; overflow-x: hidden;
-}
+.panel-box { background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.09); border-top: 2px solid rgba(255,159,67,0.6); border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+.panel-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ff9f43; margin-bottom: 10px; }
+#sidebar { position: fixed; top: 0; left: 0; width: 380px; height: 100vh; z-index: 200; display: flex; flex-direction: column; background: rgba(10,11,18,0.96); border-right: 1px solid rgba(255,255,255,0.07); backdrop-filter: blur(12px); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; overflow-x: hidden; }
 #sidebar::-webkit-scrollbar { width: 3px; }
 #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 #sidebar.collapsed { transform: translateX(-380px); }
-
-/* 사이드바 안 로고 */
-#sidebar-logo {
-  padding: 18px 16px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  flex-shrink: 0;
-  text-align: center;
-  font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 0.02em;
-}
+#sidebar-logo { padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; text-align: center; font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
 #sidebar-logo .accent { color: #ff9f43; }
-
-/* 사이드바 콘텐츠 영역 */
-#sidebar-content {
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 12px 10px; flex: 1;
-}
-
-/* ── 사이드바 토글 버튼 ── */
-#sidebar-toggle {
-  position: fixed; top: 16px; left: 394px; z-index: 300;
-  width: 28px; height: 28px; border-radius: 7px;
-  background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(8px);
-  transition: background 0.2s, left 0.28s cubic-bezier(0.4,0,0.2,1);
-}
+#sidebar-content { display: flex; flex-direction: column; gap: 8px; padding: 12px 10px; flex: 1; }
+#sidebar-toggle { position: fixed; top: 16px; left: 394px; z-index: 300; width: 28px; height: 28px; border-radius: 7px; background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: background 0.2s, left 0.28s cubic-bezier(0.4,0,0.2,1); }
 #sidebar-toggle.sidebar-open { left: 394px; }
-#sidebar.collapsed ~ * #sidebar-toggle,
-#sidebar-toggle:not(.sidebar-open) { left: 12px; }
+#sidebar.collapsed ~ * #sidebar-toggle, #sidebar-toggle:not(.sidebar-open) { left: 12px; }
 #sidebar-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; }
-
-/* ── 검색 패널 ── */
-#search-panel { }
-#search-bar {
-  display: flex; align-items: center; gap: 7px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 6px; padding: 6px 10px;
-  transition: border-color 0.2s;
-}
-#search-bar:focus-within {
-  border-color: rgba(255,159,67,0.6);
-}
-#search-bar:focus-within #search-btn svg circle,
-#search-bar:focus-within #search-btn svg line {
-  stroke: #ff9f43;
-}
-#search-bar input {
-  border: none; outline: none; font-size: 13px; font-family: inherit;
-  background: transparent; color: #fff; flex: 1; width: 0;
-}
+#search-bar { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; transition: border-color 0.2s; }
+#search-bar:focus-within { border-color: rgba(255,159,67,0.6); }
+#search-bar:focus-within #search-btn svg circle, #search-bar:focus-within #search-btn svg line { stroke: #ff9f43; }
+#search-bar input { border: none; outline: none; font-size: 13px; font-family: inherit; background: transparent; color: #fff; flex: 1; width: 0; }
 #search-bar input::placeholder { color: rgba(255,255,255,0.25); }
 #search-btn { background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; flex-shrink: 0; }
 #search-btn svg { width: 13px; height: 13px; }
 #clear-btn { background: none; border: none; cursor: pointer; font-size: 10px; color: rgba(255,255,255,0.3); padding: 0; display: none; flex-shrink: 0; }
 #search-result-count { font-size: 10px; color: rgba(255,159,67,0.7); margin-top: 5px; display: none; }
-
-/* 검색 기록 */
 #search-history { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
-.search-history-item {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 12px; color: rgba(255,255,255,0.75);
-  background: rgba(255,255,255,0.05); border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 6px 10px; cursor: pointer; transition: background 0.15s;
-}
+.search-history-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); padding: 6px 10px; cursor: pointer; transition: background 0.15s; }
 .search-history-item:hover { background: rgba(255,255,255,0.09); color: #fff; }
 .search-history-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .search-history-del { background: none; border: none; color: rgba(255,255,255,0.35); cursor: pointer; font-size: 11px; flex-shrink: 0; padding: 0 2px; }
 .search-history-del:hover { color: #ff6b6b; }
-
-/* ── 슬라이더 패널 ── */
-#left-panel { }
 .ctrl-group { margin-bottom: 10px; }
 .ctrl-group:last-child { margin-bottom: 0; }
 .ctrl-label-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
 .ctrl-label-row .val { color: #ff9f43; font-weight: 700; font-family: monospace; font-size: 13px; }
 input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.12); height: 3px; border-radius: 2px; outline: none; }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ff9f43; cursor: pointer; box-shadow: 0 0 5px rgba(255,159,67,0.5); }
-
-/* ── 페이지 추가 패널 ── */
-#add-page-panel { }
-#add-page-panel input {
-  width: 100%; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
-  padding: 6px 9px; font-size: 10px; font-family: inherit;
-  color: #fff; outline: none; margin-bottom: 6px;
-  transition: border-color 0.2s;
-}
+#add-page-panel input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 9px; font-size: 10px; font-family: inherit; color: #fff; outline: none; margin-bottom: 6px; transition: border-color 0.2s; }
 #add-page-panel input:focus { border-color: rgba(255,159,67,0.5); }
 #add-page-panel input::placeholder { color: rgba(255,255,255,0.2); }
-#add-page-btn {
-  width: 100%; background: rgba(255,159,67,0.12);
-  border: 1px solid rgba(255,159,67,0.35); border-radius: 6px;
-  padding: 6px; color: #ff9f43; font-size: 10px; font-weight: 700;
-  font-family: inherit; cursor: pointer; transition: background 0.2s;
-}
+#add-page-btn { width: 100%; background: rgba(255,159,67,0.12); border: 1px solid rgba(255,159,67,0.35); border-radius: 6px; padding: 6px; color: #ff9f43; font-size: 10px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background 0.2s; }
 #add-page-btn:hover { background: rgba(255,159,67,0.22); }
 #add-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 #add-page-error { font-size: 10px; color: #ff6b6b; margin-top: 4px; display: none; }
@@ -175,228 +75,88 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .btn-sync:hover { color: rgba(255,255,255,0.8); }
 .btn-remove { background: none; border: none; cursor: pointer; font-size: 11px; color: #ff9f43; padding: 1px 3px; line-height: 1; transition: color 0.2s; }
 .btn-remove:hover { color: #ffbe76; }
-
-#bulk-actions {
-  display: flex; gap: 6px; margin-top: 8px; padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-.bulk-btn {
-  flex: 1; font-size: 9px; font-weight: 700; font-family: inherit;
-  padding: 5px 4px; border-radius: 5px; cursor: pointer;
-  letter-spacing: 0.04em; transition: background 0.2s;
-}
-.bulk-btn.sync-all {
-  background: rgba(255,159,67,0.1); border: 1px solid rgba(255,159,67,0.3); color: #ff9f43;
-}
+#bulk-actions { display: flex; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+.bulk-btn { flex: 1; font-size: 9px; font-weight: 700; font-family: inherit; padding: 5px 4px; border-radius: 5px; cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s; }
+.bulk-btn.sync-all { background: rgba(255,159,67,0.1); border: 1px solid rgba(255,159,67,0.3); color: #ff9f43; }
 .bulk-btn.sync-all:hover { background: rgba(255,159,67,0.2); }
-.bulk-btn.close-all {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6);
-}
+.bulk-btn.close-all { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); }
 .bulk-btn.close-all:hover { background: rgba(255,100,100,0.15); border-color: rgba(255,100,100,0.3); color: #ff6b6b; }
-
-/* 확인 모달 */
-#confirm-modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
-  display: none; align-items: center; justify-content: center; z-index: 1000;
-  backdrop-filter: blur(4px);
-}
+#confirm-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
 #confirm-modal.open { display: flex; }
-#confirm-box {
-  background: rgba(14,16,24,0.98); border: 1px solid rgba(255,255,255,0.12);
-  border-top: 2px solid rgba(255,159,67,0.6);
-  border-radius: 12px; padding: 24px 22px; width: 300px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-}
+#confirm-box { background: rgba(14,16,24,0.98); border: 1px solid rgba(255,255,255,0.12); border-top: 2px solid rgba(255,159,67,0.6); border-radius: 12px; padding: 24px 22px; width: 300px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
 #confirm-box .confirm-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
 #confirm-box .confirm-msg { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 20px; }
 #confirm-box .confirm-btns { display: flex; gap: 8px; }
-#confirm-box .confirm-btns button {
-  flex: 1; padding: 9px; border-radius: 7px; font-size: 12px; font-weight: 700;
-  font-family: inherit; cursor: pointer; transition: background 0.2s;
-}
+#confirm-box .confirm-btns button { flex: 1; padding: 9px; border-radius: 7px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background 0.2s; }
 #confirm-cancel { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #aaa; }
 #confirm-cancel:hover { background: rgba(255,255,255,0.12); }
 #confirm-ok { background: rgba(255,159,67,0.15); border: 1px solid rgba(255,159,67,0.4); color: #ff9f43; }
 #confirm-ok:hover { background: rgba(255,159,67,0.25); }
-
-/* ── 디테일 패널 탭 바 ── */
-#detail-tabs-bar {
-  width: 100%; background: rgba(0,0,0,0.3);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  flex-shrink: 0; display: flex; align-items: stretch;
-}
-#detail-panel-toggle, #detail-panel-close {
-  background: none; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.4); font-size: 13px;
-  padding: 0 12px; flex-shrink: 0; transition: color 0.2s;
-  display: flex; align-items: center;
-}
+#detail-tabs-bar { width: 100%; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; display: flex; align-items: stretch; }
+#detail-panel-toggle, #detail-panel-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.4); font-size: 13px; padding: 0 12px; flex-shrink: 0; transition: color 0.2s; display: flex; align-items: center; }
 #detail-panel-toggle:hover, #detail-panel-close:hover { color: #fff; }
 #detail-panel-close { border-left: 1px solid rgba(255,255,255,0.06); color: #ff9f43 !important; }
 #detail-tabs { display: flex; align-items: stretch; flex: 1; overflow: hidden; }
-.detail-tab {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 0 10px 0 14px; font-size: 12px; font-weight: 600;
-  color: rgba(255,255,255,0.4); cursor: pointer; min-height: 42px;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap; flex-shrink: 0; max-width: 160px;
-}
+.detail-tab { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px 0 14px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4); cursor: pointer; min-height: 42px; border-right: 1px solid rgba(255,255,255,0.06); transition: background 0.15s, color 0.15s; white-space: nowrap; flex-shrink: 0; max-width: 160px; }
 .detail-tab span.tab-label { overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 .detail-tab:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
 .detail-tab.active { background: rgba(255,255,255,0.08); color: #fff; border-bottom: 2px solid #ff9f43; }
 .detail-tab .tab-close { font-size: 10px; color: rgba(255,255,255,0.3); padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
 .detail-tab .tab-close:hover { color: #ff6b6b; background: rgba(255,100,100,0.15); }
-/* ... 더보기 버튼 */
-#tab-overflow-btn {
-  background: none; border: none; cursor: pointer; flex-shrink: 0;
-  color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 700;
-  padding: 0 10px; display: none; align-items: center;
-  border-right: 1px solid rgba(255,255,255,0.06);
-}
+#tab-overflow-btn { background: none; border: none; cursor: pointer; flex-shrink: 0; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 700; padding: 0 10px; display: none; align-items: center; border-right: 1px solid rgba(255,255,255,0.06); }
 #tab-overflow-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-#tab-overflow-menu {
-  position: fixed; background: rgba(14,16,24,0.98);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 600;
-  min-width: 180px; overflow: hidden; display: none;
-}
+#tab-overflow-menu { position: fixed; background: rgba(14,16,24,0.98); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 600; min-width: 180px; overflow: hidden; display: none; }
 #tab-overflow-menu.open { display: block; }
-.overflow-tab-item {
-  padding: 10px 14px; font-size: 11px; cursor: pointer;
-  color: rgba(255,255,255,0.6); display: flex; align-items: center;
-  justify-content: space-between; gap: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
+.overflow-tab-item { padding: 10px 14px; font-size: 11px; cursor: pointer; color: rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .overflow-tab-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
 .overflow-tab-item.active { color: #ff9f43; }
 .overflow-close { font-size: 10px; color: rgba(255,255,255,0.3); padding: 1px 4px; border-radius: 3px; }
 .overflow-close:hover { color: #ff6b6b; background: rgba(255,100,100,0.15); }
 #detail-panel { display: flex; flex-direction: column; }
 #detail-body { flex: 1; overflow-y: auto; }
-#tooltip {
-  position: fixed; background: rgba(14,16,24,0.95);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
-  padding: 5px 10px; font-size: 11px; font-weight: 600; color: #fff;
-  pointer-events: none; display: none; z-index: 400;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.5); white-space: nowrap;
-}
-
-/* ── 우측 대형 디테일 패널 ── */
-#detail-panel {
-  position: fixed; top: 12px; right: -500px;
-  width: 380px; height: calc(100vh - 24px);
-  background: rgba(14,16,24,0.97);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-top: 2px solid rgba(255,159,67,0.6);
-  border-radius: 14px;
-  z-index: 200; display: flex; flex-direction: column;
-  transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: -8px 0 40px rgba(0,0,0,0.6);
-  backdrop-filter: blur(12px);
-}
+#tooltip { position: fixed; background: rgba(14,16,24,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: #fff; pointer-events: none; display: none; z-index: 400; box-shadow: 0 4px 14px rgba(0,0,0,0.5); white-space: nowrap; }
+#detail-panel { position: fixed; top: 12px; right: -500px; width: 380px; height: calc(100vh - 24px); background: rgba(14,16,24,0.97); border: 1px solid rgba(255,255,255,0.09); border-top: 2px solid rgba(255,159,67,0.6); border-radius: 14px; z-index: 200; display: flex; flex-direction: column; transition: right 0.28s cubic-bezier(0.4,0,0.2,1); box-shadow: -8px 0 40px rgba(0,0,0,0.6); backdrop-filter: blur(12px); }
 #detail-panel.open { right: 12px; }
-
-/* 우측 패널 토글 버튼 */
-#detail-panel-sidebar-toggle {
-  position: fixed; top: 16px; z-index: 300;
-  right: -500px;
-  width: 28px; height: 28px; border-radius: 7px;
-  background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px;
-  display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(8px);
-  transition: background 0.2s, right 0.28s cubic-bezier(0.4,0,0.2,1);
-}
+#detail-panel-sidebar-toggle { position: fixed; top: 16px; z-index: 300; right: -500px; width: 28px; height: 28px; border-radius: 7px; background: rgba(14,16,24,0.9); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: background 0.2s, right 0.28s cubic-bezier(0.4,0,0.2,1); }
 #detail-panel-sidebar-toggle.visible { display: flex; right: calc(380px + 24px); }
 #detail-panel-sidebar-toggle.collapsed { right: 12px; }
 #detail-panel-sidebar-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; }
 #detail-panel.panel-collapsed { right: -380px !important; }
-
-#detail-card { display: none; }
-#detail-header { display: none; }
-#detail-cat-badge { display: none; }
-
-#detail-body {
-  flex: 1; overflow-y: auto;
-  padding: 22px 22px 24px;
-}
+#detail-card, #detail-header, #detail-cat-badge { display: none; }
+#detail-body { flex: 1; overflow-y: auto; padding: 22px 22px 24px; }
 #detail-body::-webkit-scrollbar { width: 3px; }
 #detail-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-#detail-title-row {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 12px; margin-bottom: 14px;
-}
+#detail-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 #detail-title { font-size: 18px; font-weight: 700; color: #fff; line-height: 1.4; word-break: keep-all; flex: 1; }
-
-#detail-close {
-  background: rgba(255,255,255,0.08); border: none; color: #aaa; font-size: 14px;
-  cursor: pointer; width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  transition: background 0.2s, color 0.2s;
-}
+#detail-close { background: rgba(255,255,255,0.08); border: none; color: #aaa; font-size: 14px; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s, color 0.2s; }
 #detail-close:hover { background: rgba(255,255,255,0.18); color: #fff; }
-
 #detail-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
 #detail-date { font-size: 12px; color: #ff9f43; font-family: monospace; font-weight: 600; letter-spacing: 0.03em; display: none; }
 #detail-date::before { content: '📅 '; }
-
 #detail-divider { height: 1px; background: rgba(255,255,255,0.07); margin-bottom: 18px; }
 #detail-content { font-size: 13px; color: #ccc; line-height: 2.0; white-space: pre-wrap; word-break: keep-all; }
 #detail-content strong { color: #ff9f43; font-weight: 700; }
-
-/* ── 동심원 ON/OFF 토글 ── */
 .toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 26px; height: 26px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-track { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
 .toggle-thumb { display: none; }
-/* OFF: 바깥 링 + 안쪽 선 원 2개 */
 .toggle-switch .r-off-outer { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: block; }
-.toggle-switch .r-off-mid1  { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
-.toggle-switch .r-off-mid2  { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
-/* ON: 바깥 링 + 채워진 원 */
-.toggle-switch .r-on-outer  { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: none; }
+.toggle-switch .r-off-mid1 { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+.toggle-switch .r-off-mid2 { stroke: #ff9f43; fill: none; stroke-width: 1; display: block; }
+.toggle-switch .r-on-outer { stroke: #ff9f43; fill: none; stroke-width: 1.5; display: none; }
 .toggle-switch .r-on-center { fill: #ff9f43; stroke: none; display: none; }
-.toggle-switch input:checked ~ .toggle-track .r-off-outer,
-.toggle-switch input:checked ~ .toggle-track .r-off-mid1,
-.toggle-switch input:checked ~ .toggle-track .r-off-mid2 { display: none; }
-.toggle-switch input:checked ~ .toggle-track .r-on-outer,
-.toggle-switch input:checked ~ .toggle-track .r-on-center { display: block; }
-
-/* SVG 버튼 픽셀 선명하게 */
-#sidebar-toggle svg, #detail-panel-sidebar-toggle svg {
-  shape-rendering: crispEdges;
-  display: block;
-}
-/* ── 로딩 스피너 ── */
-#loading-overlay {
-  position: fixed; inset: 0; z-index: 900;
-  background: rgba(10,12,20,0.7); backdrop-filter: blur(4px);
-  display: none; align-items: center; justify-content: center;
-  flex-direction: column; gap: 14px;
-}
+.toggle-switch input:checked ~ .toggle-track .r-off-outer, .toggle-switch input:checked ~ .toggle-track .r-off-mid1, .toggle-switch input:checked ~ .toggle-track .r-off-mid2 { display: none; }
+.toggle-switch input:checked ~ .toggle-track .r-on-outer, .toggle-switch input:checked ~ .toggle-track .r-on-center { display: block; }
+#sidebar-toggle svg, #detail-panel-sidebar-toggle svg { shape-rendering: crispEdges; display: block; }
+#loading-overlay { position: fixed; inset: 0; z-index: 900; background: rgba(10,12,20,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
 #loading-overlay.visible { display: flex; }
-.spinner {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: 3px solid rgba(255,159,67,0.2);
-  border-top-color: #ff9f43;
-  animation: spin 0.8s linear infinite;
-}
+.spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(255,159,67,0.2); border-top-color: #ff9f43; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 #loading-text { font-size: 12px; color: rgba(255,255,255,0.5); }
-
-/* ── 하단 상태 표시 ── */
-#status {
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-  background: rgba(18,20,28,0.85); border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 8px; padding: 5px 12px; font-size: 11px;
-  color: rgba(255,255,255,0.5); pointer-events: none;
-}
+#status { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(18,20,28,0.85); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 5px 12px; font-size: 11px; color: rgba(255,255,255,0.5); pointer-events: none; }
 </style>
 </head>
 <body>
-<!-- ── 입력 화면 ── -->
 <div id="login-screen">
   <div id="login-box">
     <div class="login-title">Synapse<span>Log</span></div>
@@ -416,174 +176,62 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
     </div>
   </div>
 </div>
-
-<div id="loading-overlay">
-  <div class="spinner"></div>
-  <div id="loading-text">불러오는 중...</div>
-</div>
+<div id="loading-overlay"><div class="spinner"></div><div id="loading-text">불러오는 중...</div></div>
 <canvas id="c"></canvas>
-
-<!-- 확인 모달 -->
-<div id="confirm-modal">
-  <div id="confirm-box">
-    <div class="confirm-title" id="confirm-title"></div>
-    <div class="confirm-msg" id="confirm-msg"></div>
-    <div class="confirm-btns">
-      <button id="confirm-cancel" onclick="closeConfirm()">취소</button>
-      <button id="confirm-ok">확인</button>
-    </div>
-  </div>
-</div>
-
-<!-- 사이드바 토글 버튼 -->
-<button id="sidebar-toggle" class="sidebar-open" onclick="toggleSidebar()">
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
-    <line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/>
-  </svg>
-</button>
-
-<!-- 좌측 사이드바 -->
+<div id="confirm-modal"><div id="confirm-box"><div class="confirm-title" id="confirm-title"></div><div class="confirm-msg" id="confirm-msg"></div><div class="confirm-btns"><button id="confirm-cancel" onclick="closeConfirm()">취소</button><button id="confirm-ok">확인</button></div></div></div>
+<button id="sidebar-toggle" class="sidebar-open" onclick="toggleSidebar()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/></svg></button>
 <div id="sidebar">
   <div id="sidebar-logo">Synapse<span class="accent">Log</span></div>
   <div id="sidebar-content">
-    <!-- 페이지 추가 패널 -->
     <div id="add-page-panel" class="panel-box">
       <div class="panel-title">페이지 추가</div>
       <div style="position:relative; display:flex; align-items:center;">
         <input type="text" id="add-page-id" placeholder="노션 링크 붙여넣기 혹은 .MD파일 불러오기" style="padding-right:52px; flex:1;" />
         <div style="position:absolute; right:8px; display:flex; align-items:center; gap:7px;">
-          <span style="color:rgba(255,255,255,0.25); display:flex; pointer-events:none;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          </span>
-          <label for="md-import-file" title=".md 파일 임포트" style="cursor:pointer; color:#ff9f43; display:flex; align-items:center; margin:0;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </label>
+          <span style="color:rgba(255,255,255,0.25); display:flex; pointer-events:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+          <label for="md-import-file" title=".md 파일 임포트" style="cursor:pointer; color:#ff9f43; display:flex; align-items:center; margin:0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></label>
           <input type="file" id="md-import-file" accept=".md,.txt" style="display:none;" onchange="importMarkdownFile(event)">
         </div>
       </div>
       <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
       <div id="add-page-error"></div>
       <div id="added-pages-list"></div>
-      <div id="bulk-actions" style="display:none">
-        <button class="bulk-btn sync-all" onclick="confirmBulkSync()">↻ 전체 동기화</button>
-        <button class="bulk-btn close-all" onclick="confirmBulkClose()">✕ 전체 닫기</button>
-      </div>
+      <div id="bulk-actions" style="display:none"><button class="bulk-btn sync-all" onclick="confirmBulkSync()">↻ 전체 동기화</button><button class="bulk-btn close-all" onclick="confirmBulkClose()">✕ 전체 닫기</button></div>
     </div>
-    <!-- 검색 패널 -->
     <div id="search-panel" class="panel-box">
       <div class="panel-title">키워드 검색</div>
-      <div id="search-bar">
-        <input type="text" id="search-input" placeholder="키워드 검색" />
-        <button id="clear-btn">✕</button>
-        <button id="search-btn" aria-label="검색">
-          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="6.5" cy="6.5" r="4.5" stroke="#ff9f43" stroke-width="1.6"/>
-            <line x1="10" y1="10" x2="14" y2="14" stroke="#ff9f43" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
+      <div id="search-bar"><input type="text" id="search-input" placeholder="키워드 검색" /><button id="clear-btn">✕</button><button id="search-btn" aria-label="검색"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="4.5" stroke="#ff9f43" stroke-width="1.6"/><line x1="10" y1="10" x2="14" y2="14" stroke="#ff9f43" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
       <div id="search-result-count"></div>
       <div id="search-history"></div>
     </div>
-    <!-- 슬라이더 패널 -->
     <div id="left-panel" class="panel-box">
       <div class="panel-title">그래프 설정</div>
-      <div class="ctrl-group">
-        <div class="ctrl-label-row"><span>노드 반발력 (Repulsion)</span><span class="val" id="v-rep">500</span></div>
-        <input type="range" id="cfg-rep" min="100" max="2000" step="50" value="500">
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label-row"><span>중력 (Gravity)</span><span class="val" id="v-grav">0.0001</span></div>
-        <input type="range" id="cfg-grav" min="0.0001" max="0.0030" step="0.0001" value="0.0001">
-      </div>
-      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-size:13px; color:rgba(255,255,255,0.75);">노드 제목 (Node Title)</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()">
-          <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="13" cy="13" r="12" class="r-off-outer"/>
-  <circle cx="13" cy="13" r="8"  class="r-off-mid1"/>
-  <circle cx="13" cy="13" r="5"  class="r-off-mid2"/>
-  <circle cx="13" cy="13" r="12" class="r-on-outer"/>
-  <circle cx="13" cy="13" r="7"  class="r-on-center"/>
-</svg></span>
-        </label>
-      </div>
-      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-size:13px; color:rgba(255,255,255,0.75);">포커스 모드 (Focus Mode)</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()">
-          <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="13" cy="13" r="12" class="r-off-outer"/>
-  <circle cx="13" cy="13" r="8"  class="r-off-mid1"/>
-  <circle cx="13" cy="13" r="5"  class="r-off-mid2"/>
-  <circle cx="13" cy="13" r="12" class="r-on-outer"/>
-  <circle cx="13" cy="13" r="7"  class="r-on-center"/>
-</svg></span>
-        </label>
-      </div>
-      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-size:13px; color:rgba(255,255,255,0.75);">연결 모드 (Connect Mode)</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()">
-          <span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="13" cy="13" r="12" class="r-off-outer"/>
-  <circle cx="13" cy="13" r="8"  class="r-off-mid1"/>
-  <circle cx="13" cy="13" r="5"  class="r-off-mid2"/>
-  <circle cx="13" cy="13" r="12" class="r-on-outer"/>
-  <circle cx="13" cy="13" r="7"  class="r-on-center"/>
-</svg></span>
-        </label>
-      </div>
-      <button onclick="exportGraph()" style="width:100%; margin-top:8px; background:rgba(255,159,67,0.12); border:1px solid rgba(255,159,67,0.4); color:#ff9f43; border-radius:7px; padding:8px 12px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:space-between;" onmouseover="this.style.background='rgba(255,159,67,0.22)'" onmouseout="this.style.background='rgba(255,159,67,0.12)'">
-        <span>그래프 이미지 저장</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      </button>
+      <div class="ctrl-group"><div class="ctrl-label-row"><span>노드 반발력 (Repulsion)</span><span class="val" id="v-rep">500</span></div><input type="range" id="cfg-rep" min="100" max="2000" step="50" value="500"></div>
+      <div class="ctrl-group"><div class="ctrl-label-row"><span>중력 (Gravity)</span><span class="val" id="v-grav">0.0001</span></div><input type="range" id="cfg-grav" min="0.0001" max="0.0030" step="0.0001" value="0.0001"></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">노드 제목 (Node Title)</span><label class="toggle-switch"><input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="8" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">포커스 모드 (Focus Mode)</span><label class="toggle-switch"><input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="8" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">연결 모드 (Connect Mode)</span><label class="toggle-switch"><input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="8" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
+      <button onclick="exportGraph()" style="width:100%; margin-top:8px; background:rgba(255,159,67,0.12); border:1px solid rgba(255,159,67,0.4); color:#ff9f43; border-radius:7px; padding:8px 12px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:space-between;" onmouseover="this.style.background='rgba(255,159,67,0.22)'" onmouseout="this.style.background='rgba(255,159,67,0.12)'"><span>그래프 이미지 저장</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
     </div>
   </div>
 </div>
-
-<!-- 호버 미니 툴팁 -->
 <div id="tooltip"></div>
-
-<!-- 클릭 시 우측 디테일 패널 -->
 <div id="detail-panel">
-  <div id="detail-tabs-bar">
-    <div id="detail-tabs"></div>
-    <button id="tab-overflow-btn" onclick="toggleOverflowMenu(event)">···</button>
-    <button id="detail-panel-close" onclick="closePanel()" title="전체 닫기" style="color:#ff9f43;">✕</button>
-  </div>
-  <div id="detail-body">
-    <div id="detail-title-row">
-      <div id="detail-title"></div>
-    </div>
-    <div id="detail-meta-row">
-      <span id="detail-date"></span>
-    </div>
-    <div id="detail-divider"></div>
-    <div id="detail-content"></div>
-  </div>
+  <div id="detail-tabs-bar"><div id="detail-tabs"></div><button id="tab-overflow-btn" onclick="toggleOverflowMenu(event)">···</button><button id="detail-panel-close" onclick="closePanel()" title="전체 닫기" style="color:#ff9f43;">✕</button></div>
+  <div id="detail-body"><div id="detail-title-row"><div id="detail-title"></div></div><div id="detail-meta-row"><span id="detail-date"></span></div><div id="detail-divider"></div><div id="detail-content"></div></div>
 </div>
 <div id="tab-overflow-menu"></div>
-<button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기">
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
-    <line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/>
-  </svg>
-</button>
-
+<button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/></svg></button>
 <div id="status"></div>
 <div id="search-result-count"></div>
-
 <script>
+
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const tooltip = document.getElementById('tooltip');
 const statusEl = document.getElementById('status');
 const searchInput = document.getElementById('search-input');
 const clearBtn = document.getElementById('clear-btn');
-
 const cfgRep = document.getElementById('cfg-rep');
 const cfgGrav = document.getElementById('cfg-grav');
 const vRep = document.getElementById('v-rep');
@@ -592,7 +240,6 @@ const vGrav = document.getElementById('v-grav');
 let W = window.innerWidth, H = window.innerHeight;
 canvas.width = W; canvas.height = H;
 
-// 계층별 노드 반지름 (level 0=루트, 1=H1, 2=H2, 3=H3, 4=H4/볼드)
 function nodeR(level) {
   return [10, 8, 6.5, 5.5, 4.5][Math.min(level, 4)];
 }
@@ -601,7 +248,6 @@ let panX = 0, panY = 0;
 let searchKeyword = '';
 let searchMatches = new Set();
 let isStable = false;
-
 let CONFIG = { repulsion: 500, gravity: 0.0001, linkDistance: 60 };
 
 function updateConfig() {
@@ -614,50 +260,31 @@ function updateConfig() {
 cfgRep.addEventListener('input', updateConfig);
 cfgGrav.addEventListener('input', updateConfig);
 
-// HSL 기반 색상 시스템
-// level=1 노드: hue를 황금비로 순환 배분, lightness=65%
-// level=2: 부모 hue 유지, lightness=55%
-// level=3: 부모 hue 유지, lightness=42%
-// level=4(####): 부모 hue 유지, lightness=32%
-// 단, 같은 부모에서 갈라지는 형제들은 hue를 나눠 가짐
-
 let _hueIndex = 0;
-const _labelHueMap = {}; // level=1 라벨 → hue 매핑
+const _labelHueMap = {};
 
 function getBaseHue(label) {
   if (_labelHueMap[label] === undefined) {
-    // 황금비 기반 hue 배분 — 겹치지 않게
     _labelHueMap[label] = (_hueIndex * 137.508) % 360;
     _hueIndex++;
   }
   return _labelHueMap[label];
 }
-
-function hslColor(h, s, l) {
-  return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`;
-}
-
-function getH1Color(label) {
-  const hue = getBaseHue(label);
-  return hslColor(hue, 75, 65);
-}
-
+function hslColor(h, s, l) { return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`; }
+function getH1Color(label) { return hslColor(getBaseHue(label), 75, 65); }
 function extractHue(color) {
   if (!color) return 0;
   const m = color.match(/hsl\((\d+(?:\.\d+)?)/);
   return m ? parseFloat(m[1]) : 0;
 }
-
 function getSaturation(color) {
   if (!color) return 70;
   const m = color.match(/hsl\(\d+(?:\.\d+)?,\s*(\d+(?:\.\d+)?)%/);
   return m ? parseFloat(m[1]) : 70;
 }
-
 function hexToRgb(hex) {
   if (!hex) return [150,150,150];
   if (hex.startsWith('hsl')) {
-    // hsl(h, s%, l%) → rgb 변환
     const m = hex.match(/hsl\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)%,\s*(\d+(?:\.\d+)?)%\)/);
     if (!m) return [150,150,150];
     let h = parseFloat(m[1])/360, s = parseFloat(m[2])/100, l = parseFloat(m[3])/100;
@@ -670,7 +297,7 @@ function hexToRgb(hex) {
   return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
 }
 function rgbStr(rgb, a=1) { return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
-// 마크다운 정리 — 볼드 **, 대괄호 [], 해시 # 등 제거
+
 function cleanLabel(str) {
   if (!str) return '';
   return str
@@ -681,17 +308,14 @@ function cleanLabel(str) {
     .replace(/→|⇒|—/g, '')
     .trim();
 }
-
-// desc 정리 — **볼드** 는 그대로 유지 (상세창에서 주황 굵은 글씨로 표현)
 function cleanDesc(str) {
   if (!str) return '';
   return str
-    .replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '$1') // *이탤릭*만 제거, **볼드** 유지
+    .replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '$1')
     .replace(/[\[\]#`]/g, '')
     .replace(/\{[^}]*\}/g, '')
     .trim();
 }
-
 
 function parseMarkdown(text, rootTitle) {
   const nodes = [], edges = [], nodeMap = {};
@@ -700,46 +324,33 @@ function parseMarkdown(text, rootTitle) {
   function addNode(rawLabel, cat, desc='', parentId=null, date='', level=0) {
     const label = cleanLabel(rawLabel);
     if (!label || label.length < 1) return null;
-
     const parentNode = nodeMap[parentId];
     let finalCat = cat;
     if (parentNode && parentNode.level > 0) finalCat = parentNode.cat;
-
     let color = null;
-    if (level === 0) {
-      color = '#ffffff';
-    } else if (level === 1) {
-      color = getH1Color(label);  // lightness=65%
-    } else if (level === 2) {
+    if (level === 0) { color = '#ffffff'; }
+    else if (level === 1) { color = getH1Color(label); }
+    else if (level === 2) {
       const parentColor = parentNode?.color;
       if (parentColor) {
         const parentHue = extractHue(parentColor);
         const siblingCount = edges.filter(e => e.from === parentId).length;
         const hueOffset = (siblingCount * 47) % 120 - 60;
         color = hslColor((parentHue + hueOffset + 360) % 360, 70, 58);
-      } else {
-        color = getH1Color(label);
-      }
+      } else { color = getH1Color(label); }
     } else if (level === 3) {
       const parentColor = parentNode?.color;
-      if (parentColor) {
-        color = hslColor(extractHue(parentColor), 65, 50);
-      }
+      if (parentColor) color = hslColor(extractHue(parentColor), 65, 50);
     } else if (level === 4) {
       const parentColor = parentNode?.color;
-      if (parentColor) {
-        color = hslColor(extractHue(parentColor), getSaturation(parentColor), 42);
-      }
+      if (parentColor) color = hslColor(extractHue(parentColor), getSaturation(parentColor), 42);
     }
-
     const id = 'n' + (nid++);
     const n = {
       id, label, cat: finalCat, desc: cleanDesc(desc), date,
       x: W/2 + (Math.random()-0.5)*60,
       y: H/2 + (Math.random()-0.5)*60,
-      vx: 0, vy: 0,
-      level, fixed: false,
-      color // 노드별 색상
+      vx: 0, vy: 0, level, fixed: false, color
     };
     nodes.push(n);
     nodeMap[id] = n;
@@ -754,35 +365,22 @@ function parseMarkdown(text, rootTitle) {
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
     if (!line || line.startsWith('---') || line.startsWith('<')) continue;
-
-    // ── 헤딩 파싱 (H1~H4)
     const headerMatch = line.match(/^(#{1,4})\s+(.*)$/);
     if (headerMatch) {
       const rawDepth = headerMatch[1].length;
       const depth = Math.min(rawDepth, 4);
-      // 헤딩 텍스트에서 ** 볼드 마크다운 제거
       let lbl = headerMatch[2].trim().replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*\*/g, '');
-
       let cat = 'sub';
       if (depth === 1) {
         if (lbl.includes('회상') || lbl.includes('경험')) cat = 'exp';
         if (lbl.includes('가치관')) cat = 'value';
       }
-
       let nDate = '';
       const inlineDateMatch = lbl.match(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/);
-      if (inlineDateMatch) {
-        nDate = inlineDateMatch[1];
-        lbl = lbl.replace(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/, '');
-      }
-
+      if (inlineDateMatch) { nDate = inlineDateMatch[1]; lbl = lbl.replace(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/, ''); }
       let parentId = null;
-      for (let d = depth - 1; d >= 0; d--) {
-        if (currentParents[d]) { parentId = currentParents[d]; break; }
-      }
+      for (let d = depth - 1; d >= 0; d--) { if (currentParents[d]) { parentId = currentParents[d]; break; } }
       if (!parentId) parentId = rootId;
-
-      // 본문 설명 수집 — 다음 헤딩 전까지만
       let descLines = [];
       let nextIdx = i + 1;
       while (nextIdx < lines.length) {
@@ -790,18 +388,14 @@ function parseMarkdown(text, rootTitle) {
         if (!nextLine) { nextIdx++; continue; }
         if (nextLine.startsWith('#')) break;
         if (nextLine.startsWith('[DB_PAGE]')) break;
-        // 날짜 라인 처리
         const dateOnlyMatch = nextLine.match(/^-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-$/);
         if (dateOnlyMatch) { nDate = nDate || dateOnlyMatch[1]; nextIdx++; continue; }
-        // 볼드 단독 라인이 다음 노드 제목이면 멈춤
         if (/^\*\*[^*]{3,60}\*\*$/.test(nextLine) && descLines.length > 0) break;
-        // 콜아웃(>)은 desc에 포함하되 길이 제한
         if (descLines.join('\n').length > 3000) { nextIdx++; continue; }
         descLines.push(nextLine);
         nextIdx++;
       }
       const finalDesc = descLines.join('\n').substring(0, 5000);
-
       const curId = addNode(lbl, cat, finalDesc, parentId, nDate, depth);
       if (curId) {
         currentParents[depth] = curId;
@@ -810,30 +404,21 @@ function parseMarkdown(text, rootTitle) {
       if (nextIdx > i + 1) i = nextIdx - 1;
       continue;
     }
-
-    // 볼드 텍스트(**텍스트**)는 노드로 만들지 않음 — 헤딩(#~####)만 노드로 처리
   }
-
   return { nodes, edges, nodeMap };
 }
 
-// 하드코딩 fallback 없음 — 항상 노션 API 데이터 사용
 const MARKDOWN = ``;
-
 let nodes=[], edges=[], nodeMap={};
 let drag=null, hoveredNode=null;
 let isPanning=false, panStartX=0, panStartY=0, panStartOffsetX=0, panStartOffsetY=0;
-
-// ── 전역 변수 ──
 let _savedToken = sessionStorage.getItem('snlog_token') || '';
 let _addedPageIds = new Set();
 
-// F5 후 토큰 복원
 if (_savedToken) {
   document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('input-token');
     if (input) input.value = _savedToken;
-    // 토큰 있으면 바로 그래프 화면으로
     const loginScreen = document.getElementById('login-screen');
     if (loginScreen) loginScreen.style.display = 'none';
     buildGraph();
@@ -843,21 +428,14 @@ if (_savedToken) {
   });
 }
 
-// ── 토큰만 입력 → 그래프 화면 진입 ──
 async function startGraph() {
   const token = document.getElementById('input-token').value.trim();
   const errEl = document.getElementById('login-error');
-  const btn = document.getElementById('login-btn');
-
-  if (!token) {
-    errEl.textContent = 'Notion API Token을 입력해주세요';
-    errEl.style.display = 'block'; return;
-  }
+  if (!token) { errEl.textContent = 'Notion API Token을 입력해주세요'; errEl.style.display = 'block'; return; }
   if (!token.startsWith('secret_') && !token.startsWith('ntn_')) {
     errEl.textContent = '올바른 토큰 형식이 아니에요 (secret_ 또는 ntn_ 으로 시작)';
     errEl.style.display = 'block'; return;
   }
-
   _savedToken = token;
   try { sessionStorage.setItem('snlog_token', token); } catch(e) {}
   document.getElementById('login-screen').style.display = 'none';
@@ -865,106 +443,62 @@ async function startGraph() {
   loop();
 }
 
-// ── 그래프 이미지 Export ──
 function exportGraph() {
-  const SIZE = 1024;
-  const PADDING = 60;
-
-  // visible 노드 전체 bounding box 계산
+  const SIZE = 1024, PADDING = 60;
   const visibleNodes = nodes.filter(n => n.visible);
   if (visibleNodes.length === 0) return;
-
   const minX = Math.min(...visibleNodes.map(n => n.x));
   const maxX = Math.max(...visibleNodes.map(n => n.x));
   const minY = Math.min(...visibleNodes.map(n => n.y));
   const maxY = Math.max(...visibleNodes.map(n => n.y));
-
-  const graphW = maxX - minX || 1;
-  const graphH = maxY - minY || 1;
-
-  // 정사각형 기준 스케일 계산 (종횡비 유지)
+  const graphW = maxX - minX || 1, graphH = maxY - minY || 1;
   const exportScale = (SIZE - PADDING * 2) / Math.max(graphW, graphH);
-
-  // 오프스크린 캔버스
   const offscreen = document.createElement('canvas');
-  offscreen.width = SIZE;
-  offscreen.height = SIZE;
+  offscreen.width = SIZE; offscreen.height = SIZE;
   const ctx2 = offscreen.getContext('2d');
-
-  // 배경
-  ctx2.fillStyle = '#0a0c14';
-  ctx2.fillRect(0, 0, SIZE, SIZE);
-
-  // 그래프를 중앙에 배치할 오프셋
+  ctx2.fillStyle = '#0a0c14'; ctx2.fillRect(0, 0, SIZE, SIZE);
   const offsetX = (SIZE - graphW * exportScale) / 2 - minX * exportScale;
   const offsetY = (SIZE - graphH * exportScale) / 2 - minY * exportScale;
-
   ctx2.save();
   ctx2.translate(offsetX, offsetY);
   ctx2.scale(exportScale, exportScale);
-
-  // 엣지 그리기
-  ctx2.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx2.lineWidth = 1 / exportScale;
   edges.forEach(e => {
     const a = nodeMap[e.from], b = nodeMap[e.to];
     if (!a?.visible || !b?.visible) return;
-    if (e.weakLink) {
-      ctx2.setLineDash([6, 6]);
-      ctx2.strokeStyle = 'rgba(255,255,255,0.08)';
-    } else {
-      ctx2.setLineDash([]);
-      ctx2.strokeStyle = 'rgba(255,255,255,0.12)';
-    }
-    ctx2.beginPath();
-    ctx2.moveTo(a.x, a.y);
-    ctx2.lineTo(b.x, b.y);
-    ctx2.stroke();
+    if (e.mentionLink) { ctx2.setLineDash([5,6]); ctx2.strokeStyle = 'rgba(255,255,255,0.3)'; }
+    else if (e.weakLink) { ctx2.setLineDash([6,6]); ctx2.strokeStyle = 'rgba(255,255,255,0.08)'; }
+    else { ctx2.setLineDash([]); ctx2.strokeStyle = 'rgba(255,255,255,0.12)'; }
+    ctx2.lineWidth = 1/exportScale;
+    ctx2.beginPath(); ctx2.moveTo(a.x,a.y); ctx2.lineTo(b.x,b.y); ctx2.stroke();
   });
   ctx2.setLineDash([]);
-
-  // 노드 그리기
   visibleNodes.forEach(n => {
     const r = nodeR(n.level);
     const rgb = hexToRgb(n.color || '#74b9ff');
-    ctx2.beginPath();
-    ctx2.arc(n.x, n.y, r, 0, Math.PI * 2);
-    ctx2.fillStyle = rgbStr(rgb, 1);
+    ctx2.beginPath(); ctx2.arc(n.x, n.y, r, 0, Math.PI*2);
+    ctx2.fillStyle = n.ghostNode ? 'rgba(255,255,255,0.2)' : rgbStr(rgb, 1);
     ctx2.fill();
-
-    // 라벨
     if (_showLabels) {
       let lbl = n.label;
-      if (n.level >= 2 && lbl.length > 14) lbl = lbl.substring(0, 13) + '…';
+      if (n.level >= 2 && lbl.length > 14) lbl = lbl.substring(0,13) + '…';
       const fontSize = n.level <= 1 ? 12 : 10;
-      ctx2.font = n.level <= 1
-        ? `bold ${fontSize}px 'Noto Sans KR', sans-serif`
-        : `500 ${fontSize}px 'Noto Sans KR', sans-serif`;
+      ctx2.font = n.level <= 1 ? `bold ${fontSize}px 'Noto Sans KR', sans-serif` : `500 ${fontSize}px 'Noto Sans KR', sans-serif`;
       ctx2.fillStyle = 'rgba(215,220,230,0.85)';
-      ctx2.textAlign = 'center';
-      ctx2.textBaseline = 'top';
+      ctx2.textAlign = 'center'; ctx2.textBaseline = 'top';
       ctx2.fillText(lbl, n.x, n.y + r + 4);
     }
   });
-
   ctx2.restore();
-
-  // 워터마크
   ctx2.fillStyle = 'rgba(255,255,255,0.15)';
   ctx2.font = 'bold 13px sans-serif';
-  ctx2.textAlign = 'right';
-  ctx2.textBaseline = 'bottom';
-  ctx2.fillText('SynapseLog', SIZE - 16, SIZE - 14);
-
-  // 다운로드
+  ctx2.textAlign = 'right'; ctx2.textBaseline = 'bottom';
+  ctx2.fillText('SynapseLog', SIZE-16, SIZE-14);
   const link = document.createElement('a');
-  const timestamp = new Date().toISOString().slice(0, 10);
-  link.download = `SynapseLog_${timestamp}.png`;
+  link.download = `SynapseLog_${new Date().toISOString().slice(0,10)}.png`;
   link.href = offscreen.toDataURL('image/png');
   link.click();
 }
 
-// ── 마크다운 파일 직접 임포트 ──
 function importMarkdownFile(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -988,7 +522,6 @@ function importMarkdownFile(event) {
   event.target.value = '';
 }
 
-// ── 페이지 목록 저장/복원 ──
 function savePageList() {
   const list = [];
   _addedPageIds.forEach(pageId => {
@@ -1022,35 +555,24 @@ async function restorePageList() {
   updateBulkActionsVisibility();
 }
 
-// ── 페이지 추가 ──
 async function addPage() {
   const raw = document.getElementById('add-page-id').value.trim();
   const pageId = (raw.match(/([a-f0-9]{32})/i)?.[1] || raw.replace(/-/g, '')).toLowerCase();
   const errEl = document.getElementById('add-page-error');
   const btn = document.getElementById('add-page-btn');
-
   if (!pageId) { errEl.textContent = 'Page ID를 입력해주세요'; errEl.style.display = 'block'; return; }
   if (_addedPageIds.has(pageId)) { errEl.textContent = '이미 추가된 페이지예요'; errEl.style.display = 'block'; return; }
   if (!_savedToken) { errEl.textContent = '토큰 정보가 없어요. 새로고침 후 다시 시도해주세요'; errEl.style.display = 'block'; return; }
-
-  btn.disabled = true;
-  btn.textContent = '불러오는 중...';
+  btn.disabled = true; btn.textContent = '불러오는 중...';
   errEl.style.display = 'none';
   showLoading('노션 페이지 불러오는 중...');
-
   try {
-    // localStorage 캐시 확인
     const cacheKey = `snlog_${pageId}`;
     const cached = sessionStorage.getItem(cacheKey);
     let data;
-
     if (cached) {
-      try {
-        data = JSON.parse(cached);
-        setLoadingText('캐시에서 불러오는 중...');
-      } catch(e) { data = null; }
+      try { data = JSON.parse(cached); setLoadingText('캐시에서 불러오는 중...'); } catch(e) { data = null; }
     }
-
     if (!data) {
       const res = await fetch('/api/notion', {
         method: 'POST',
@@ -1060,13 +582,14 @@ async function addPage() {
       const text = await res.text();
       try { data = JSON.parse(text); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해 주세요'); }
       if (!res.ok) throw new Error(data.error || '오류가 발생했어요');
-      // 캐시 저장
       try { sessionStorage.setItem(cacheKey, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
     }
-
     _addedPageIds.add(pageId);
     mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
-
+    // ── [[]] mention 링크 자동 연결 ──
+    if (data.mentionPageIds?.length) {
+      processMentionLinks(data.mentionPageIds, pageId);
+    }
     const list = document.getElementById('added-pages-list');
     const item = document.createElement('div');
     item.className = 'added-page-item';
@@ -1076,22 +599,15 @@ async function addPage() {
     list.appendChild(item);
     updateBulkActionsVisibility();
     savePageList();
-
     document.getElementById('add-page-id').value = '';
-    btn.disabled = false;
-    btn.textContent = '+ 노드 불러오기';
+    btn.disabled = false; btn.textContent = '+ 노드 불러오기';
     isStable = false;
   } catch(e) {
-    errEl.textContent = e.message;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '+ 노드 불러오기';
-  } finally {
-    hideLoading();
-  }
+    errEl.textContent = e.message; errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '+ 노드 불러오기';
+  } finally { hideLoading(); }
 }
 
-// ── 확인 모달 ──
 let _confirmCallback = null;
 function showConfirm(title, msg, onOk) {
   document.getElementById('confirm-title').textContent = title;
@@ -1100,41 +616,23 @@ function showConfirm(title, msg, onOk) {
   _confirmCallback = onOk;
   document.getElementById('confirm-ok').onclick = () => { closeConfirm(); onOk(); };
 }
-function closeConfirm() {
-  document.getElementById('confirm-modal').classList.remove('open');
-  _confirmCallback = null;
-}
+function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); _confirmCallback = null; }
 
-// 전체 동기화
-function confirmBulkSync() {
-  showConfirm('전체 동기화', '모든 페이지의 노션 데이터를 새로 불러옵니다. 계속할까요?', bulkSync);
-}
-async function bulkSync() {
-  const ids = [..._addedPageIds];
-  for (const pid of ids) {
-    await syncPage(pid);
-  }
-}
-
-// 전체 닫기
+function confirmBulkSync() { showConfirm('전체 동기화', '모든 페이지의 노션 데이터를 새로 불러옵니다. 계속할까요?', bulkSync); }
+async function bulkSync() { const ids = [..._addedPageIds]; for (const pid of ids) { await syncPage(pid); } }
 function confirmBulkClose() {
   showConfirm('전체 닫기', '추가된 모든 페이지 노드를 제거합니다. 계속할까요?', () => {
     const ids = [..._addedPageIds];
-    ids.forEach(pid => {
-      const el = document.querySelector(`[data-page-id="${pid}"]`);
-      removePage(pid, el);
-    });
+    ids.forEach(pid => { const el = document.querySelector(`[data-page-id="${pid}"]`); removePage(pid, el); });
     document.getElementById('bulk-actions').style.display = 'none';
   });
 }
 
-// 단일 페이지 동기화
 async function syncPage(pageId) {
   const item = document.querySelector(`[data-page-id="${pageId}"]`);
   const syncBtn = item?.querySelector('.page-action-btn.sync');
   if (syncBtn) syncBtn.textContent = '⟳';
   showLoading('동기화 중...');
-
   try {
     const res = await fetch('/api/notion', {
       method: 'POST',
@@ -1143,24 +641,22 @@ async function syncPage(pageId) {
     });
     const text2 = await res.text();
     let data;
-    try { data = JSON.parse(text2); } catch(e) { throw new Error('서버 응답 오류 — 잠시 후 다시 시도해 주세요'); }
+    try { data = JSON.parse(text2); } catch(e) { throw new Error('서버 응답 오류'); }
     if (!res.ok) throw new Error(data.error);
-    // 캐시 갱신
     try { sessionStorage.setItem(`snlog_${pageId}`, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
-
-    // 기존 노드 제거 후 새로 병합
     const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
     nodes = nodes.filter(n => !removeIds.has(n.id));
     edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
     Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
-
     mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
+    // ── [[]] mention 링크 자동 연결 ──
+    if (data.mentionPageIds?.length) {
+      processMentionLinks(data.mentionPageIds, pageId);
+    }
     if (syncBtn) syncBtn.textContent = '↻';
   } catch(e) {
     if (syncBtn) syncBtn.textContent = '↻';
-  } finally {
-    hideLoading();
-  }
+  } finally { hideLoading(); }
 }
 
 function updateBulkActionsVisibility() {
@@ -1168,7 +664,6 @@ function updateBulkActionsVisibility() {
   if (bulk) bulk.style.display = _addedPageIds.size > 0 ? 'flex' : 'none';
 }
 
-// ── 페이지 제거 — 모든 페이지 동등하게 노드만 제거 ──
 function removePage(pageId, el) {
   _addedPageIds.delete(pageId);
   if (el) el.remove();
@@ -1181,51 +676,33 @@ function removePage(pageId, el) {
   savePageList();
 }
 
-// 기존 그래프에 새 페이지 노드 병합
 function mergeGraph(title, markdown, pageId) {
   const result = parseMarkdown(markdown, title);
   const idMap = {};
   const prefix = 'p' + Date.now() + '_';
   const trackId = pageId || title;
-
-  // 기존 그래프 전체 경계(bounding box) 계산
   const existingNodes = nodes.filter(n => n.visible !== false);
   let newRootX, newRootY;
-
-  if (existingNodes.length === 0) {
-    newRootX = W/2 + 500;
-    newRootY = H/2;
-  } else {
+  if (existingNodes.length === 0) { newRootX = W/2 + 500; newRootY = H/2; }
+  else {
     const minX = Math.min(...existingNodes.map(n => n.x));
     const maxX = Math.max(...existingNodes.map(n => n.x));
     const minY = Math.min(...existingNodes.map(n => n.y));
     const maxY = Math.max(...existingNodes.map(n => n.y));
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
-
-    // 기존 그래프 크기 + 여유 거리만큼 떨어진 위치에 배치
-    const graphW = maxX - minX;
-    const graphH = maxY - minY;
-    const margin = 300; // 여유 거리
-
-    // 추가된 페이지 수에 따라 각도 분산 (0°, 90°, 180°, 270° 순환)
+    const centerX = (minX+maxX)/2, centerY = (minY+maxY)/2;
+    const graphW = maxX-minX, graphH = maxY-minY;
+    const margin = 300;
     const existingCount = nodes.filter(n => n.level === 0 && n.sourcePageId).length;
     const angles = [0, Math.PI, Math.PI/2, -Math.PI/2, Math.PI*0.75, -Math.PI*0.75, Math.PI*0.25, -Math.PI*0.25];
     const angle = angles[existingCount % angles.length];
-
-    // 각도 방향으로 bounding box 끝에서 margin만큼 더 나간 위치
-    const distX = (graphW / 2 + margin) * Math.abs(Math.cos(angle));
-    const distY = (graphH / 2 + margin) * Math.abs(Math.sin(angle));
-    const dist = Math.max(distX + distY, 600);
-
-    newRootX = centerX + Math.cos(angle) * dist;
-    newRootY = centerY + Math.sin(angle) * dist;
+    const distX = (graphW/2+margin)*Math.abs(Math.cos(angle));
+    const distY = (graphH/2+margin)*Math.abs(Math.sin(angle));
+    const dist = Math.max(distX+distY, 600);
+    newRootX = centerX + Math.cos(angle)*dist;
+    newRootY = centerY + Math.sin(angle)*dist;
   }
-
-  // 새 페이지 원형 배치 기준점 → 계산된 위치로 이동
   const newRoot = result.nodes.find(n => n.level === 0);
   const newRootOldId = newRoot ? newRoot.id : null;
-
   result.nodes.forEach(n => {
     const oldId = n.id;
     const newId = prefix + oldId;
@@ -1238,37 +715,25 @@ function mergeGraph(title, markdown, pageId) {
     nodes.push(n);
     nodeMap[newId] = n;
   });
-
-  // 루트 노드만 먼저 표시
   const newRootNewId = newRootOldId ? idMap[newRootOldId] : null;
   const newRootNode = newRootNewId ? nodeMap[newRootNewId] : null;
-  if (newRootNode) { newRootNode.visible = true; }
-
-  // 2단계: 엣지 ID 매핑
+  if (newRootNode) newRootNode.visible = true;
   result.edges.forEach(e => {
-    const newFrom = idMap[e.from];
-    const newTo = idMap[e.to];
-    if (newFrom && newTo && nodeMap[newFrom] && nodeMap[newTo]) {
-      edges.push({ from: newFrom, to: newTo });
-    }
+    const newFrom = idMap[e.from], newTo = idMap[e.to];
+    if (newFrom && newTo && nodeMap[newFrom] && nodeMap[newTo]) edges.push({ from: newFrom, to: newTo });
   });
-
-  // 3단계: 루트끼리 약한 연결
   const firstRoot = nodes.find(n => n.level === 0 && !n.sourcePageId);
   if (firstRoot && newRootNewId && firstRoot.id !== newRootNewId) {
     edges.push({ from: firstRoot.id, to: newRootNewId, weakLink: true });
   }
-
-  // 4단계: 레벨별 순차 등장
   const LEVEL_DELAY = 500;
   const RADII = [0, 300, 220, 150, 100];
   const newNodeIds = new Set(Object.values(idMap));
   const maxLevel = Math.max(...nodes.filter(n => newNodeIds.has(n.id)).map(n => n.level), 0);
-
   for (let lv = 1; lv <= maxLevel; lv++) {
     setTimeout(() => {
       const levelNodes = nodes.filter(n => newNodeIds.has(n.id) && n.level === lv);
-      const radius = RADII[Math.min(lv, RADII.length - 1)];
+      const radius = RADII[Math.min(lv, RADII.length-1)];
       const byParent = new Map();
       levelNodes.forEach(n => {
         const parentEdge = edges.find(e => e.to === n.id && !e.weakLink);
@@ -1277,68 +742,44 @@ function mergeGraph(title, markdown, pageId) {
         if (!byParent.has(parentId)) byParent.set(parentId, { parent: parentNode, children: [] });
         byParent.get(parentId).children.push(n);
       });
-      byParent.forEach(({ parent, children }) => {
-        if (parent) placeChildrenAroundParent(parent, children, radius);
-      });
+      byParent.forEach(({ parent, children }) => { if (parent) placeChildrenAroundParent(parent, children, radius); });
       levelNodes.forEach(n => { n.visible = true; });
       isStable = false;
     }, lv * LEVEL_DELAY);
   }
-
   isStable = false;
   setTimeout(fitGraph, maxLevel * LEVEL_DELAY + 600);
 }
 
-// 그래프 전체를 화면에 맞게 자동 조정 — 부드러운 애니메이션
 let _fitAnimId = null;
-
 function fitGraph() {
   if (nodes.length === 0) return;
   const visibleNodes = nodes.filter(n => n.visible);
   if (visibleNodes.length === 0) return;
-
   const sidebarWidth = document.getElementById('sidebar').classList.contains('collapsed') ? 0 : 380;
   const detailWidth = document.getElementById('detail-panel').classList.contains('open') ? 400 : 0;
   const availW = W - sidebarWidth - detailWidth - 40;
   const availH = H - 40;
   const offsetLeft = sidebarWidth + 20;
-
   const minX = Math.min(...visibleNodes.map(n => n.x));
   const maxX = Math.max(...visibleNodes.map(n => n.x));
   const minY = Math.min(...visibleNodes.map(n => n.y));
   const maxY = Math.max(...visibleNodes.map(n => n.y));
-
-  const graphW = maxX - minX || 1;
-  const graphH = maxY - minY || 1;
-
-  const targetScale = Math.min(availW / graphW, availH / graphH, 1.5) * 0.82;
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-  const targetPanX = (offsetLeft + availW / 2) - W/2 - (centerX - W/2) * targetScale;
-  const targetPanY = (availH / 2 + 20) - H/2 - (centerY - H/2) * targetScale;
-
-  // 이전 애니메이션 취소
+  const graphW = maxX-minX || 1, graphH = maxY-minY || 1;
+  const targetScale = Math.min(availW/graphW, availH/graphH, 1.5) * 0.82;
+  const centerX = (minX+maxX)/2, centerY = (minY+maxY)/2;
+  const targetPanX = (offsetLeft+availW/2) - W/2 - (centerX-W/2)*targetScale;
+  const targetPanY = (availH/2+20) - H/2 - (centerY-H/2)*targetScale;
   if (_fitAnimId) cancelAnimationFrame(_fitAnimId);
-
-  const DURATION = 600; // ms
-  const startTime = performance.now();
-  const startScale = scale;
-  const startPanX = panX;
-  const startPanY = panY;
-
+  const DURATION = 600, startTime = performance.now();
+  const startScale = scale, startPanX = panX, startPanY = panY;
   function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
-
   function animate(now) {
-    const t = Math.min((now - startTime) / DURATION, 1);
-    const e = easeInOut(t);
-    scale = startScale + (targetScale - startScale) * e;
-    panX = startPanX + (targetPanX - startPanX) * e;
-    panY = startPanY + (targetPanY - startPanY) * e;
-    if (t < 1) {
-      _fitAnimId = requestAnimationFrame(animate);
-    } else {
-      _fitAnimId = null;
-    }
+    const t = Math.min((now-startTime)/DURATION, 1), e = easeInOut(t);
+    scale = startScale + (targetScale-startScale)*e;
+    panX = startPanX + (targetPanX-startPanX)*e;
+    panY = startPanY + (targetPanY-startPanY)*e;
+    if (t < 1) { _fitAnimId = requestAnimationFrame(animate); } else { _fitAnimId = null; }
   }
   _fitAnimId = requestAnimationFrame(animate);
 }
@@ -1347,9 +788,9 @@ function placeChildrenAroundParent(parentNode, children, radius) {
   if (!children.length) return;
   const cx = parentNode.x, cy = parentNode.y;
   children.forEach((n, i) => {
-    const angle = (2 * Math.PI / children.length) * i - Math.PI / 2;
-    n.x = cx + Math.cos(angle) * radius;
-    n.y = cy + Math.sin(angle) * radius;
+    const angle = (2*Math.PI/children.length)*i - Math.PI/2;
+    n.x = cx + Math.cos(angle)*radius;
+    n.y = cy + Math.sin(angle)*radius;
     n.vx = 0; n.vy = 0;
   });
 }
@@ -1357,36 +798,25 @@ function placeChildrenAroundParent(parentNode, children, radius) {
 function buildGraph() {
   _hueIndex = 0;
   const markdown = window._NOTION_MARKDOWN || MARKDOWN;
-
   if (!markdown || !markdown.trim()) {
     nodes = []; edges = []; Object.keys(nodeMap).forEach(k => delete nodeMap[k]);
-    isStable = false;
-    return;
+    isStable = false; return;
   }
-
   const title = window._NOTION_TITLE || '노션 페이지';
   const r = parseMarkdown(markdown, title);
   nodes = r.nodes; edges = r.edges; nodeMap = r.nodeMap;
-
-  // 루트만 중앙에, 나머지 모두 숨김
   const root = nodes.find(n => n.level === 0);
   if (root) { root.x = W/2; root.y = H/2; root.vx = 0; root.vy = 0; }
   nodes.forEach(n => { n.visible = n.level === 0; });
   isStable = false;
-
-  const LEVEL_DELAY = 500; // 레벨 간 딜레이 ms
-  const RADII = [0, 300, 220, 150, 100]; // 각 레벨별 배치 반경
-
+  const LEVEL_DELAY = 500;
+  const RADII = [0, 300, 220, 150, 100];
   const maxLevel = Math.max(...nodes.map(n => n.level), 0);
-
   for (let lv = 1; lv <= maxLevel; lv++) {
     const delay = lv * LEVEL_DELAY;
     setTimeout(() => {
-      // 이 레벨 노드들을 부모 위치 기준으로 원형 배치
       const levelNodes = nodes.filter(n => n.level === lv);
-      const radius = RADII[Math.min(lv, RADII.length - 1)];
-
-      // 부모별로 그룹핑해서 각 부모 주변에 배치
+      const radius = RADII[Math.min(lv, RADII.length-1)];
       const byParent = new Map();
       levelNodes.forEach(n => {
         const parentEdge = edges.find(e => e.to === n.id && !e.weakLink);
@@ -1395,95 +825,64 @@ function buildGraph() {
         if (!byParent.has(parentId)) byParent.set(parentId, { parent: parentNode, children: [] });
         byParent.get(parentId).children.push(n);
       });
-
-      byParent.forEach(({ parent, children }) => {
-        if (parent) placeChildrenAroundParent(parent, children, radius);
-      });
-
+      byParent.forEach(({ parent, children }) => { if (parent) placeChildrenAroundParent(parent, children, radius); });
       levelNodes.forEach(n => { n.visible = true; });
       isStable = false;
     }, delay);
   }
-
-  // 모든 레벨 등장 후 fitGraph
-  setTimeout(fitGraph, maxLevel * LEVEL_DELAY + 600);
+  setTimeout(fitGraph, maxLevel*LEVEL_DELAY+600);
 }
 
 function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
 
 function simulate() {
   if (isStable && !drag) return;
-  const repulsion = CONFIG.repulsion;
-  const damping = 0.92;  // 높을수록 빨리 멈춤
-  const centerForce = CONFIG.gravity;
+  const repulsion = CONFIG.repulsion, damping = 0.92, centerForce = CONFIG.gravity;
   let totalVelocity = 0;
-
   nodes.forEach(n => {
     if(!n.visible || n.fixed || n === drag) return;
     let fx = 0, fy = 0;
-
-    // 반발력
     nodes.forEach(m => {
       if(m === n || !m.visible) return;
-      const dx = n.x - m.x, dy = n.y - m.y;
+      const dx = n.x-m.x, dy = n.y-m.y;
       const d = Math.max(dist(n,m), 1);
-      const limit = 400;
-      if(d < limit) {
-        const f = repulsion / (d*d);
-        fx += dx/d*f; fy += dy/d*f;
-      }
+      if(d < 400) { const f = repulsion/(d*d); fx += dx/d*f; fy += dy/d*f; }
     });
-
-    // 링크 장력
     edges.forEach(e => {
       if(e.from !== n.id && e.to !== n.id) return;
-      const other = nodeMap[e.from === n.id ? e.to : e.from];
+      const other = nodeMap[e.from===n.id?e.to:e.from];
       if(!other||!other.visible) return;
-      const dx = other.x - n.x, dy = other.y - n.y;
+      const dx = other.x-n.x, dy = other.y-n.y;
       const d = Math.max(dist(n,other), 1);
-      let natural = CONFIG.linkDistance;
-      let strength = 0.005;
-      if(e.weakLink) {
-        natural = 600;
-        strength = 0.001;
-      } else if(e.manualLink) {
-        // 수동 연결 — 장력 없음 (시각적 연결만)
-        return;
-      } else {
+      let natural = CONFIG.linkDistance, strength = 0.005;
+      if(e.weakLink) { natural = 600; strength = 0.001; }
+      else if(e.mentionLink) { natural = 500; strength = 0.0008; }
+      else if(e.manualLink) { return; }
+      else {
         if(n.level===1||other.level===1) natural *= 1.2;
         if(n.level>=3||other.level>=3) natural *= 0.9;
       }
-      const f = (d - natural) * strength;
+      const f = (d-natural)*strength;
       fx += dx/d*f; fy += dy/d*f;
     });
-
-    fx += (W/2 - n.x) * centerForce;
-    fy += (H/2 - n.y) * centerForce;
-
-    // 속도 클램핑 — 한 프레임에 너무 많이 이동 방지
-    n.vx = Math.max(-3, Math.min(3, (n.vx + fx) * damping));
-    n.vy = Math.max(-3, Math.min(3, (n.vy + fy) * damping));
+    fx += (W/2-n.x)*centerForce; fy += (H/2-n.y)*centerForce;
+    n.vx = Math.max(-3, Math.min(3, (n.vx+fx)*damping));
+    n.vy = Math.max(-3, Math.min(3, (n.vy+fy)*damping));
     n.x += n.vx; n.y += n.vy;
-    totalVelocity += Math.abs(n.vx) + Math.abs(n.vy);
+    totalVelocity += Math.abs(n.vx)+Math.abs(n.vy);
   });
-
   if (totalVelocity < 2.0 && !drag) isStable = true;
 }
 
-function screenToWorld(sx, sy) {
-  return { x:(sx-W/2-panX)/scale+W/2, y:(sy-H/2-panY)/scale+H/2 };
-}
+function screenToWorld(sx, sy) { return { x:(sx-W/2-panX)/scale+W/2, y:(sy-H/2-panY)/scale+H/2 }; }
 
 function draw() {
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#0c0d12';
-  ctx.fillRect(0,0,W,H);
-
+  ctx.fillStyle='#0c0d12'; ctx.fillRect(0,0,W,H);
   ctx.save();
   ctx.translate(W/2+panX, H/2+panY);
   ctx.scale(scale, scale);
   ctx.translate(-W/2, -H/2);
-
   const hasSearch = searchKeyword.length > 0;
 
   edges.forEach(e => {
@@ -1492,113 +891,83 @@ function draw() {
     const isHov = hoveredNode&&(hoveredNode.id===e.from||hoveredNode.id===e.to);
     const bothMatch = hasSearch&&searchMatches.has(e.from)&&searchMatches.has(e.to);
     const eitherMatch = hasSearch&&(searchMatches.has(e.from)||searchMatches.has(e.to));
-
     let alpha, width;
     if(hasSearch){ alpha=bothMatch?0.85:eitherMatch?0.25:0.02; width=bothMatch?2.0:0.6; }
     else { alpha=isHov?0.85:0.55; width=isHov?2.2:0.8; }
 
-    if(e.manualLink) {
-      // 수동 연결 — 주황색 점선
+    // ── [[]] mention 연결 — 흰색 점선 ──
+    if(e.mentionLink) {
+      ctx.strokeStyle = `rgba(255,255,255,${isHov ? 0.7 : 0.35})`;
+      ctx.lineWidth = (isHov ? 1.8 : 1.2) / scale;
+      ctx.setLineDash([5, 6]);
+    } else if(e.manualLink) {
       ctx.strokeStyle = `rgba(255,159,67,${isHov ? 0.9 : 0.6})`;
       ctx.lineWidth = (isHov ? 2.0 : 1.5) / scale;
       ctx.setLineDash([6, 5]);
     } else if(e.weakLink) {
       ctx.strokeStyle = `rgba(255,159,67,${isHov?0.6:0.25})`;
-      ctx.lineWidth = 1/scale;
-      ctx.setLineDash([6,6]);
+      ctx.lineWidth = 1/scale; ctx.setLineDash([6,6]);
     } else if(hasSearch) {
       const nodeColor = na.color || '#74b9ff';
-      if(bothMatch) {
-        ctx.strokeStyle = rgbStr(hexToRgb(nodeColor), 0.9);
-        ctx.lineWidth = 1.6/scale;
-        ctx.setLineDash([5,3]);
-      } else if(eitherMatch) {
-        ctx.strokeStyle = rgbStr(hexToRgb(nodeColor), 0.35);
-        ctx.lineWidth = 0.8/scale;
-        ctx.setLineDash([4,5]);
-      } else {
-        ctx.strokeStyle = rgbStr(hexToRgb(nodeColor), 0.05);
-        ctx.lineWidth = 0.5/scale;
-        ctx.setLineDash([3,7]);
-      }
+      if(bothMatch) { ctx.strokeStyle=rgbStr(hexToRgb(nodeColor),0.9); ctx.lineWidth=1.6/scale; ctx.setLineDash([5,3]); }
+      else if(eitherMatch) { ctx.strokeStyle=rgbStr(hexToRgb(nodeColor),0.35); ctx.lineWidth=0.8/scale; ctx.setLineDash([4,5]); }
+      else { ctx.strokeStyle=rgbStr(hexToRgb(nodeColor),0.05); ctx.lineWidth=0.5/scale; ctx.setLineDash([3,7]); }
     } else {
       const nodeColor = na.color || '#74b9ff';
-      ctx.strokeStyle=rgbStr(hexToRgb(nodeColor), alpha);
-      ctx.lineWidth=width/scale;
-      ctx.setLineDash([]);
+      ctx.strokeStyle=rgbStr(hexToRgb(nodeColor),alpha);
+      ctx.lineWidth=width/scale; ctx.setLineDash([]);
     }
     ctx.beginPath(); ctx.moveTo(na.x,na.y); ctx.lineTo(nb.x,nb.y); ctx.stroke();
     ctx.setLineDash([]);
   });
 
-  // 3. 검색 매칭 연결선 — 계층 타고 올라가 공통 조상 경유 단일 경로
   if(hasSearch && searchMatches.size > 0) {
     const matchArr = [...searchMatches].map(id => nodeMap[id]).filter(n => n && n.visible);
-
-    // 각 매칭 노드에서 루트까지 경로(부모 체인) 구하기
     function getPath(node) {
-      const path = [node];
-      let cur = node;
-      for(let depth = 0; depth < 10; depth++) {
-        const parentEdge = edges.find(e => e.to === cur.id && !e.weakLink);
+      const path = [node]; let cur = node;
+      for(let depth=0; depth<10; depth++) {
+        const parentEdge = edges.find(e => e.to===cur.id && !e.weakLink && !e.mentionLink);
         if(!parentEdge) break;
         const parent = nodeMap[parentEdge.from];
         if(!parent) break;
-        path.unshift(parent);
-        cur = parent;
+        path.unshift(parent); cur = parent;
       }
       return path;
     }
-
-    // 매칭 노드들의 경로를 따라 컬러 점선 그리기
-    // 기존 실선 엣지 Set 구성 — 이미 실선으로 그린 구간은 점선 제외
     const existingEdgeSet = new Set(
-      edges.filter(e => !e.weakLink).map(e => [e.from, e.to].sort().join('|'))
+      edges.filter(e => !e.weakLink && !e.mentionLink).map(e => [e.from,e.to].sort().join('|'))
     );
     const drawnPairs = new Set();
-    ctx.setLineDash([4, 6]);
-    ctx.lineWidth = 1.2 / scale;
-
+    ctx.setLineDash([4,6]); ctx.lineWidth = 1.2/scale;
     matchArr.forEach(n => {
       const path = getPath(n);
-      for(let i = 0; i < path.length - 1; i++) {
-        const a = path[i], b = path[i+1];
-        if(!a.visible || !b.visible) continue;
-        if(a.level === 1 && b.level === 1) continue;
-        const key = [a.id, b.id].sort().join('|');
-        if(drawnPairs.has(key)) continue;
-        if(existingEdgeSet.has(key)) continue; // 실선 엣지 구간 제외
+      for(let i=0; i<path.length-1; i++) {
+        const a=path[i], b=path[i+1];
+        if(!a.visible||!b.visible) continue;
+        if(a.level===1&&b.level===1) continue;
+        const key=[a.id,b.id].sort().join('|');
+        if(drawnPairs.has(key)||existingEdgeSet.has(key)) continue;
         drawnPairs.add(key);
-        const nodeColor = b.color || a.color || '#ff9f43';
-        const rgb = hexToRgb(nodeColor);
-        ctx.strokeStyle = rgbStr(rgb, 0.75);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        const nodeColor = b.color||a.color||'#ff9f43';
+        ctx.strokeStyle=rgbStr(hexToRgb(nodeColor),0.75);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
       }
     });
-
-    // 페이지간 연결 — 루트 컬러 기반 점선 (이미 그린 구간 제외)
     const matchedRoots = new Set();
-    matchArr.forEach(n => {
-      const path = getPath(n);
-      const rootNode = path.find(p => p.level === 0);
-      if(rootNode) matchedRoots.add(rootNode);
-    });
-    const rootArr = [...matchedRoots];
-    if(rootArr.length > 1) {
-      ctx.lineWidth = 1.5 / scale;
-      ctx.setLineDash([6, 5]);
-      for(let i = 0; i < rootArr.length - 1; i++) {
-        const a = rootArr[i], b = rootArr[i+1];
-        if(!a.visible || !b.visible) continue;
-        const key = [a.id, b.id].sort().join('|');
+    matchArr.forEach(n => { const path=getPath(n); const rootNode=path.find(p=>p.level===0); if(rootNode) matchedRoots.add(rootNode); });
+    const rootArr=[...matchedRoots];
+    if(rootArr.length>1) {
+      ctx.lineWidth=1.5/scale; ctx.setLineDash([6,5]);
+      for(let i=0; i<rootArr.length-1; i++) {
+        const a=rootArr[i], b=rootArr[i+1];
+        if(!a.visible||!b.visible) continue;
+        const key=[a.id,b.id].sort().join('|');
         if(drawnPairs.has(key)) continue;
         drawnPairs.add(key);
-        const rgb = hexToRgb(a.color || '#ff9f43');
-        ctx.strokeStyle = rgbStr(rgb, 0.9);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.strokeStyle=rgbStr(hexToRgb(a.color||'#ff9f43'),0.9);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
       }
     }
-
     ctx.setLineDash([]);
   }
 
@@ -1606,13 +975,11 @@ function draw() {
     if(!n.visible) return;
     const isHov=hoveredNode===n;
     const isMatch=searchMatches.has(n.id);
-    const isDim = (hasSearch && !isMatch) || (_focusMode && n.dimmed);
-    const r = nodeR(n.level);
-    const nodeColor = n.level===0 ? '#ffffff' : (n.color || '#74b9ff');
+    const isDim=(hasSearch&&!isMatch)||(_focusMode&&n.dimmed);
+    const r=nodeR(n.level);
+    const nodeColor = n.ghostNode ? 'rgba(255,255,255,0.3)' : (n.level===0 ? '#ffffff' : (n.color||'#74b9ff'));
 
-    // 글로우 효과 — 매칭 노드는 흰색 글로우, 호버는 노드 색상 글로우
     if(isMatch) {
-      // 흰색 글로우 (2겹)
       ctx.beginPath(); ctx.arc(n.x,n.y,r+18,0,Math.PI*2);
       const g1=ctx.createRadialGradient(n.x,n.y,r,n.x,n.y,r+18);
       g1.addColorStop(0,'rgba(255,255,255,0.25)'); g1.addColorStop(1,'rgba(255,255,255,0)');
@@ -1630,567 +997,426 @@ function draw() {
     }
 
     ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
-    if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; }
-    else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; }
-    else {
-      const rgb = hexToRgb(nodeColor);
-      // 계층별 채도 차이 — 배경색(#0c0d12 ≈ rgb(12,13,18))과 믹싱해서 채도를 낮춤
-      // level1=100%, level2=72%, level3=50%, level4=35%
-      const satRatio = [1, 1, 0.72, 0.50, 0.35][Math.min(n.level, 4)];
-      const bg = [12, 13, 18];
-      const mixed = rgb.map((c, i) => Math.round(c * satRatio + bg[i] * (1 - satRatio)));
-      if(isDim) {
-        ctx.fillStyle = rgbStr(mixed, 0.15);
-        ctx.strokeStyle = rgbStr(mixed, 0.06);
-      } else {
-        ctx.fillStyle = rgbStr(mixed, 1);
-        ctx.strokeStyle = rgbStr(mixed, 1);
-      }
-    }
-    ctx.lineWidth=isHov?2/scale:1/scale;
-    ctx.fill(); ctx.stroke();
-
-    // 연결 모드 선택 노드 — 주황색 링
-    if (_connectMode && n.connectSelected) {
-      ctx.beginPath(); ctx.arc(n.x, n.y, r + 5/scale, 0, Math.PI*2);
-      ctx.strokeStyle = '#ff9f43';
-      ctx.lineWidth = 2/scale;
-      ctx.setLineDash([4, 3]);
-      ctx.stroke();
+    if(n.ghostNode) {
+      // 유령 노드 — 흐린 흰색 테두리만
+      ctx.fillStyle = isDim ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)';
+      ctx.strokeStyle = isDim ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1.5/scale;
+      ctx.setLineDash([3,3]);
+      ctx.fill(); ctx.stroke();
       ctx.setLineDash([]);
-    }
-    // 연결 모드 — 첫 번째 노드 선택 시 이미 수동 연결된 노드는 빨간 링
-    if (_connectMode && _connectFirstNode && !n.connectSelected) {
-      const alreadyLinked = edges.some(e =>
-        e.manualLink && ((e.from === _connectFirstNode.id && e.to === n.id) || (e.from === n.id && e.to === _connectFirstNode.id))
-      );
-      if (alreadyLinked) {
-        ctx.beginPath(); ctx.arc(n.x, n.y, r + 5/scale, 0, Math.PI*2);
-        ctx.strokeStyle = '#ff6b6b';
-        ctx.lineWidth = 2/scale;
-        ctx.setLineDash([4, 3]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
+    } else if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; ctx.lineWidth=isHov?2/scale:1/scale; ctx.fill(); ctx.stroke(); }
+    else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=isHov?2/scale:1/scale; ctx.fill(); ctx.stroke(); }
+    else {
+      const rgb=hexToRgb(nodeColor);
+      const satRatio=[1,1,0.72,0.50,0.35][Math.min(n.level,4)];
+      const bg=[12,13,18];
+      const mixed=rgb.map((c,i)=>Math.round(c*satRatio+bg[i]*(1-satRatio)));
+      ctx.fillStyle=isDim?rgbStr(mixed,0.15):rgbStr(mixed,1);
+      ctx.strokeStyle=isDim?rgbStr(mixed,0.06):rgbStr(mixed,1);
+      ctx.lineWidth=isHov?2/scale:1/scale;
+      ctx.fill(); ctx.stroke();
     }
 
-    let lbl = n.label;
-    if (_showLabels) {
-      if(n.level>=2 && lbl.length>14) lbl = lbl.substring(0,13)+'…';
-      let fontSize = 10;
+    if(_connectMode&&n.connectSelected) {
+      ctx.beginPath(); ctx.arc(n.x,n.y,r+5/scale,0,Math.PI*2);
+      ctx.strokeStyle='#ff9f43'; ctx.lineWidth=2/scale; ctx.setLineDash([4,3]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    if(_connectMode&&_connectFirstNode&&!n.connectSelected) {
+      const alreadyLinked=edges.some(e=>e.manualLink&&((e.from===_connectFirstNode.id&&e.to===n.id)||(e.from===n.id&&e.to===_connectFirstNode.id)));
+      if(alreadyLinked) { ctx.beginPath(); ctx.arc(n.x,n.y,r+5/scale,0,Math.PI*2); ctx.strokeStyle='#ff6b6b'; ctx.lineWidth=2/scale; ctx.setLineDash([4,3]); ctx.stroke(); ctx.setLineDash([]); }
+    }
+
+    if(_showLabels) {
+      let lbl=n.label;
+      if(n.level>=2&&lbl.length>14) lbl=lbl.substring(0,13)+'…';
+      let fontSize=10;
       if(n.level===0||n.level===1) fontSize=12;
       else if(n.level===2) fontSize=11;
       ctx.font=(n.level<=1)?`bold ${fontSize}px 'Noto Sans KR',sans-serif`:`500 ${fontSize}px 'Noto Sans KR',sans-serif`;
-      ctx.fillStyle=isMatch?'#ffffff':`rgba(215,220,230,${isDim?0.12:0.85})`;
+      ctx.fillStyle=isMatch?'#ffffff':`rgba(215,220,230,${isDim?0.12:(n.ghostNode?0.4:0.85)})`;
       ctx.textAlign='center'; ctx.textBaseline='top';
       ctx.fillText(lbl, n.x, n.y+r+5);
     }
   });
-
   ctx.restore();
 }
 
 function getNodeAt(sx, sy) {
-  const w = screenToWorld(sx, sy);
-  return nodes.find(n => n.visible && dist(n,w) <= nodeR(n.level)+5) || null;
+  const w=screenToWorld(sx,sy);
+  return nodes.find(n=>n.visible&&dist(n,w)<=nodeR(n.level)+5)||null;
 }
 
-// 우측 디테일 패널
 const detailPanel = document.getElementById('detail-panel');
 const detailTitle = document.getElementById('detail-title');
 const detailDate = document.getElementById('detail-date');
 const detailContent = document.getElementById('detail-content');
 
-// ── 사이드바 토글 ──
 let _showLabels = true;
-function toggleLabels() {
-  const cb = document.getElementById('label-toggle-input');
-  _showLabels = cb ? cb.checked : !_showLabels;
-}
+function toggleLabels() { const cb=document.getElementById('label-toggle-input'); _showLabels=cb?cb.checked:!_showLabels; }
 
-// ── 로딩 스피너 ──
-function showLoading(text = '불러오는 중...') {
-  const el = document.getElementById('loading-overlay');
-  const txt = document.getElementById('loading-text');
-  if (el) el.classList.add('visible');
-  if (txt) txt.textContent = text;
-}
-function setLoadingText(text) {
-  const txt = document.getElementById('loading-text');
-  if (txt) txt.textContent = text;
-}
-function hideLoading() {
-  const el = document.getElementById('loading-overlay');
-  if (el) el.classList.remove('visible');
-}
+function showLoading(text='불러오는 중...') { const el=document.getElementById('loading-overlay'); const txt=document.getElementById('loading-text'); if(el) el.classList.add('visible'); if(txt) txt.textContent=text; }
+function setLoadingText(text) { const txt=document.getElementById('loading-text'); if(txt) txt.textContent=text; }
+function hideLoading() { const el=document.getElementById('loading-overlay'); if(el) el.classList.remove('visible'); }
 
-// ── 포커스 모드 ──
-let _focusMode = false;
-let _focusNodeId = null;
-
+let _focusMode=false, _focusNodeId=null;
 function toggleFocusMode() {
-  const cb = document.getElementById('focus-toggle-input');
-  _focusMode = cb ? cb.checked : !_focusMode;
-  if (!_focusMode) {
-    _focusNodeId = null;
-    nodes.forEach(n => { n.dimmed = false; });
-  } else if (_focusNodeId) {
-    applyFocusMode(_focusNodeId);
-  }
-  isStable = false;
+  const cb=document.getElementById('focus-toggle-input');
+  _focusMode=cb?cb.checked:!_focusMode;
+  if(!_focusMode) { _focusNodeId=null; nodes.forEach(n=>{n.dimmed=false;}); }
+  else if(_focusNodeId) applyFocusMode(_focusNodeId);
+  isStable=false;
 }
 
-// ── 연결 모드 ──
-let _connectMode = false;
-let _connectFirstNode = null;
-
+let _connectMode=false, _connectFirstNode=null;
 function toggleConnectMode() {
-  const cb = document.getElementById('connect-toggle-input');
-  _connectMode = cb ? cb.checked : !_connectMode;
-  _connectFirstNode = null;
-  // 상태바 안내
-  const statusEl2 = document.getElementById('status');
-  if (_connectMode && statusEl2) statusEl2.textContent = '연결 모드: 첫 번째 노드를 클릭하세요';
-  else if (statusEl2) statusEl2.textContent = '';
-  isStable = false;
+  const cb=document.getElementById('connect-toggle-input');
+  _connectMode=cb?cb.checked:!_connectMode;
+  _connectFirstNode=null;
+  const s=document.getElementById('status');
+  if(_connectMode&&s) s.textContent='연결 모드: 첫 번째 노드를 클릭하세요';
+  else if(s) s.textContent='';
+  isStable=false;
 }
 
 function handleConnectClick(n) {
-  const statusEl2 = document.getElementById('status');
-  if (!_connectFirstNode) {
-    // 첫 번째 노드 선택
-    _connectFirstNode = n;
-    n.connectSelected = true;
-    if (statusEl2) statusEl2.textContent = `"${n.label}" 선택됨 — 연결할 노드를 클릭하세요`;
-  } else if (_connectFirstNode.id === n.id) {
-    // 같은 노드 클릭 → 선택 취소
-    _connectFirstNode.connectSelected = false;
-    _connectFirstNode = null;
-    if (statusEl2) statusEl2.textContent = '연결 모드: 첫 번째 노드를 클릭하세요';
+  const s=document.getElementById('status');
+  if(!_connectFirstNode) {
+    _connectFirstNode=n; n.connectSelected=true;
+    if(s) s.textContent=`"${n.label}" 선택됨 — 연결할 노드를 클릭하세요`;
+  } else if(_connectFirstNode.id===n.id) {
+    _connectFirstNode.connectSelected=false; _connectFirstNode=null;
+    if(s) s.textContent='연결 모드: 첫 번째 노드를 클릭하세요';
   } else {
-    // 두 번째 노드 → 이미 수동 연결 있으면 삭제, 없으면 생성
-    const a = _connectFirstNode, b = n;
-    const existingManual = edges.find(e =>
-      e.manualLink && ((e.from === a.id && e.to === b.id) || (e.from === b.id && e.to === a.id))
-    );
-    if (existingManual) {
-      // 이미 연결됨 → 삭제
-      removeManualLink(a.id, b.id);
-      if (statusEl2) statusEl2.textContent = `"${a.label}" ↔ "${b.label}" 연결 삭제됨`;
-    } else {
-      // 새 연결 생성
-      const alreadyExists = edges.some(e =>
-        !e.manualLink && ((e.from === a.id && e.to === b.id) || (e.from === b.id && e.to === a.id))
-      );
-      edges.push({ from: a.id, to: b.id, manualLink: true });
-      saveManualLinks();
-      if (statusEl2) statusEl2.textContent = `"${a.label}" ↔ "${b.label}" 연결됨`;
-    }
-    a.connectSelected = false;
-    _connectFirstNode = null;
-    setTimeout(() => { if (statusEl2) statusEl2.textContent = '연결 모드: 첫 번째 노드를 클릭하세요'; }, 2000);
+    const a=_connectFirstNode, b=n;
+    const existingManual=edges.find(e=>e.manualLink&&((e.from===a.id&&e.to===b.id)||(e.from===b.id&&e.to===a.id)));
+    if(existingManual) { removeManualLink(a.id,b.id); if(s) s.textContent=`"${a.label}" ↔ "${b.label}" 연결 삭제됨`; }
+    else { edges.push({from:a.id,to:b.id,manualLink:true}); saveManualLinks(); if(s) s.textContent=`"${a.label}" ↔ "${b.label}" 연결됨`; }
+    a.connectSelected=false; _connectFirstNode=null;
+    setTimeout(()=>{if(s)s.textContent='연결 모드: 첫 번째 노드를 클릭하세요';},2000);
   }
-  isStable = false;
+  isStable=false;
 }
 
-function saveManualLinks() {
-  const manual = edges.filter(e => e.manualLink).map(e => ({ from: e.from, to: e.to }));
-  try { sessionStorage.setItem('snlog_manual_links', JSON.stringify(manual)); } catch(e) {}
-}
-
+function saveManualLinks() { const manual=edges.filter(e=>e.manualLink).map(e=>({from:e.from,to:e.to})); try{sessionStorage.setItem('snlog_manual_links',JSON.stringify(manual));}catch(e){} }
 function loadManualLinks() {
-  const saved = sessionStorage.getItem('snlog_manual_links');
-  if (!saved) return;
-  let links;
-  try { links = JSON.parse(saved); } catch(e) { return; }
-  links.forEach(({ from, to }) => {
-    if (nodeMap[from] && nodeMap[to]) {
-      const exists = edges.some(e => (e.from === from && e.to === to) || (e.from === to && e.to === from));
-      if (!exists) edges.push({ from, to, manualLink: true });
-    }
-  });
+  const saved=sessionStorage.getItem('snlog_manual_links');
+  if(!saved) return;
+  let links; try{links=JSON.parse(saved);}catch(e){return;}
+  links.forEach(({from,to})=>{ if(nodeMap[from]&&nodeMap[to]){ const exists=edges.some(e=>(e.from===from&&e.to===to)||(e.from===to&&e.to===from)); if(!exists) edges.push({from,to,manualLink:true}); } });
 }
-
-// 우클릭으로 수동 연결 삭제
-function removeManualLink(fromId, toId) {
-  edges = edges.filter(e => !(e.manualLink && ((e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId))));
-  saveManualLinks();
-  isStable = false;
-}
+function removeManualLink(fromId,toId) { edges=edges.filter(e=>!(e.manualLink&&((e.from===fromId&&e.to===toId)||(e.from===toId&&e.to===fromId)))); saveManualLinks(); isStable=false; }
 
 function applyFocusMode(nodeId) {
-  if (!_focusMode) return;
-  _focusNodeId = nodeId;
-  const connectedIds = new Set([nodeId]);
-  edges.forEach(e => {
-    if (e.from === nodeId) connectedIds.add(e.to);
-    if (e.to === nodeId) connectedIds.add(e.from);
-  });
-  nodes.forEach(n => { n.dimmed = !connectedIds.has(n.id); });
-  isStable = false;
+  if(!_focusMode) return;
+  _focusNodeId=nodeId;
+  const connectedIds=new Set([nodeId]);
+  edges.forEach(e=>{ if(e.from===nodeId) connectedIds.add(e.to); if(e.to===nodeId) connectedIds.add(e.from); });
+  nodes.forEach(n=>{n.dimmed=!connectedIds.has(n.id);});
+  isStable=false;
 }
 
 function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const btn = document.getElementById('sidebar-toggle');
-  const collapsed = sidebar.classList.toggle('collapsed');
-  btn.innerHTML = collapsed
-    ? `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`
-    : `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`;
-  btn.style.left = collapsed ? '12px' : '394px';
+  const sidebar=document.getElementById('sidebar');
+  const btn=document.getElementById('sidebar-toggle');
+  const collapsed=sidebar.classList.toggle('collapsed');
+  btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="1" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`;
+  btn.style.left=collapsed?'12px':'394px';
 }
 
-let _detailPanelCollapsed = false;
-const PANEL_SVG_RIGHT = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`;
-
+let _detailPanelCollapsed=false;
+const PANEL_SVG_RIGHT=`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>`;
 function toggleDetailPanel() {
-  _detailPanelCollapsed = !_detailPanelCollapsed;
-  const panel = document.getElementById('detail-panel');
-  const btn = document.getElementById('detail-panel-sidebar-toggle');
-  if (_detailPanelCollapsed) {
-    panel.classList.add('panel-collapsed');
-    if (btn) { btn.innerHTML = PANEL_SVG_RIGHT; btn.classList.add('collapsed'); }
-  } else {
-    panel.classList.remove('panel-collapsed');
-    if (btn) { btn.innerHTML = PANEL_SVG_RIGHT; btn.classList.remove('collapsed'); }
-  }
+  _detailPanelCollapsed=!_detailPanelCollapsed;
+  const panel=document.getElementById('detail-panel'), btn=document.getElementById('detail-panel-sidebar-toggle');
+  if(_detailPanelCollapsed){panel.classList.add('panel-collapsed');if(btn){btn.innerHTML=PANEL_SVG_RIGHT;btn.classList.add('collapsed');}}
+  else{panel.classList.remove('panel-collapsed');if(btn){btn.innerHTML=PANEL_SVG_RIGHT;btn.classList.remove('collapsed');}}
 }
 
-// ── 탭 기반 디테일 패널 ──
-let _tabs = []; // { nodeId, label, node }
-let _activeTabId = null;
-
+let _tabs=[], _activeTabId=null;
 function renderTabs() {
-  const tabsEl = document.getElementById('detail-tabs');
-  const overflowBtn = document.getElementById('tab-overflow-btn');
-  if (!tabsEl) return;
-  tabsEl.innerHTML = '';
-
-  // 최신순 — 뒤에서부터 앞으로 (최신이 왼쪽)
-  const reversed = [..._tabs].reverse();
-  const MAX_VISIBLE = 3;
-  const visibleTabs = reversed.slice(0, MAX_VISIBLE);
-  const hiddenTabs = reversed.slice(MAX_VISIBLE);
-
-  visibleTabs.forEach(tab => {
-    const el = document.createElement('div');
-    el.className = 'detail-tab' + (tab.nodeId === _activeTabId ? ' active' : '');
-    el.innerHTML = `<span class="tab-label">${tab.label}</span><span class="tab-close">✕</span>`;
-    el.querySelector('.tab-label').onclick = () => switchTab(tab.nodeId);
-    el.querySelector('.tab-close').onclick = (e) => { e.stopPropagation(); closeTab(tab.nodeId); };
+  const tabsEl=document.getElementById('detail-tabs'), overflowBtn=document.getElementById('tab-overflow-btn');
+  if(!tabsEl) return;
+  tabsEl.innerHTML='';
+  const reversed=[..._tabs].reverse();
+  const MAX_VISIBLE=3;
+  const visibleTabs=reversed.slice(0,MAX_VISIBLE), hiddenTabs=reversed.slice(MAX_VISIBLE);
+  visibleTabs.forEach(tab=>{
+    const el=document.createElement('div');
+    el.className='detail-tab'+(tab.nodeId===_activeTabId?' active':'');
+    el.innerHTML=`<span class="tab-label">${tab.label}</span><span class="tab-close">✕</span>`;
+    el.querySelector('.tab-label').onclick=()=>switchTab(tab.nodeId);
+    el.querySelector('.tab-close').onclick=(e)=>{e.stopPropagation();closeTab(tab.nodeId);};
     tabsEl.appendChild(el);
   });
-
-  if (overflowBtn) {
-    overflowBtn.style.display = hiddenTabs.length > 0 ? 'flex' : 'none';
-  }
+  if(overflowBtn) overflowBtn.style.display=hiddenTabs.length>0?'flex':'none';
 }
 
 function toggleOverflowMenu(e) {
-  const menu = document.getElementById('tab-overflow-menu');
-  const btn = document.getElementById('tab-overflow-btn');
-  if (!menu) return;
-  const isOpen = menu.classList.contains('open');
+  const menu=document.getElementById('tab-overflow-menu'), btn=document.getElementById('tab-overflow-btn');
+  if(!menu) return;
+  const isOpen=menu.classList.contains('open');
   menu.classList.toggle('open');
-  if (!isOpen) {
-    const rect = btn.getBoundingClientRect();
-    menu.style.top = (rect.bottom + 4) + 'px';
-    menu.style.right = (window.innerWidth - rect.right) + 'px';
-    menu.innerHTML = _tabs.map(tab => `
-      <div class="overflow-tab-item ${tab.nodeId === _activeTabId ? 'active' : ''}" onclick="switchTab('${tab.nodeId}'); closeOverflowMenu()">
-        <span>${tab.label}</span>
-        <span class="overflow-close" onclick="event.stopPropagation(); closeTab('${tab.nodeId}'); closeOverflowMenu()">✕</span>
-      </div>`).join('');
+  if(!isOpen){
+    const rect=btn.getBoundingClientRect();
+    menu.style.top=(rect.bottom+4)+'px'; menu.style.right=(window.innerWidth-rect.right)+'px';
+    menu.innerHTML=_tabs.map(tab=>`<div class="overflow-tab-item ${tab.nodeId===_activeTabId?'active':''}" onclick="switchTab('${tab.nodeId}');closeOverflowMenu()"><span>${tab.label}</span><span class="overflow-close" onclick="event.stopPropagation();closeTab('${tab.nodeId}');closeOverflowMenu()">✕</span></div>`).join('');
   }
 }
+function closeOverflowMenu(){const menu=document.getElementById('tab-overflow-menu');if(menu)menu.classList.remove('open');}
+document.addEventListener('click',(e)=>{if(!e.target.closest('#tab-overflow-btn')&&!e.target.closest('#tab-overflow-menu'))closeOverflowMenu();});
 
-function closeOverflowMenu() {
-  const menu = document.getElementById('tab-overflow-menu');
-  if (menu) menu.classList.remove('open');
-}
-
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#tab-overflow-btn') && !e.target.closest('#tab-overflow-menu')) {
-    closeOverflowMenu();
-  }
-});
-
-function switchTab(nodeId) {
-  _activeTabId = nodeId;
-  const tab = _tabs.find(t => t.nodeId === nodeId);
-  if (tab) renderPanelContent(tab.node);
-  renderTabs();
-}
-
-function closeTab(nodeId) {
-  const idx = _tabs.findIndex(t => t.nodeId === nodeId);
-  _tabs = _tabs.filter(t => t.nodeId !== nodeId);
-  if (_tabs.length === 0) {
-    closePanel();
-  } else {
-    const next = _tabs[Math.min(idx, _tabs.length - 1)];
-    switchTab(next.nodeId);
-  }
+function switchTab(nodeId){_activeTabId=nodeId;const tab=_tabs.find(t=>t.nodeId===nodeId);if(tab)renderPanelContent(tab.node);renderTabs();}
+function closeTab(nodeId){
+  const idx=_tabs.findIndex(t=>t.nodeId===nodeId);
+  _tabs=_tabs.filter(t=>t.nodeId!==nodeId);
+  if(_tabs.length===0){closePanel();}else{const next=_tabs[Math.min(idx,_tabs.length-1)];switchTab(next.nodeId);}
   renderTabs();
 }
 
 function renderPanelContent(n) {
-  if(detailTitle) detailTitle.textContent = n.label;
-  if(detailDate) {
-    if(n.date) { detailDate.style.display = 'inline'; detailDate.textContent = n.date; }
-    else { detailDate.style.display = 'none'; }
+  if(detailTitle) detailTitle.textContent=n.label;
+  if(detailDate){
+    if(n.date){detailDate.style.display='inline';detailDate.textContent=n.date;}
+    else{detailDate.style.display='none';}
   }
-  // 노션 링크 버튼
-  let notionLinkEl = document.getElementById('detail-notion-link');
-  if (!notionLinkEl) {
-    notionLinkEl = document.createElement('a');
-    notionLinkEl.id = 'detail-notion-link';
-    notionLinkEl.target = '_blank';
-    notionLinkEl.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#ff9f43;text-decoration:none;margin-left:8px;opacity:0.8;';
-    notionLinkEl.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Notion에서 보기`;
-    if (detailTitle) detailTitle.parentElement.appendChild(notionLinkEl);
+  let notionLinkEl=document.getElementById('detail-notion-link');
+  if(!notionLinkEl){
+    notionLinkEl=document.createElement('a');
+    notionLinkEl.id='detail-notion-link'; notionLinkEl.target='_blank';
+    notionLinkEl.style.cssText='display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#ff9f43;text-decoration:none;margin-left:8px;opacity:0.8;';
+    notionLinkEl.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Notion에서 보기`;
+    if(detailTitle) detailTitle.parentElement.appendChild(notionLinkEl);
   }
-  // 노드의 sourcePageId로 노션 URL 생성
-  const pid = n.sourcePageId || '';
-  if (pid) {
-    notionLinkEl.href = `https://notion.so/${pid.replace(/-/g,'')}`;
-    notionLinkEl.style.display = 'inline-flex';
-  } else {
-    notionLinkEl.style.display = 'none';
-  }
+  const pid=n.sourcePageId||'';
+  if(pid&&!n.ghostNode){notionLinkEl.href=`https://notion.so/${pid.replace(/-/g,'')}`;notionLinkEl.style.display='inline-flex';}
+  else{notionLinkEl.style.display='none';}
 
-  const rawDesc = n.desc || '(내용 없음)';
-  if(detailContent) detailContent.innerHTML = rawDesc.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // ── ghostNode 판별 — "API가 할당되지 않은 페이지입니다." 표시 ──
+  const rawDesc = n.ghostNode
+    ? '<span style="color:rgba(255,255,255,0.4);font-style:italic;">API가 할당되지 않은 페이지입니다.</span>'
+    : (n.desc || '(내용 없음)').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  if(detailContent) detailContent.innerHTML = rawDesc;
 }
 
 function openPanel(n) {
-  const existing = _tabs.find(t => t.nodeId === n.id);
-  if (existing) {
-    switchTab(n.id);
-  } else {
-    _tabs.push({ nodeId: n.id, label: n.label, node: n });
-    _activeTabId = n.id;
-    renderPanelContent(n);
-    renderTabs();
-  }
-  _detailPanelCollapsed = false;
-  detailPanel.classList.add('open');
-  detailPanel.classList.remove('panel-collapsed');
+  const existing=_tabs.find(t=>t.nodeId===n.id);
+  if(existing){switchTab(n.id);}
+  else{_tabs.push({nodeId:n.id,label:n.label,node:n});_activeTabId=n.id;renderPanelContent(n);renderTabs();}
+  _detailPanelCollapsed=false;
+  detailPanel.classList.add('open'); detailPanel.classList.remove('panel-collapsed');
   statusEl.classList.add('panel-open');
-  const toggleBtn = document.getElementById('detail-panel-sidebar-toggle');
-  if (toggleBtn) { toggleBtn.classList.add('visible'); toggleBtn.classList.remove('collapsed'); toggleBtn.innerHTML = PANEL_SVG_RIGHT; }
-  // 포커스 모드 적용
-  if (_focusMode) applyFocusMode(n.id);
+  const toggleBtn=document.getElementById('detail-panel-sidebar-toggle');
+  if(toggleBtn){toggleBtn.classList.add('visible');toggleBtn.classList.remove('collapsed');toggleBtn.innerHTML=PANEL_SVG_RIGHT;}
+  if(_focusMode) applyFocusMode(n.id);
 }
 
 function closePanel() {
-  _tabs = [];
-  _activeTabId = null;
-  detailPanel.classList.remove('open');
-  detailPanel.classList.remove('panel-collapsed');
+  _tabs=[]; _activeTabId=null;
+  detailPanel.classList.remove('open','panel-collapsed');
   statusEl.classList.remove('panel-open');
   renderTabs();
-  const toggleBtn = document.getElementById('detail-panel-sidebar-toggle');
-  if (toggleBtn) { toggleBtn.classList.remove('visible', 'collapsed'); }
+  const toggleBtn=document.getElementById('detail-panel-sidebar-toggle');
+  if(toggleBtn) toggleBtn.classList.remove('visible','collapsed');
 }
 
-// ── 검색 기록 ──
-const _searchHistory = [];
-const MAX_HISTORY = 8;
-
-function renderSearchHistory() {
-  const container = document.getElementById('search-history');
-  if (!container) return;
-  container.innerHTML = '';
-  _searchHistory.forEach((kw, idx) => {
-    const item = document.createElement('div');
-    item.className = 'search-history-item';
-    item.innerHTML = `<span>${kw}</span><button class="search-history-del" onclick="deleteHistory(${idx}, event)">✕</button>`;
-    item.addEventListener('click', () => { searchInput.value = kw; doSearch(kw); });
+const _searchHistory=[];
+const MAX_HISTORY=8;
+function renderSearchHistory(){
+  const container=document.getElementById('search-history');
+  if(!container) return;
+  container.innerHTML='';
+  _searchHistory.forEach((kw,idx)=>{
+    const item=document.createElement('div');
+    item.className='search-history-item';
+    item.innerHTML=`<span>${kw}</span><button class="search-history-del" onclick="deleteHistory(${idx},event)">✕</button>`;
+    item.addEventListener('click',()=>{searchInput.value=kw;doSearch(kw);});
     container.appendChild(item);
   });
 }
-
-function addHistory(kw) {
-  if (!kw || kw.length < 1) return;
-  const idx = _searchHistory.indexOf(kw);
-  if (idx !== -1) _searchHistory.splice(idx, 1);
+function addHistory(kw){
+  if(!kw||kw.length<1) return;
+  const idx=_searchHistory.indexOf(kw);
+  if(idx!==-1) _searchHistory.splice(idx,1);
   _searchHistory.unshift(kw);
-  if (_searchHistory.length > MAX_HISTORY) _searchHistory.pop();
+  if(_searchHistory.length>MAX_HISTORY) _searchHistory.pop();
   renderSearchHistory();
 }
+function deleteHistory(idx,e){e.stopPropagation();_searchHistory.splice(idx,1);renderSearchHistory();}
 
-function deleteHistory(idx, e) {
-  e.stopPropagation();
-  _searchHistory.splice(idx, 1);
-  renderSearchHistory();
-}
-
-function doSearch(kw) {
-  searchKeyword = kw.trim().toLowerCase();
+function doSearch(kw){
+  searchKeyword=kw.trim().toLowerCase();
   searchMatches.clear();
-  const resultEl = document.getElementById('search-result-count');
-  if(searchKeyword) {
-    // 1차: 라벨/설명 매칭
-    const directMatches = new Set();
-    nodes.forEach(n => {
+  const resultEl=document.getElementById('search-result-count');
+  if(searchKeyword){
+    const directMatches=new Set();
+    nodes.forEach(n=>{
       if(!n.visible) return;
-      const lt = n.label.toLowerCase(), dt = n.desc.toLowerCase();
+      const lt=n.label.toLowerCase(),dt=n.desc.toLowerCase();
       if(lt.includes(searchKeyword)||dt.includes(searchKeyword)) directMatches.add(n.id);
     });
-
-    // 2차: 매칭 노드의 조상 노드도 포함 (경로 연결선을 위해)
-    function getAncestors(nodeId) {
-      const ancestors = [];
-      let cur = nodeId;
-      for(let i = 0; i < 10; i++) {
-        const parentEdge = edges.find(e => e.to === cur && !e.weakLink);
-        if(!parentEdge) break;
-        ancestors.push(parentEdge.from);
-        cur = parentEdge.from;
-      }
+    function getAncestors(nodeId){
+      const ancestors=[];let cur=nodeId;
+      for(let i=0;i<10;i++){const parentEdge=edges.find(e=>e.to===cur&&!e.weakLink&&!e.mentionLink);if(!parentEdge)break;ancestors.push(parentEdge.from);cur=parentEdge.from;}
       return ancestors;
     }
-
-    directMatches.forEach(id => {
-      searchMatches.add(id);
-      getAncestors(id).forEach(aid => searchMatches.add(aid));
-    });
-
-    // 결과 표시는 직접 매칭만 카운트
-    if(resultEl) { resultEl.style.display='block'; resultEl.textContent=`${directMatches.size}개 결과`; }
+    directMatches.forEach(id=>{searchMatches.add(id);getAncestors(id).forEach(aid=>searchMatches.add(aid));});
+    if(resultEl){resultEl.style.display='block';resultEl.textContent=`${directMatches.size}개 결과`;}
     clearBtn.style.display='block';
   } else {
     if(resultEl) resultEl.style.display='none';
     clearBtn.style.display='none';
   }
-  isStable = false;
+  isStable=false;
 }
 
-searchInput.addEventListener('input', e => doSearch(e.target.value));
-searchInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter') {
-    const kw = searchInput.value.trim();
-    if(kw) addHistory(kw);
-    doSearch(kw);
+searchInput.addEventListener('input',e=>doSearch(e.target.value));
+searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){const kw=searchInput.value.trim();if(kw)addHistory(kw);doSearch(kw);}});
+document.getElementById('search-btn').addEventListener('click',()=>{const kw=searchInput.value.trim();if(kw)addHistory(kw);doSearch(kw);});
+clearBtn.addEventListener('click',()=>{searchInput.value='';doSearch('');});
+
+document.getElementById('add-page-id').addEventListener('paste',function(e){
+  setTimeout(()=>{
+    const val=this.value.trim();
+    const match=val.match(/([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})/i);
+    if(match&&(val.startsWith('http')||val.includes('notion'))){this.value=match[1].replace(/-/g,'');}
+  },0);
+});
+
+let mouseDownNode=null, mouseDownTime=0;
+canvas.addEventListener('mousemove',e=>{
+  if(drag){const w=screenToWorld(e.clientX,e.clientY);drag.x=w.x;drag.y=w.y;return;}
+  if(isPanning){panX=panStartOffsetX+(e.clientX-panStartX);panY=panStartOffsetY+(e.clientY-panStartY);return;}
+  const n=getNodeAt(e.clientX,e.clientY);
+  hoveredNode=n; canvas.style.cursor=n?'pointer':'default';
+  if(n&&n.level>0){tooltip.textContent=n.label;tooltip.style.display='block';tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY-32)+'px';}
+  else{tooltip.style.display='none';}
+});
+canvas.addEventListener('mousedown',e=>{
+  mouseDownTime=Date.now();
+  const n=getNodeAt(e.clientX,e.clientY);
+  mouseDownNode=n;
+  if(n&&!n.fixed){drag=n;isStable=false;}
+  else{isPanning=true;panStartX=e.clientX;panStartY=e.clientY;panStartOffsetX=panX;panStartOffsetY=panY;canvas.style.cursor='grab';}
+});
+canvas.addEventListener('mouseup',e=>{
+  const elapsed=Date.now()-mouseDownTime;
+  const n=getNodeAt(e.clientX,e.clientY);
+  if(elapsed<150&&n&&n===mouseDownNode&&n.level>0){
+    if(_connectMode){handleConnectClick(n);}else{openPanel(n);}
   }
+  drag=null;isPanning=false;canvas.style.cursor='default';
 });
-document.getElementById('search-btn').addEventListener('click', () => {
-  const kw = searchInput.value.trim();
-  if(kw) addHistory(kw);
-  doSearch(kw);
-});
-clearBtn.addEventListener('click', () => { searchInput.value = ''; doSearch(''); });
+canvas.addEventListener('mouseleave',()=>{tooltip.style.display='none';hoveredNode=null;drag=null;isPanning=false;});
 
-// 3. 노션 URL 붙여넣으면 32자리 ID 자동 추출
-document.getElementById('add-page-id').addEventListener('paste', function(e) {
-  setTimeout(() => {
-    const val = this.value.trim();
-    const match = val.match(/([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})/i);
-    if(match && (val.startsWith('http') || val.includes('notion'))) {
-      this.value = match[1].replace(/-/g, '');
-    }
-  }, 0);
-});
-
-// 마우스 이동 — 미니 툴팁 (이름만 표시)
-let mouseDownNode = null;
-let mouseDownTime = 0;
-
-canvas.addEventListener('mousemove', e => {
-  if(drag) {
-    const w=screenToWorld(e.clientX, e.clientY);
-    drag.x=w.x; drag.y=w.y; return;
-  }
-  if(isPanning) {
-    panX=panStartOffsetX+(e.clientX-panStartX);
-    panY=panStartOffsetY+(e.clientY-panStartY);
-    return;
-  }
-  const n = getNodeAt(e.clientX, e.clientY);
-  hoveredNode = n;
-  canvas.style.cursor = n ? 'pointer' : 'default';
-
-  if(n && n.level > 0) {
-    tooltip.textContent = n.label;
-    tooltip.style.display = 'block';
-    tooltip.style.left = (e.clientX+14) + 'px';
-    tooltip.style.top = (e.clientY-32) + 'px';
-  } else {
-    tooltip.style.display = 'none';
-  }
-});
-
-canvas.addEventListener('mousedown', e => {
-  mouseDownTime = Date.now();
-  const n = getNodeAt(e.clientX, e.clientY);
-  mouseDownNode = n;
-  if(n && !n.fixed) { drag=n; isStable=false; }
-  else { isPanning=true; panStartX=e.clientX; panStartY=e.clientY; panStartOffsetX=panX; panStartOffsetY=panY; canvas.style.cursor='grab'; }
-});
-
-canvas.addEventListener('mouseup', e => {
-  const elapsed = Date.now() - mouseDownTime;
-  const n = getNodeAt(e.clientX, e.clientY);
-  if(elapsed < 150 && n && n === mouseDownNode && n.level > 0) {
-    if (_connectMode) {
-      handleConnectClick(n);
-    } else {
-      openPanel(n);
-    }
-  }
-  drag=null; isPanning=false; canvas.style.cursor='default';
-});
-
-canvas.addEventListener('mouseleave', ()=>{ tooltip.style.display='none'; hoveredNode=null; drag=null; isPanning=false; });
-
-// 우클릭 — 수동 연결 엣지 삭제
-canvas.addEventListener('contextmenu', e => {
+canvas.addEventListener('contextmenu',e=>{
   e.preventDefault();
-  const w = screenToWorld(e.clientX, e.clientY);
-  // 수동 엣지 중 가장 가까운 엣지 찾기
-  let closest = null, minDist = 12 / scale;
-  edges.filter(e2 => e2.manualLink).forEach(e2 => {
-    const na = nodeMap[e2.from], nb = nodeMap[e2.to];
-    if (!na?.visible || !nb?.visible) return;
-    // 점-선 거리 계산
-    const dx = nb.x - na.x, dy = nb.y - na.y;
-    const len = Math.sqrt(dx*dx + dy*dy);
-    if (len === 0) return;
-    const t = Math.max(0, Math.min(1, ((w.x-na.x)*dx + (w.y-na.y)*dy) / (len*len)));
-    const px = na.x + t*dx - w.x, py = na.y + t*dy - w.y;
-    const d = Math.sqrt(px*px + py*py);
-    if (d < minDist) { minDist = d; closest = e2; }
+  const w=screenToWorld(e.clientX,e.clientY);
+  let closest=null,minDist=12/scale;
+  edges.filter(e2=>e2.manualLink).forEach(e2=>{
+    const na=nodeMap[e2.from],nb=nodeMap[e2.to];
+    if(!na?.visible||!nb?.visible) return;
+    const dx=nb.x-na.x,dy=nb.y-na.y,len=Math.sqrt(dx*dx+dy*dy);
+    if(len===0) return;
+    const t=Math.max(0,Math.min(1,((w.x-na.x)*dx+(w.y-na.y)*dy)/(len*len)));
+    const px=na.x+t*dx-w.x,py=na.y+t*dy-w.y;
+    const d=Math.sqrt(px*px+py*py);
+    if(d<minDist){minDist=d;closest=e2;}
   });
-  if (closest) {
-    if (confirm(`"${nodeMap[closest.from]?.label}" ↔ "${nodeMap[closest.to]?.label}" 연결을 삭제할까요?`)) {
-      removeManualLink(closest.from, closest.to);
-    }
-  }
+  if(closest){if(confirm(`"${nodeMap[closest.from]?.label}" ↔ "${nodeMap[closest.to]?.label}" 연결을 삭제할까요?`)){removeManualLink(closest.from,closest.to);}}
 });
 
-canvas.addEventListener('wheel', e => {
+canvas.addEventListener('wheel',e=>{
   e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.06 : 0.94;
-  const mx=e.clientX, my=e.clientY;
-  const wx=(mx-W/2-panX)/scale, wy=(my-H/2-panY)/scale;
-  scale = Math.max(0.15, Math.min(4, scale*factor));
-  panX = mx-W/2-wx*scale;
-  panY = my-H/2-wy*scale;
+  const factor=e.deltaY<0?1.06:0.94;
+  const mx=e.clientX,my=e.clientY;
+  const wx=(mx-W/2-panX)/scale,wy=(my-H/2-panY)/scale;
+  scale=Math.max(0.15,Math.min(4,scale*factor));
+  panX=mx-W/2-wx*scale; panY=my-H/2-wy*scale;
   statusEl.textContent=`확대: ${Math.round(scale*100)}%`;
   clearTimeout(canvas._st);
-  canvas._st=setTimeout(()=>{ statusEl.textContent=''; }, 1200);
-}, {passive:false});
+  canvas._st=setTimeout(()=>{statusEl.textContent='';},1200);
+},{passive:false});
 
-window.addEventListener('resize', ()=>{
-  W=window.innerWidth; H=window.innerHeight;
-  canvas.width=W; canvas.height=H;
+window.addEventListener('resize',()=>{
+  W=window.innerWidth;H=window.innerHeight;
+  canvas.width=W;canvas.height=H;
   const root=nodes.find(n=>n.level===0);
-  if(root){ root.x=W/2; root.y=H/2; }
+  if(root){root.x=W/2;root.y=H/2;}
   isStable=false;
 });
 
-// 입력 화면에서 startGraph() 호출 시 buildGraph + loop 시작
+// ── [[]] mention 링크 처리 ──
+async function processMentionLinks(mentionPageIds, sourcePageId) {
+  if (!mentionPageIds || mentionPageIds.length === 0) return;
+  if (!_savedToken) return;
+
+  for (const mId of mentionPageIds) {
+    const existingRoot = nodes.find(n => n.sourcePageId === mId && n.level === 0);
+    const sourceRoot = nodes.find(n => n.sourcePageId === sourcePageId && n.level === 0);
+    if (!sourceRoot) continue;
+
+    if (existingRoot) {
+      const alreadyLinked = edges.some(e =>
+        e.mentionLink && ((e.from === sourceRoot.id && e.to === existingRoot.id) ||
+        (e.from === existingRoot.id && e.to === sourceRoot.id))
+      );
+      if (!alreadyLinked) {
+        edges.push({ from: sourceRoot.id, to: existingRoot.id, mentionLink: true });
+        isStable = false;
+      }
+      continue;
+    }
+
+    try {
+      const res = await fetch('/api/notion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: _savedToken, pageId: mId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        mergeGraph(data.title || mId, data.markdown || '', mId);
+        setTimeout(() => {
+          const newRoot = nodes.find(n => n.sourcePageId === mId && n.level === 0);
+          if (newRoot && sourceRoot) {
+            const alreadyLinked = edges.some(e =>
+              e.mentionLink && ((e.from === sourceRoot.id && e.to === newRoot.id) ||
+              (e.from === newRoot.id && e.to === sourceRoot.id))
+            );
+            if (!alreadyLinked) {
+              edges.push({ from: sourceRoot.id, to: newRoot.id, mentionLink: true });
+              isStable = false;
+            }
+          }
+          if (data.mentionPageIds?.length) processMentionLinks(data.mentionPageIds, mId);
+        }, 600);
+      } else {
+        addGhostNode(mId, sourceRoot);
+      }
+    } catch (e) {
+      addGhostNode(mId, sourceRoot);
+    }
+  }
+}
+
+function addGhostNode(ghostPageId, sourceRoot) {
+  if (nodes.find(n => n.sourcePageId === ghostPageId)) return;
+  const ghostId = 'ghost_' + ghostPageId;
+  const ghostNode = {
+    id: ghostId, label: '비공개 페이지', cat: 'ghost', desc: '', date: '',
+    x: sourceRoot ? sourceRoot.x + (Math.random()-0.5)*200 : W/2,
+    y: sourceRoot ? sourceRoot.y + (Math.random()-0.5)*200 : H/2,
+    vx: 0, vy: 0, level: 1, fixed: false,
+    color: 'rgba(255,255,255,0.2)',
+    ghostNode: true, sourcePageId: ghostPageId, visible: true
+  };
+  nodes.push(ghostNode);
+  nodeMap[ghostId] = ghostNode;
+  if (sourceRoot) edges.push({ from: sourceRoot.id, to: ghostId, mentionLink: true });
+  isStable = false;
+}
+
 updateConfig();
 function loop(){ simulate(); draw(); requestAnimationFrame(loop); }
 
