@@ -31,13 +31,13 @@ canvas { display: block; }
 #sidebar { position: fixed; top: 0; left: 0; width: 380px; height: 100vh; z-index: 200; display: flex; flex-direction: column; background: rgba(10,11,18,0.96); border-right: 1px solid rgba(255,255,255,0.07); backdrop-filter: blur(12px); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; overflow-x: hidden; }
 #sidebar-page-list::-webkit-scrollbar { width: 3px; }
 #sidebar-page-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-.page-list-item { display:flex; align-items:center; border-radius:6px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.04); overflow:hidden; transition:border-color 0.15s; }
+.page-list-item { display:flex; align-items:center; border-radius:6px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.04); overflow:hidden; transition:border-color 0.15s; min-height:30px; }
 .page-list-item.active { border-left:3px solid #ff9f43; }
-.page-list-item .item-label { flex:1; font-size:12px; color:rgba(255,255,255,0.65); padding:7px 9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; transition:color 0.15s; }
-.page-list-item.active .item-label { color:rgba(255,159,67,0.9); cursor:default; }
+.page-list-item .item-label { flex:1; font-size:12px; color:rgba(255,255,255,0.75); padding:7px 9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; transition:color 0.15s; min-width:0; }
+.page-list-item.active .item-label { color:#ff9f43; cursor:default; }
 .page-list-item:not(.active):hover .item-label { color:#fff; }
 .page-list-item:not(.active):hover { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.12); }
-.page-list-item .item-actions { display:flex; align-items:center; gap:0; flex-shrink:0; padding-right:4px; }
+.page-list-item .item-actions { display:flex; align-items:center; flex-shrink:0; padding-right:4px; }
 .page-list-item .item-actions button { background:none; border:none; cursor:pointer; font-size:12px; padding:4px 5px; line-height:1; color:rgba(255,255,255,0.35); transition:color 0.15s; }
 .page-list-item .item-actions .btn-sync:hover { color:rgba(255,255,255,0.8); }
 .page-list-item .item-actions .btn-remove:hover { color:#ff6b6b; }
@@ -208,7 +208,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <div class="panel-title">페이지 추가</div>
       <!-- 통합 페이지 목록 -->
       <div id="sidebar-page-list-wrap" style="display:none; margin-bottom:8px;">
-        <div id="sidebar-page-list" style="max-height:108px; overflow-y:auto; display:flex; flex-direction:column; gap:3px;"></div>
+        <div id="sidebar-page-list" style="max-height:96px; overflow-y:scroll; display:flex; flex-direction:column; gap:3px; padding-right:2px;"></div>
       </div>
       <!-- 수동 입력 -->
       <div style="position:relative; display:flex; align-items:center;">
@@ -222,7 +222,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <button id="add-page-btn" onclick="addPage()">+ 노드 불러오기</button>
       <div id="add-page-error"></div>
       <div id="added-pages-list" style="display:none;"></div>
-      <div id="bulk-actions" style="display:none"><button class="bulk-btn sync-all" onclick="confirmBulkSync()">↻ 전체 동기화</button><button class="bulk-btn close-all" onclick="confirmBulkClose()">✕ 전체 닫기</button></div>
+      <div id="bulk-actions" style="display:none"><button class="bulk-btn sync-all" onclick="confirmBulkSync()">전체 동기화</button><button class="bulk-btn close-all" onclick="confirmBulkClose()">전체 닫기</button></div>
     </div>
     <div id="search-panel" class="panel-box">
       <div class="panel-title">키워드 검색</div>
