@@ -586,9 +586,9 @@ async function addPage() {
     }
     _addedPageIds.add(pageId);
     mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
-    // ── [[]] mention 링크 자동 연결 ──
+    // ── [[]] mention 링크 자동 연결 (노드 배치 완료 후 실행) ──
     if (data.mentionPageIds?.length) {
-      processMentionLinks(data.mentionPageIds, pageId);
+      setTimeout(() => processMentionLinks(data.mentionPageIds, pageId), 800);
     }
     const list = document.getElementById('added-pages-list');
     const item = document.createElement('div');
@@ -644,14 +644,14 @@ async function syncPage(pageId) {
     try { data = JSON.parse(text2); } catch(e) { throw new Error('서버 응답 오류'); }
     if (!res.ok) throw new Error(data.error);
     try { sessionStorage.setItem(`snlog_${pageId}`, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
-    const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
+    const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId || n.id === 'ghost_' + pageId).map(n => n.id));
     nodes = nodes.filter(n => !removeIds.has(n.id));
     edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
     Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
     mergeGraph(data.title || '추가 페이지', data.markdown || '', pageId);
-    // ── [[]] mention 링크 자동 연결 ──
+    // ── [[]] mention 링크 자동 연결 (노드 배치 완료 후 실행) ──
     if (data.mentionPageIds?.length) {
-      processMentionLinks(data.mentionPageIds, pageId);
+      setTimeout(() => processMentionLinks(data.mentionPageIds, pageId), 800);
     }
     if (syncBtn) syncBtn.textContent = '↻';
   } catch(e) {
@@ -667,7 +667,7 @@ function updateBulkActionsVisibility() {
 function removePage(pageId, el) {
   _addedPageIds.delete(pageId);
   if (el) el.remove();
-  const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId).map(n => n.id));
+  const removeIds = new Set(nodes.filter(n => n.sourcePageId === pageId || n.id === 'ghost_' + pageId).map(n => n.id));
   nodes = nodes.filter(n => !removeIds.has(n.id));
   edges = edges.filter(e => !removeIds.has(e.from) && !removeIds.has(e.to));
   Object.keys(nodeMap).forEach(k => { if (removeIds.has(k)) delete nodeMap[k]; });
