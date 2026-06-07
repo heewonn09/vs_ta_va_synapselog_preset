@@ -164,6 +164,124 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(255,159,67,0.2); border-top-color: #ff9f43; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 #loading-text { font-size: 12px; color: rgba(255,255,255,0.5); }
+/* ── 사이드바 하단 프로필 ── */
+#sidebar-profile {
+  flex-shrink: 0; padding: 10px 12px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: none; align-items: center; gap: 10px;
+  cursor: pointer; transition: background 0.15s;
+}
+#sidebar-profile:hover { background: rgba(255,255,255,0.04); }
+#profile-avatar {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,159,67,0.2); border: 1px solid rgba(255,159,67,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #ff9f43; overflow: hidden;
+}
+#profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+#profile-info { flex: 1; min-width: 0; }
+#profile-name { font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#profile-workspace { font-size: 10px; color: rgba(255,255,255,0.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+#profile-gear { flex-shrink: 0; color: #ff9f43; display: flex; align-items: center; }
+
+/* ── 설정 모달 ── */
+#settings-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1100; backdrop-filter: blur(6px);
+}
+#settings-modal.open { display: flex; }
+#settings-box {
+  background: rgba(14,16,24,0.98); border: 1px solid rgba(255,255,255,0.1);
+  border-top: 2px solid rgba(255,159,67,0.6); border-radius: 16px;
+  width: 400px; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7); padding: 24px;
+}
+#settings-box::-webkit-scrollbar { width: 3px; }
+#settings-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.settings-profile-row {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 22px;
+  padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.settings-avatar {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,159,67,0.2); border: 1px solid rgba(255,159,67,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: #ff9f43; overflow: hidden;
+}
+.settings-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.settings-profile-info .s-name { font-size: 15px; font-weight: 700; color: #fff; }
+.settings-profile-info .s-email { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.settings-profile-info .s-workspace { font-size: 11px; color: rgba(255,159,67,0.6); margin-top: 2px; }
+.settings-section { margin-bottom: 20px; }
+.settings-section-title {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 13px; color: rgba(255,255,255,0.75); }
+.settings-row-sub { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+.s-toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.s-toggle input { opacity: 0; width: 0; height: 0; }
+.s-toggle-track {
+  position: absolute; inset: 0; border-radius: 10px;
+  background: rgba(255,255,255,0.1); transition: background 0.2s; cursor: pointer;
+}
+.s-toggle input:checked + .s-toggle-track { background: rgba(255,159,67,0.7); }
+.s-toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; transition: transform 0.2s; pointer-events: none;
+}
+.s-toggle input:checked ~ .s-toggle-thumb { transform: translateX(16px); }
+.s-storage-btn {
+  font-size: 11px; font-weight: 700; font-family: inherit; padding: 5px 12px;
+  border-radius: 6px; cursor: pointer; transition: background 0.2s;
+}
+.s-storage-btn.local { background: rgba(255,159,67,0.15); border: 1px solid rgba(255,159,67,0.4); color: #ff9f43; }
+.s-storage-btn.local:hover { background: rgba(255,159,67,0.25); }
+.s-storage-btn.session { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+.s-storage-btn.session:hover { background: rgba(255,255,255,0.12); }
+.s-warn { font-size: 11px; color: rgba(255,159,67,0.7); background: rgba(255,159,67,0.08); border: 1px solid rgba(255,159,67,0.2); border-radius: 6px; padding: 8px 10px; margin-top: 8px; line-height: 1.6; display: none; }
+.s-delete-btn {
+  font-size: 11px; font-weight: 700; font-family: inherit; padding: 4px 10px;
+  border-radius: 5px; cursor: pointer; background: rgba(255,100,100,0.1);
+  border: 1px solid rgba(255,100,100,0.25); color: rgba(255,120,120,0.8);
+  transition: background 0.2s;
+}
+.s-delete-btn:hover { background: rgba(255,100,100,0.2); color: #ff6b6b; }
+.s-size-group { display: flex; gap: 6px; }
+.s-size-btn {
+  flex: 1; font-size: 11px; font-weight: 700; font-family: inherit;
+  padding: 5px 0; border-radius: 6px; cursor: pointer; text-align: center;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5); transition: all 0.15s;
+}
+.s-size-btn.active { background: rgba(255,159,67,0.15); border-color: rgba(255,159,67,0.4); color: #ff9f43; }
+.settings-close-btn {
+  width: 100%; margin-top: 16px; padding: 10px; border-radius: 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+}
+.settings-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.token-edit-row { display: flex; gap: 6px; margin-top: 8px; }
+.token-edit-row input {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 7px 10px; font-size: 12px; font-family: inherit;
+  color: #fff; outline: none; transition: border-color 0.2s;
+}
+.token-edit-row input:focus { border-color: rgba(255,159,67,0.5); }
+.token-edit-row button {
+  font-size: 11px; font-weight: 700; font-family: inherit; padding: 7px 12px;
+  border-radius: 6px; cursor: pointer; background: rgba(255,159,67,0.15);
+  border: 1px solid rgba(255,159,67,0.4); color: #ff9f43; transition: background 0.2s;
+}
+.token-edit-row button:hover { background: rgba(255,159,67,0.25); }
 #status { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(18,20,28,0.85); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 5px 12px; font-size: 11px; color: rgba(255,255,255,0.5); pointer-events: none; }
 </style>
 </head>
@@ -240,8 +358,107 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <button onclick="exportGraph()" style="width:100%; margin-top:8px; background:rgba(255,159,67,0.12); border:1px solid rgba(255,159,67,0.4); color:#ff9f43; border-radius:7px; padding:8px 12px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:space-between;" onmouseover="this.style.background='rgba(255,159,67,0.22)'" onmouseout="this.style.background='rgba(255,159,67,0.12)'"><span>그래프 이미지 저장</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
     </div>
   </div>
+  <!-- 사이드바 하단 프로필 -->
+  <div id="sidebar-profile" onclick="openSettings()">
+    <div id="profile-avatar"><span id="profile-initial">?</span></div>
+    <div id="profile-info">
+      <div id="profile-name">프로필 로딩 중...</div>
+      <div id="profile-workspace"></div>
+    </div>
+    <div id="profile-gear">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </div>
 </div>
-<div id="tooltip"></div>
+
+<!-- 설정 모달 -->
+<div id="settings-modal">
+  <div id="settings-box">
+    <!-- 프로필 -->
+    <div class="settings-profile-row">
+      <div class="settings-avatar" id="settings-avatar"><span id="settings-initial">?</span></div>
+      <div class="settings-profile-info">
+        <div class="s-name" id="settings-name">—</div>
+        <div class="s-email" id="settings-email">—</div>
+        <div class="s-workspace" id="settings-workspace">—</div>
+      </div>
+    </div>
+
+    <!-- API 토큰 수정 -->
+    <div class="settings-section">
+      <div class="settings-section-title">API 토큰</div>
+      <div class="token-edit-row">
+        <input type="password" id="settings-token-input" placeholder="새 토큰 입력..." />
+        <button onclick="updateToken()">저장</button>
+      </div>
+      <div id="settings-token-msg" style="font-size:11px; color:rgba(255,159,67,0.7); margin-top:6px; display:none;"></div>
+    </div>
+
+    <!-- 스토리지 전환 -->
+    <div class="settings-section">
+      <div class="settings-section-title">스토리지 설정</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">로컬 저장 사용</div>
+          <div class="settings-row-sub">브라우저를 닫아도 데이터가 유지됩니다</div>
+        </div>
+        <label class="s-toggle">
+          <input type="checkbox" id="s-local-toggle" onchange="onStorageToggle(this)">
+          <div class="s-toggle-track"></div>
+          <div class="s-toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="s-warn" id="s-local-warn">⚠ API 토큰이 이 기기의 브라우저에 저장됩니다. 공용 컴퓨터에서는 사용을 권장하지 않습니다.</div>
+    </div>
+
+    <!-- 스토리지 범위 -->
+    <div class="settings-section">
+      <div class="settings-section-title">로컬 저장 범위</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">페이지 캐시</div><div class="settings-row-sub">불러온 노션 페이지 내용</div></div>
+        <label class="s-toggle"><input type="checkbox" id="s-scope-pages" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">그래프 슬라이더</div><div class="settings-row-sub">반발력·중력 수치</div></div>
+        <label class="s-toggle"><input type="checkbox" id="s-scope-slider" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">연결 모드 캐시</div><div class="settings-row-sub">수동 연결 엣지</div></div>
+        <label class="s-toggle"><input type="checkbox" id="s-scope-connect" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">키워드 검색 기록</div><div class="settings-row-sub">검색 히스토리</div></div>
+        <label class="s-toggle"><input type="checkbox" id="s-scope-search" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">이미지 저장 크기</div><div class="settings-row-sub">PNG 출력 해상도 설정</div></div>
+        <label class="s-toggle"><input type="checkbox" id="s-scope-imgsize" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
+      </div>
+    </div>
+
+    <!-- 이미지 저장 크기 -->
+    <div class="settings-section">
+      <div class="settings-section-title">이미지 저장 크기</div>
+      <div class="s-size-group">
+        <button class="s-size-btn active" id="s-size-1024" onclick="setExportSize(1024)">1024px</button>
+        <button class="s-size-btn" id="s-size-2048" onclick="setExportSize(2048)">2048px</button>
+        <button class="s-size-btn" id="s-size-4096" onclick="setExportSize(4096)">4096px</button>
+      </div>
+    </div>
+
+    <!-- 캐시 삭제 -->
+    <div class="settings-section">
+      <div class="settings-section-title">캐시 삭제</div>
+      <div class="settings-row"><span class="settings-row-label">페이지 캐시</span><button class="s-delete-btn" onclick="clearCache('pages')">삭제</button></div>
+      <div class="settings-row"><span class="settings-row-label">그래프 슬라이더</span><button class="s-delete-btn" onclick="clearCache('slider')">삭제</button></div>
+      <div class="settings-row"><span class="settings-row-label">연결 모드 캐시</span><button class="s-delete-btn" onclick="clearCache('connect')">삭제</button></div>
+      <div class="settings-row"><span class="settings-row-label">키워드 검색 기록</span><button class="s-delete-btn" onclick="clearCache('search')">삭제</button></div>
+      <div class="settings-row"><span class="settings-row-label">전체 캐시</span><button class="s-delete-btn" onclick="clearCache('all')">전체 삭제</button></div>
+    </div>
+
+    <button class="settings-close-btn" onclick="closeSettings()">닫기</button>
+  </div>
+</div>
 <div id="detail-panel">
   <div id="detail-tabs-bar"><div id="detail-tabs"></div><button id="tab-overflow-btn" onclick="toggleOverflowMenu(event)">···</button><button id="detail-panel-close" onclick="closePanel()" title="전체 닫기" style="color:#ff9f43;">✕</button></div>
   <div id="detail-body"><div id="detail-title-row"><div id="detail-title"></div></div><div id="detail-meta-row"><span id="detail-date"></span></div><div id="detail-divider"></div><div id="detail-content"></div></div>
@@ -282,6 +499,8 @@ function updateConfig() {
   vRep.textContent = Math.round(parseFloat(cfgRep.value) / 100);
   vGrav.textContent = Math.round(parseFloat(cfgGrav.value) * 10000);
   isStable = false;
+  // 슬라이더 수치 저장
+  snSet('snlog_slider', JSON.stringify({ rep: cfgRep.value, grav: cfgGrav.value }), 'slider');
 }
 cfgRep.addEventListener('input', updateConfig);
 cfgGrav.addEventListener('input', updateConfig);
@@ -438,7 +657,7 @@ const MARKDOWN = ``;
 let nodes=[], edges=[], nodeMap={};
 let drag=null, hoveredNode=null;
 let isPanning=false, panStartX=0, panStartY=0, panStartOffsetX=0, panStartOffsetY=0;
-let _savedToken = sessionStorage.getItem('snlog_token') || '';
+let _savedToken = sessionStorage.getItem('snlog_token') || localStorage.getItem('snlog_token') || '';
 let _addedPageIds = new Set();
 
 if (_savedToken) {
@@ -452,6 +671,9 @@ if (_savedToken) {
     setTimeout(restorePageList, 500);
     setTimeout(loadManualLinks, 800);
     setTimeout(initSidebarPageList, 600);
+    setTimeout(loadProfile, 400);
+    setTimeout(restoreSlider, 200);
+    setTimeout(restoreSearchHistory, 300);
   });
 }
 
@@ -587,9 +809,9 @@ async function startWithSelected() {
     return;
   }
   document.getElementById('login-screen').style.display = 'none';
-  buildGraph();
-  loop();
+  buildGraph(); loop();
   setTimeout(initSidebarPageList, 300);
+  setTimeout(loadProfile, 500);
   for (const pageId of window._selectedPageIds) {
     await addPageById(pageId);
   }
@@ -597,9 +819,9 @@ async function startWithSelected() {
 
 function skipToGraph() {
   document.getElementById('login-screen').style.display = 'none';
-  buildGraph();
-  loop();
+  buildGraph(); loop();
   setTimeout(initSidebarPageList, 300);
+  setTimeout(loadProfile, 500);
 }
 
 // 사이드바 페이지 목록 초기화 (그래프 진입 후 토큰 있을 때)
@@ -687,7 +909,7 @@ async function addPageById(pageId) {
 }
 
 function exportGraph() {
-  const SIZE = 1024, PADDING = 60;
+  const SIZE = _exportSize || 1024, PADDING = 60;
   const visibleNodes = nodes.filter(n => n.visible);
   if (visibleNodes.length === 0) return;
   const minX = Math.min(...visibleNodes.map(n => n.x));
@@ -1502,8 +1724,9 @@ function addHistory(kw){
   _searchHistory.unshift(kw);
   if(_searchHistory.length>MAX_HISTORY) _searchHistory.pop();
   renderSearchHistory();
+  saveSearchHistory();
 }
-function deleteHistory(idx,e){e.stopPropagation();_searchHistory.splice(idx,1);renderSearchHistory();}
+function deleteHistory(idx,e){e.stopPropagation();_searchHistory.splice(idx,1);renderSearchHistory();saveSearchHistory();}
 
 function doSearch(kw){
   searchKeyword=kw.trim().toLowerCase();
@@ -1605,6 +1828,203 @@ window.addEventListener('resize',()=>{
   const root=nodes.find(n=>n.level===0);
   if(root){root.x=W/2;root.y=H/2;}
   isStable=false;
+});
+
+// ── 슬라이더 복원 ──
+function restoreSlider() {
+  const saved = snGet('snlog_slider', 'slider');
+  if (!saved) return;
+  try {
+    const { rep, grav } = JSON.parse(saved);
+    if (rep) { cfgRep.value = rep; }
+    if (grav) { cfgGrav.value = grav; }
+    updateConfig();
+  } catch(e) {}
+}
+
+// ── 검색 기록 저장/복원 ──
+function saveSearchHistory() {
+  snSet('snlog_search_history', JSON.stringify(_searchHistory), 'search');
+}
+function restoreSearchHistory() {
+  const saved = snGet('snlog_search_history', 'search');
+  if (!saved) return;
+  try {
+    const arr = JSON.parse(saved);
+    arr.forEach(kw => { if (!_searchHistory.includes(kw)) _searchHistory.push(kw); });
+    renderSearchHistory();
+  } catch(e) {}
+}
+
+// ── 스토리지 시스템 ──
+let _useLocalStorage = localStorage.getItem('snlog_use_local') === 'true';
+let _storageScopes = JSON.parse(localStorage.getItem('snlog_scopes') || '{"pages":true,"slider":true,"connect":true,"search":true,"imgsize":true}');
+let _exportSize = parseInt(localStorage.getItem('snlog_export_size') || '1024');
+
+function getStorage(scope) {
+  if (_useLocalStorage && _storageScopes[scope] !== false) return localStorage;
+  return sessionStorage;
+}
+
+function snSet(key, value, scope) {
+  const s = scope ? getStorage(scope) : sessionStorage;
+  try { s.setItem(key, value); } catch(e) {}
+}
+function snGet(key, scope) {
+  if (scope && _useLocalStorage && _storageScopes[scope] !== false) {
+    const lv = localStorage.getItem(key);
+    if (lv !== null) return lv;
+  }
+  return sessionStorage.getItem(key);
+}
+function snRemove(key, scope) {
+  sessionStorage.removeItem(key);
+  if (scope) localStorage.removeItem(key);
+}
+
+// ── 프로필 ──
+let _profile = {};
+
+async function loadProfile() {
+  if (!_savedToken) return;
+  try {
+    const res = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _savedToken, action: 'profile' })
+    });
+    if (!res.ok) return;
+    _profile = await res.json();
+    renderProfile();
+  } catch(e) {}
+}
+
+function renderProfile() {
+  const profileEl = document.getElementById('sidebar-profile');
+  if (profileEl) profileEl.style.display = 'flex';
+
+  const initial = (_profile.name || '?')[0].toUpperCase();
+  const initEl = document.getElementById('profile-initial');
+  const avatarEl = document.getElementById('profile-avatar');
+  if (_profile.avatar) {
+    avatarEl.innerHTML = `<img src="${_profile.avatar}" onerror="this.parentElement.innerHTML='<span>${initial}</span>'" />`;
+  } else if (initEl) {
+    initEl.textContent = initial;
+  }
+  const nameEl = document.getElementById('profile-name');
+  const wsEl = document.getElementById('profile-workspace');
+  if (nameEl) nameEl.textContent = _profile.name || '—';
+  if (wsEl) wsEl.textContent = _profile.workspace || '';
+}
+
+// ── 설정 모달 ──
+function openSettings() {
+  // 프로필 동기화
+  const sInitial = document.getElementById('settings-initial');
+  const sAvatar = document.getElementById('settings-avatar');
+  const initial = (_profile.name || '?')[0].toUpperCase();
+  if (_profile.avatar) {
+    sAvatar.innerHTML = `<img src="${_profile.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<span>${initial}</span>'" />`;
+  } else if (sInitial) { sInitial.textContent = initial; }
+  const sName = document.getElementById('settings-name');
+  const sEmail = document.getElementById('settings-email');
+  const sWs = document.getElementById('settings-workspace');
+  if (sName) sName.textContent = _profile.name || '—';
+  if (sEmail) sEmail.textContent = _profile.email || '—';
+  if (sWs) sWs.textContent = _profile.workspace || '—';
+
+  // 스토리지 토글 상태
+  const localToggle = document.getElementById('s-local-toggle');
+  if (localToggle) localToggle.checked = _useLocalStorage;
+  const warn = document.getElementById('s-local-warn');
+  if (warn) warn.style.display = _useLocalStorage ? 'block' : 'none';
+
+  // 범위 토글
+  ['pages','slider','connect','search','imgsize'].forEach(k => {
+    const el = document.getElementById(`s-scope-${k}`);
+    if (el) el.checked = _storageScopes[k] !== false;
+  });
+
+  // 이미지 크기
+  [1024,2048,4096].forEach(s => {
+    const btn = document.getElementById(`s-size-${s}`);
+    if (btn) btn.classList.toggle('active', _exportSize === s);
+  });
+
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+  // 범위 저장
+  ['pages','slider','connect','search','imgsize'].forEach(k => {
+    const el = document.getElementById(`s-scope-${k}`);
+    if (el) _storageScopes[k] = el.checked;
+  });
+  localStorage.setItem('snlog_scopes', JSON.stringify(_storageScopes));
+}
+
+function onStorageToggle(el) {
+  _useLocalStorage = el.checked;
+  localStorage.setItem('snlog_use_local', _useLocalStorage);
+  const warn = document.getElementById('s-local-warn');
+  if (warn) warn.style.display = _useLocalStorage ? 'block' : 'none';
+  // 토큰 이관
+  if (_useLocalStorage && _savedToken) {
+    localStorage.setItem('snlog_token', _savedToken);
+  } else {
+    localStorage.removeItem('snlog_token');
+  }
+}
+
+function updateToken() {
+  const input = document.getElementById('settings-token-input');
+  const msg = document.getElementById('settings-token-msg');
+  const val = input?.value.trim();
+  if (!val) { if (msg) { msg.textContent = '토큰을 입력해주세요'; msg.style.display = 'block'; } return; }
+  if (!val.startsWith('secret_') && !val.startsWith('ntn_')) {
+    if (msg) { msg.textContent = '올바른 형식이 아닙니다 (secret_ 또는 ntn_)'; msg.style.display = 'block'; } return;
+  }
+  _savedToken = val;
+  sessionStorage.setItem('snlog_token', val);
+  if (_useLocalStorage) localStorage.setItem('snlog_token', val);
+  if (input) input.value = '';
+  if (msg) { msg.textContent = '저장됐어요'; msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  loadProfile();
+}
+
+function setExportSize(size) {
+  _exportSize = size;
+  localStorage.setItem('snlog_export_size', size);
+  [1024,2048,4096].forEach(s => {
+    const btn = document.getElementById(`s-size-${s}`);
+    if (btn) btn.classList.toggle('active', s === size);
+  });
+}
+
+function clearCache(type) {
+  const allKeys = [...Object.keys(sessionStorage), ...Object.keys(localStorage)];
+  if (type === 'pages' || type === 'all') {
+    allKeys.filter(k => k.startsWith('snlog_') && !['snlog_token','snlog_pages','snlog_manual_links','snlog_use_local','snlog_scopes','snlog_export_size','snlog_slider','snlog_search_history'].includes(k))
+      .forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
+    sessionStorage.removeItem('snlog_pages'); localStorage.removeItem('snlog_pages');
+  }
+  if (type === 'slider' || type === 'all') {
+    sessionStorage.removeItem('snlog_slider'); localStorage.removeItem('snlog_slider');
+  }
+  if (type === 'connect' || type === 'all') {
+    sessionStorage.removeItem('snlog_manual_links'); localStorage.removeItem('snlog_manual_links');
+  }
+  if (type === 'search' || type === 'all') {
+    sessionStorage.removeItem('snlog_search_history'); localStorage.removeItem('snlog_search_history');
+  }
+  const msg = document.getElementById('settings-token-msg');
+  if (msg) { msg.textContent = '삭제됐어요'; msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 1500); }
+}
+
+// 설정 모달 외부 클릭 닫기
+document.getElementById('settings-modal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
 });
 
 updateConfig();
