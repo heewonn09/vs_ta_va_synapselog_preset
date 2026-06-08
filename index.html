@@ -1901,11 +1901,12 @@ canvas.addEventListener('mouseup',e=>{
     nodes.forEach(nd=>{nd.dimmed=false;});
     isStable=false;
   } else if(elapsed<150&&!n&&_connectMode){
-    // 연결 모드 빈 공간 클릭 → 선택 취소
-    if(_connectFirstNode) { _connectFirstNode.connectSelected=false; _connectFirstNode=null; }
-    const s=document.getElementById('status');
-    if(s) s.textContent='연결 모드: 첫 번째 노드를 클릭하세요';
-    isStable=false;
+    if(_connectFirstNode) {
+      _connectFirstNode.connectSelected=false; _connectFirstNode=null;
+      const s=document.getElementById('status');
+      if(s) s.textContent='연결 모드: 첫 번째 노드를 클릭하세요';
+      isStable=false;
+    }
   }
   drag=null;isPanning=false;canvas.style.cursor='default';
 });
