@@ -1773,8 +1773,22 @@ function renderPanelContent(n) {
   if(pid){notionLinkEl.href=`https://notion.so/${pid.replace(/-/g,'')}`;notionLinkEl.style.display='inline-flex';}
   else{notionLinkEl.style.display='none';}
 
-  const rawDesc = (n.desc || '(내용 없음)').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  if(detailContent) detailContent.innerHTML = rawDesc;
+  // desc 렌더링 — 검색 중이면 키워드 하이라이트
+  let rawDesc = (n.desc || '(내용 없음)').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  if (searchKeyword && searchMatches.has(n.id)) {
+    const re = new RegExp(`(${searchKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    rawDesc = rawDesc.replace(re, '<mark style="background:rgba(255,159,67,0.35);color:#ff9f43;border-radius:3px;padding:0 2px;">$1</mark>');
+  }
+  if(detailContent) {
+    detailContent.innerHTML = rawDesc;
+    // 키워드 위치로 스크롤
+    if (searchKeyword && searchMatches.has(n.id)) {
+      setTimeout(() => {
+        const mark = detailContent.querySelector('mark');
+        if (mark) mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
 }
 
 function openPanel(n) {
@@ -1787,14 +1801,10 @@ function openPanel(n) {
   const toggleBtn=document.getElementById('detail-panel-sidebar-toggle');
   if(toggleBtn){toggleBtn.classList.add('visible');toggleBtn.classList.remove('collapsed');toggleBtn.innerHTML=PANEL_SVG_RIGHT;}
   if(_focusMode) applyFocusMode(n.id);
-
-  // 검색 중 매칭 노드 클릭 → 키워드 포함 문장 점선 박스 표시
-  showSearchTooltip(n);
 }
 
-// 검색 키워드 포함 문장 점선 박스
 let _searchTooltipTimer = null;
-function showSearchTooltip(n) {
+function showSearchTooltip(n, mouseX, mouseY) {
   const el = document.getElementById('search-tooltip');
   if (!el) return;
   if (!searchKeyword || !searchMatches.has(n.id)) { el.style.display = 'none'; return; }
@@ -1803,33 +1813,32 @@ function showSearchTooltip(n) {
   const label = n.label || '';
   const kw = searchKeyword.toLowerCase();
 
-  // 키워드 포함 문장 추출
   const sentences = (label + '\n' + desc).split(/[\n。.!?]/);
   const matched = sentences.filter(s => s.toLowerCase().includes(kw)).slice(0, 3);
   if (!matched.length) { el.style.display = 'none'; return; }
 
-  // 키워드 강조
+  const re = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   el.innerHTML = matched.map(s => {
     const escaped = s.trim().replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;');
-    const re = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     return escaped.replace(re, '<span class="s-kw">$1</span>');
   }).join('<br>');
 
-  // 노드 위치 기준으로 박스 위치 계산
-  const nodeScreenX = (n.x - W/2) * scale + W/2 + panX;
-  const nodeScreenY = (n.y - W/2) * scale + H/2 + panY;
   el.style.display = 'block';
-  const bw = 260, bh = 80;
-  let left = nodeScreenX + 20;
-  let top = nodeScreenY - 40;
-  if (left + bw > W - 400) left = nodeScreenX - bw - 20;
-  if (top < 10) top = 10;
+  // 노드 스크린 좌표 계산
+  const nodeScreenX = (n.x - W/2) * scale + W/2 + panX;
+  const nodeScreenY = (n.y - H/2) * scale + H/2 + panY;
+  const r = nodeR(n.level);
+  const rScreen = r * scale;
+  // 노드 바로 위에 배치
+  const bw = 240;
+  let left = nodeScreenX - bw / 2;
+  let top = nodeScreenY - rScreen - 12;
+  el.style.width = bw + 'px';
+  if (left < 390) left = 390;
+  if (left + bw > W - 410) left = W - 410 - bw;
   el.style.left = left + 'px';
-  el.style.top = top + 'px';
-
-  // 4초 후 자동 숨김
-  clearTimeout(_searchTooltipTimer);
-  _searchTooltipTimer = setTimeout(() => { el.style.display = 'none'; }, 4000);
+  // 박스 높이 모르므로 일단 top 설정 후 위로 올림
+  el.style.top = (top - 80) + 'px';
 }
 
 function closePanel() {
@@ -1913,8 +1922,20 @@ canvas.addEventListener('mousemove',e=>{
   if(isPanning){panX=panStartOffsetX+(e.clientX-panStartX);panY=panStartOffsetY+(e.clientY-panStartY);return;}
   const n=getNodeAt(e.clientX,e.clientY);
   hoveredNode=n; canvas.style.cursor=n?'pointer':'default';
-  if(n&&n.level>0){tooltip.textContent=n.label;tooltip.style.display='block';tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY-32)+'px';}
-  else{tooltip.style.display='none';}
+  if(n&&n.level>0){
+    tooltip.textContent=n.label;tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY-32)+'px';
+  } else { tooltip.style.display='none'; }
+
+  // 검색 중 매칭 노드 호버 → 키워드 포함 문장 노드 바로 위에 표시
+  const stEl = document.getElementById('search-tooltip');
+  if (stEl) {
+    if (n && searchKeyword && searchMatches.has(n.id)) {
+      showSearchTooltip(n, e.clientX, e.clientY);
+    } else {
+      stEl.style.display = 'none';
+    }
+  }
 });
 canvas.addEventListener('mousedown',e=>{
   mouseDownTime=Date.now();
@@ -1936,7 +1957,12 @@ canvas.addEventListener('mouseup',e=>{
   }
   drag=null;isPanning=false;canvas.style.cursor='default';
 });
-canvas.addEventListener('mouseleave',()=>{tooltip.style.display='none';hoveredNode=null;drag=null;isPanning=false;});
+canvas.addEventListener('mouseleave',()=>{
+  tooltip.style.display='none';
+  hoveredNode=null;drag=null;isPanning=false;
+  const stEl=document.getElementById('search-tooltip');
+  if(stEl) stEl.style.display='none';
+});
 
 canvas.addEventListener('contextmenu',e=>{
   e.preventDefault();
