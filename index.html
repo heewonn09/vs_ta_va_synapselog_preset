@@ -158,15 +158,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .toggle-switch .r-on-center { fill: #ff9f43; stroke: none; display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-off-outer, .toggle-switch input:checked ~ .toggle-track .r-off-mid1 { display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-on-outer, .toggle-switch input:checked ~ .toggle-track .r-on-center { display: block; }
-#search-tooltip {
-  position: fixed; z-index: 500; pointer-events: none;
-  background: rgba(10,12,20,0.92); border: 1.5px dashed rgba(255,159,67,0.6);
-  border-radius: 8px; padding: 8px 12px; max-width: 260px;
-  font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.7;
-  display: none; word-break: keep-all; backdrop-filter: blur(6px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-}
-#search-tooltip .s-kw { color: #ff9f43; font-weight: 700; }
 #loading-overlay { position: fixed; inset: 0; z-index: 900; background: rgba(10,12,20,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
 #loading-overlay.visible { display: flex; }
 .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(255,159,67,0.2); border-top-color: #ff9f43; animation: spin 0.8s linear infinite; }
@@ -360,7 +351,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <div class="panel-title">그래프 설정</div>
       <div class="ctrl-group"><div class="ctrl-label-row"><span>노드 반발력 (Repulsion)</span><span class="val" id="v-rep">5</span></div><input type="range" id="cfg-rep" min="100" max="2000" step="50" value="500"></div>
       <div class="ctrl-group"><div class="ctrl-label-row"><span>중력 (Gravity)</span><span class="val" id="v-grav">10</span></div><input type="range" id="cfg-grav" min="0.0001" max="0.0030" step="0.0001" value="0.0010"></div>
-      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">제목 숨김 (Title Hidden)</span><label class="toggle-switch"><input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">제목 표시 (Title Mark)</span><label class="toggle-switch"><input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
       <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">포커스 모드 (Focus Mode)</span><label class="toggle-switch"><input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
       <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);">연결 모드 (Connect Mode)</span><label class="toggle-switch"><input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()"><span class="toggle-track"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
       <button onclick="exportGraph()" style="width:100%; margin-top:8px; background:rgba(255,159,67,0.12); border:1px solid rgba(255,159,67,0.4); color:#ff9f43; border-radius:7px; padding:8px 12px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:space-between;" onmouseover="this.style.background='rgba(255,159,67,0.22)'" onmouseout="this.style.background='rgba(255,159,67,0.12)'"><span>그래프 이미지 저장</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
@@ -436,13 +427,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         </div>
       </div>
       <div class="settings-row">
-        <div><div class="settings-row-label">그래프 슬라이더</div><div class="settings-row-sub">반발력·중력 수치</div></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <label class="s-toggle"><input type="checkbox" id="s-scope-slider" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
-          <button class="s-delete-btn" onclick="clearCache('slider')">삭제</button>
-        </div>
-      </div>
-      <div class="settings-row">
         <div><div class="settings-row-label">연결 모드 캐시</div><div class="settings-row-sub">수동 연결 엣지</div></div>
         <div style="display:flex;align-items:center;gap:8px;">
           <label class="s-toggle"><input type="checkbox" id="s-scope-connect" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
@@ -470,7 +454,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 <button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/></svg></button>
 <div id="status"></div>
 <div id="search-result-count"></div>
-<div id="search-tooltip"></div>
 <script>
 
 const canvas = document.getElementById('c');
@@ -915,7 +898,12 @@ async function addPageById(pageId) {
 function exportGraph() {
   const SIZE = _exportSize || 2048, PADDING = 60;
   const hasSearch = searchKeyword.length > 0;
-  const visibleNodes = nodes.filter(n => n.visible && (!_focusMode || !n.dimmed));
+  const visibleNodes = nodes.filter(n => {
+    if (!n.visible) return false;
+    if (_focusMode && n.dimmed) return false;
+    if (hasSearch && !searchMatches.has(n.id)) return false;
+    return true;
+  });
   if (visibleNodes.length === 0) return;
   const minX = Math.min(...visibleNodes.map(n => n.x));
   const maxX = Math.max(...visibleNodes.map(n => n.x));
@@ -1501,12 +1489,12 @@ function draw() {
     if(_focusMode && !isDim && n.level > 0) {
       const childCount = getChildCount(n.id);
       if(childCount >= 3) {
-        const hubStrength = Math.min((childCount - 2) / 4, 1); // 3개=0.25, 6개=1.0 고정
-        const glowR = r + 10 + hubStrength * 20;
+        const hubStrength = Math.min((childCount - 2) / 4, 1);
+        const glowR = r + 6 + hubStrength * 12;
         const rgbH = hexToRgb(nodeColor);
         ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2);
         const gH = ctx.createRadialGradient(n.x, n.y, r, n.x, n.y, glowR);
-        gH.addColorStop(0, rgbStr(rgbH, 0.45 + hubStrength * 0.25));
+        gH.addColorStop(0, rgbStr(rgbH, 0.28 + hubStrength * 0.15));
         gH.addColorStop(1, rgbStr(rgbH, 0));
         ctx.fillStyle = gH; ctx.fill();
       }
@@ -1803,43 +1791,6 @@ function openPanel(n) {
   if(_focusMode) applyFocusMode(n.id);
 }
 
-let _searchTooltipTimer = null;
-function showSearchTooltip(n, mouseX, mouseY) {
-  const el = document.getElementById('search-tooltip');
-  if (!el) return;
-  if (!searchKeyword || !searchMatches.has(n.id)) { el.style.display = 'none'; return; }
-
-  const desc = n.desc || '';
-  const label = n.label || '';
-  const kw = searchKeyword.toLowerCase();
-
-  const sentences = (label + '\n' + desc).split(/[\n。.!?]/);
-  const matched = sentences.filter(s => s.toLowerCase().includes(kw)).slice(0, 3);
-  if (!matched.length) { el.style.display = 'none'; return; }
-
-  const re = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  el.innerHTML = matched.map(s => {
-    const escaped = s.trim().replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;');
-    return escaped.replace(re, '<span class="s-kw">$1</span>');
-  }).join('<br>');
-
-  el.style.display = 'block';
-  // 노드 스크린 좌표 계산
-  const nodeScreenX = (n.x - W/2) * scale + W/2 + panX;
-  const nodeScreenY = (n.y - H/2) * scale + H/2 + panY;
-  const r = nodeR(n.level);
-  const rScreen = r * scale;
-  // 노드 바로 위에 배치
-  const bw = 240;
-  let left = nodeScreenX - bw / 2;
-  let top = nodeScreenY - rScreen - 12;
-  el.style.width = bw + 'px';
-  if (left < 390) left = 390;
-  if (left + bw > W - 410) left = W - 410 - bw;
-  el.style.left = left + 'px';
-  // 박스 높이 모르므로 일단 top 설정 후 위로 올림
-  el.style.top = (top - 80) + 'px';
-}
 
 function closePanel() {
   _tabs=[]; _activeTabId=null;
@@ -1897,8 +1848,6 @@ function doSearch(kw){
   } else {
     if(resultEl) resultEl.style.display='none';
     clearBtn.style.display='none';
-    const stEl = document.getElementById('search-tooltip');
-    if (stEl) stEl.style.display = 'none';
   }
   isStable=false;
 }
@@ -1926,16 +1875,6 @@ canvas.addEventListener('mousemove',e=>{
     tooltip.textContent=n.label;tooltip.style.display='block';
     tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY-32)+'px';
   } else { tooltip.style.display='none'; }
-
-  // 검색 중 매칭 노드 호버 → 키워드 포함 문장 노드 바로 위에 표시
-  const stEl = document.getElementById('search-tooltip');
-  if (stEl) {
-    if (n && searchKeyword && searchMatches.has(n.id)) {
-      showSearchTooltip(n, e.clientX, e.clientY);
-    } else {
-      stEl.style.display = 'none';
-    }
-  }
 });
 canvas.addEventListener('mousedown',e=>{
   mouseDownTime=Date.now();
@@ -1950,9 +1889,14 @@ canvas.addEventListener('mouseup',e=>{
   if(elapsed<150&&n&&n===mouseDownNode&&n.level>0){
     if(_connectMode){handleConnectClick(n);}else{openPanel(n);}
   } else if(elapsed<150&&!n&&_focusMode){
-    // 빈 공간 클릭 → 포커스 해제
     _focusNodeId=null;
     nodes.forEach(nd=>{nd.dimmed=false;});
+    isStable=false;
+  } else if(elapsed<150&&!n&&_connectMode){
+    // 연결 모드 빈 공간 클릭 → 선택 취소
+    if(_connectFirstNode) { _connectFirstNode.connectSelected=false; _connectFirstNode=null; }
+    const s=document.getElementById('status');
+    if(s) s.textContent='연결 모드: 첫 번째 노드를 클릭하세요';
     isStable=false;
   }
   drag=null;isPanning=false;canvas.style.cursor='default';
@@ -1960,8 +1904,6 @@ canvas.addEventListener('mouseup',e=>{
 canvas.addEventListener('mouseleave',()=>{
   tooltip.style.display='none';
   hoveredNode=null;drag=null;isPanning=false;
-  const stEl=document.getElementById('search-tooltip');
-  if(stEl) stEl.style.display='none';
 });
 
 canvas.addEventListener('contextmenu',e=>{
@@ -2113,7 +2055,7 @@ function openSettings() {
   if (warn) warn.style.display = _useLocalStorage ? 'block' : 'none';
 
   // 범위 토글
-  ['pages','slider','connect','search'].forEach(k => {
+  ['pages','connect','search'].forEach(k => {
     const el = document.getElementById(`s-scope-${k}`);
     if (el) el.checked = _storageScopes[k] !== false;
   });
@@ -2130,7 +2072,7 @@ function openSettings() {
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
   // 범위 저장
-  ['pages','slider','connect','search'].forEach(k => {
+  ['pages','connect','search'].forEach(k => {
     const el = document.getElementById(`s-scope-${k}`);
     if (el) _storageScopes[k] = el.checked;
   });
