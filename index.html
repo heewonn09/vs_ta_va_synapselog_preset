@@ -1433,14 +1433,26 @@ function draw() {
     const r=nodeR(n.level);
     const nodeColor = n.level===0 ? '#ffffff' : (n.color||'#74b9ff');
 
-    // 수동 연결된 노드 — 포커스 모드일 때만 해당 노드 색상 글로우
+    // 수동 연결된 노드 — 포커스 모드일 때 흰색 글로우
     const isManualLinked = _focusMode && edges.some(e => e.manualLink && (e.from === n.id || e.to === n.id));
     if(isManualLinked && !isDim) {
-      const rgbM = hexToRgb(nodeColor);
       ctx.beginPath(); ctx.arc(n.x, n.y, r+14, 0, Math.PI*2);
       const gM = ctx.createRadialGradient(n.x, n.y, r, n.x, n.y, r+14);
-      gM.addColorStop(0, rgbStr(rgbM, 0.35)); gM.addColorStop(1, rgbStr(rgbM, 0));
+      gM.addColorStop(0, 'rgba(255,255,255,0.35)'); gM.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = gM; ctx.fill();
+    }
+
+    // 포커스 모드 — 허브 노드 글로우 (하위 노드 많을수록 강함)
+    if(_focusMode && !isDim && n.level > 0) {
+      const hubStrength = getHubGlow(n.id);
+      if(hubStrength > 0.2) {
+        const glowR = r + 8 + hubStrength * 14;
+        ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2);
+        const gH = ctx.createRadialGradient(n.x, n.y, r, n.x, n.y, glowR);
+        gH.addColorStop(0, `rgba(255,255,255,${hubStrength * 0.45})`);
+        gH.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = gH; ctx.fill();
+      }
     }
 
     if(isMatch) {
@@ -1814,6 +1826,11 @@ canvas.addEventListener('mouseup',e=>{
   const n=getNodeAt(e.clientX,e.clientY);
   if(elapsed<150&&n&&n===mouseDownNode&&n.level>0){
     if(_connectMode){handleConnectClick(n);}else{openPanel(n);}
+  } else if(elapsed<150&&!n&&_focusMode){
+    // 빈 공간 클릭 → 포커스 해제
+    _focusNodeId=null;
+    nodes.forEach(nd=>{nd.dimmed=false;});
+    isStable=false;
   }
   drag=null;isPanning=false;canvas.style.cursor='default';
 });
@@ -2056,6 +2073,18 @@ function clearCache(type) {
 document.getElementById('settings-modal')?.addEventListener('click', function(e) {
   if (e.target === this) closeSettings();
 });
+
+// 하위 노드 수 계산
+function getChildCount(nodeId) {
+  return edges.filter(e => e.from === nodeId && !e.weakLink && !e.manualLink).length;
+}
+// 포커스 모드 허브 글로우 강도 (0~1)
+function getHubGlow(nodeId) {
+  const count = getChildCount(nodeId);
+  if (count === 0) return 0;
+  const visibleMax = Math.max(...nodes.filter(n=>n.visible).map(n=>getChildCount(n.id)), 1);
+  return Math.min(count / visibleMax, 1);
+}
 
 updateConfig();
 function loop(){ simulate(); draw(); requestAnimationFrame(loop); }
