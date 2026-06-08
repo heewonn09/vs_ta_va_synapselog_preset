@@ -394,9 +394,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <div id="settings-token-msg" style="font-size:11px; color:rgba(255,159,67,0.7); margin-top:6px; display:none;"></div>
     </div>
 
-    <!-- 스토리지 전환 -->
+    <!-- 스토리지 + 캐시 통합 -->
     <div class="settings-section">
-      <div class="settings-section-title">스토리지 설정</div>
+      <div class="settings-section-title">저장 & 캐시</div>
       <div class="settings-row">
         <div>
           <div class="settings-row-label">로컬 저장 사용</div>
@@ -409,11 +409,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         </label>
       </div>
       <div class="s-warn" id="s-local-warn">⚠ API 토큰이 이 기기의 브라우저에 저장됩니다. 공용 컴퓨터에서는 사용을 권장하지 않습니다.</div>
-    </div>
-
-    <!-- 스토리지 범위 -->
-    <div class="settings-section">
-      <div class="settings-section-title">로컬 저장 범위</div>
+      <div style="height:8px;"></div>
+      <div class="settings-section-title" style="margin-top:4px;">로컬 저장 범위</div>
       <div class="settings-row">
         <div><div class="settings-row-label">페이지 캐시</div><div class="settings-row-sub">불러온 노션 페이지 내용</div></div>
         <label class="s-toggle"><input type="checkbox" id="s-scope-pages" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
@@ -430,18 +427,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <div><div class="settings-row-label">키워드 검색 기록</div><div class="settings-row-sub">검색 히스토리</div></div>
         <label class="s-toggle"><input type="checkbox" id="s-scope-search" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
       </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">이미지 저장 크기</div><div class="settings-row-sub">PNG 출력 해상도 설정</div></div>
-        <label class="s-toggle"><input type="checkbox" id="s-scope-imgsize" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
-      </div>
     </div>
 
     <!-- 이미지 저장 크기 -->
     <div class="settings-section">
       <div class="settings-section-title">이미지 저장 크기</div>
       <div class="s-size-group">
-        <button class="s-size-btn active" id="s-size-1024" onclick="setExportSize(1024)">1024px</button>
-        <button class="s-size-btn" id="s-size-2048" onclick="setExportSize(2048)">2048px</button>
+        <button class="s-size-btn" id="s-size-1024" onclick="setExportSize(1024)">1024px</button>
+        <button class="s-size-btn active" id="s-size-2048" onclick="setExportSize(2048)">2048px</button>
         <button class="s-size-btn" id="s-size-4096" onclick="setExportSize(4096)">4096px</button>
       </div>
     </div>
@@ -1890,7 +1883,7 @@ function restoreSearchHistory() {
 // ── 스토리지 시스템 ──
 let _useLocalStorage = localStorage.getItem('snlog_use_local') === 'true';
 let _storageScopes = JSON.parse(localStorage.getItem('snlog_scopes') || '{"pages":true,"slider":true,"connect":true,"search":true,"imgsize":true}');
-let _exportSize = parseInt(localStorage.getItem('snlog_export_size') || '1024');
+let _exportSize = parseInt(localStorage.getItem('snlog_export_size') || '2048');
 
 function getStorage(scope) {
   if (_useLocalStorage && _storageScopes[scope] !== false) return localStorage;
@@ -1971,7 +1964,7 @@ function openSettings() {
   if (warn) warn.style.display = _useLocalStorage ? 'block' : 'none';
 
   // 범위 토글
-  ['pages','slider','connect','search','imgsize'].forEach(k => {
+  ['pages','slider','connect','search'].forEach(k => {
     const el = document.getElementById(`s-scope-${k}`);
     if (el) el.checked = _storageScopes[k] !== false;
   });
@@ -1988,7 +1981,7 @@ function openSettings() {
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
   // 범위 저장
-  ['pages','slider','connect','search','imgsize'].forEach(k => {
+  ['pages','slider','connect','search'].forEach(k => {
     const el = document.getElementById(`s-scope-${k}`);
     if (el) _storageScopes[k] = el.checked;
   });
