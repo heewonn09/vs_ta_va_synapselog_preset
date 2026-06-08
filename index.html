@@ -158,7 +158,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 .toggle-switch .r-on-center { fill: #ff9f43; stroke: none; display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-off-outer, .toggle-switch input:checked ~ .toggle-track .r-off-mid1 { display: none; }
 .toggle-switch input:checked ~ .toggle-track .r-on-outer, .toggle-switch input:checked ~ .toggle-track .r-on-center { display: block; }
-#sidebar-toggle svg, #detail-panel-sidebar-toggle svg { shape-rendering: crispEdges; display: block; }
+#search-tooltip {
+  position: fixed; z-index: 500; pointer-events: none;
+  background: rgba(10,12,20,0.92); border: 1.5px dashed rgba(255,159,67,0.6);
+  border-radius: 8px; padding: 8px 12px; max-width: 260px;
+  font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.7;
+  display: none; word-break: keep-all; backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+#search-tooltip .s-kw { color: #ff9f43; font-weight: 700; }
 #loading-overlay { position: fixed; inset: 0; z-index: 900; background: rgba(10,12,20,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
 #loading-overlay.visible { display: flex; }
 .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(255,159,67,0.2); border-top-color: #ff9f43; animation: spin 0.8s linear infinite; }
@@ -462,6 +470,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 <button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/></svg></button>
 <div id="status"></div>
 <div id="search-result-count"></div>
+<div id="search-tooltip"></div>
 <script>
 
 const canvas = document.getElementById('c');
@@ -904,8 +913,9 @@ async function addPageById(pageId) {
 }
 
 function exportGraph() {
-  const SIZE = _exportSize || 1024, PADDING = 60;
-  const visibleNodes = nodes.filter(n => n.visible);
+  const SIZE = _exportSize || 2048, PADDING = 60;
+  const hasSearch = searchKeyword.length > 0;
+  const visibleNodes = nodes.filter(n => n.visible && (!_focusMode || !n.dimmed));
   if (visibleNodes.length === 0) return;
   const minX = Math.min(...visibleNodes.map(n => n.x));
   const maxX = Math.max(...visibleNodes.map(n => n.x));
@@ -919,16 +929,30 @@ function exportGraph() {
   ctx2.fillStyle = '#0a0c14'; ctx2.fillRect(0, 0, SIZE, SIZE);
   const offsetX = (SIZE - graphW * exportScale) / 2 - minX * exportScale;
   const offsetY = (SIZE - graphH * exportScale) / 2 - minY * exportScale;
+  const visibleIds = new Set(visibleNodes.map(n => n.id));
   ctx2.save();
   ctx2.translate(offsetX, offsetY);
   ctx2.scale(exportScale, exportScale);
   edges.forEach(e => {
     const a = nodeMap[e.from], b = nodeMap[e.to];
     if (!a?.visible || !b?.visible) return;
+    if (!visibleIds.has(a.id) || !visibleIds.has(b.id)) return;
     const edgeRgb = hexToRgb(a.color || '#ffffff');
-    if (e.manualLink) { ctx2.setLineDash([4,5]); ctx2.strokeStyle = rgbStr(edgeRgb, 0.6); ctx2.lineWidth = 0.8; }
-    else if (e.weakLink) { ctx2.setLineDash([4,4]); ctx2.strokeStyle = rgbStr(edgeRgb, 0.2); ctx2.lineWidth = 0.6; }
-    else { ctx2.setLineDash([]); ctx2.strokeStyle = rgbStr(edgeRgb, 0.55); ctx2.lineWidth = 0.7; }
+    // 검색 모드 반영
+    if (hasSearch) {
+      const bothMatch = searchMatches.has(e.from) && searchMatches.has(e.to);
+      const eitherMatch = searchMatches.has(e.from) || searchMatches.has(e.to);
+      if (!eitherMatch) return;
+      ctx2.setLineDash(bothMatch ? [] : [4,5]);
+      ctx2.strokeStyle = rgbStr(edgeRgb, bothMatch ? 0.9 : 0.3);
+      ctx2.lineWidth = bothMatch ? 1.0 : 0.5;
+    } else if (e.manualLink) {
+      ctx2.setLineDash([4,5]); ctx2.strokeStyle = rgbStr(edgeRgb, 0.6); ctx2.lineWidth = 0.8;
+    } else if (e.weakLink) {
+      ctx2.setLineDash([4,4]); ctx2.strokeStyle = rgbStr(edgeRgb, 0.2); ctx2.lineWidth = 0.6;
+    } else {
+      ctx2.setLineDash([]); ctx2.strokeStyle = rgbStr(edgeRgb, 0.55); ctx2.lineWidth = 0.7;
+    }
     ctx2.beginPath(); ctx2.moveTo(a.x, a.y); ctx2.lineTo(b.x, b.y); ctx2.stroke();
   });
   ctx2.setLineDash([]);
@@ -936,16 +960,47 @@ function exportGraph() {
     const r = nodeR(n.level);
     const nodeColor = n.level === 0 ? '#ffffff' : (n.color || '#74b9ff');
     const rgb = hexToRgb(nodeColor);
-    // export에선 배경 혼합 없이 원본 색상 그대로
+    const isMatch = searchMatches.has(n.id);
+    // 검색 매칭 글로우
+    if (hasSearch && isMatch) {
+      ctx2.beginPath(); ctx2.arc(n.x, n.y, r+10, 0, Math.PI*2);
+      const gS = ctx2.createRadialGradient(n.x, n.y, r, n.x, n.y, r+10);
+      gS.addColorStop(0, 'rgba(255,255,255,0.4)'); gS.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx2.fillStyle = gS; ctx2.fill();
+    }
+    // 포커스 허브 글로우
+    if (_focusMode) {
+      const childCount = getChildCount(n.id);
+      if (childCount >= 3) {
+        const hubStrength = Math.min((childCount - 2) / 4, 1);
+        const glowR = r + 10 + hubStrength * 20;
+        const rgbH = hexToRgb(nodeColor);
+        ctx2.beginPath(); ctx2.arc(n.x, n.y, glowR, 0, Math.PI*2);
+        const gH = ctx2.createRadialGradient(n.x, n.y, r, n.x, n.y, glowR);
+        gH.addColorStop(0, rgbStr(rgbH, 0.45 + hubStrength * 0.25));
+        gH.addColorStop(1, rgbStr(rgbH, 0));
+        ctx2.fillStyle = gH; ctx2.fill();
+      }
+    }
+    // 수동 연결 노드 글로우
+    if (_focusMode) {
+      const isManualLinked = edges.some(e => e.manualLink && (e.from === n.id || e.to === n.id));
+      if (isManualLinked) {
+        ctx2.beginPath(); ctx2.arc(n.x, n.y, r+10, 0, Math.PI*2);
+        const gM = ctx2.createRadialGradient(n.x, n.y, r, n.x, n.y, r+10);
+        gM.addColorStop(0, 'rgba(255,255,255,0.35)'); gM.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx2.fillStyle = gM; ctx2.fill();
+      }
+    }
     ctx2.beginPath(); ctx2.arc(n.x, n.y, r, 0, Math.PI*2);
-    ctx2.fillStyle = rgbStr(rgb, 1);
+    ctx2.fillStyle = hasSearch && isMatch ? '#ffffff' : rgbStr(rgb, 1);
     ctx2.fill();
     if (_showLabels) {
       let lbl = n.label;
       if (n.level >= 2 && lbl.length > 14) lbl = lbl.substring(0,13) + '…';
       const fontSize = n.level <= 1 ? 12 : 10;
       ctx2.font = n.level <= 1 ? `bold ${fontSize}px 'Noto Sans KR', sans-serif` : `500 ${fontSize}px 'Noto Sans KR', sans-serif`;
-      ctx2.fillStyle = 'rgba(215,220,230,0.85)';
+      ctx2.fillStyle = hasSearch && isMatch ? '#ffffff' : 'rgba(215,220,230,0.85)';
       ctx2.textAlign = 'center'; ctx2.textBaseline = 'top';
       ctx2.fillText(lbl, n.x, n.y + r + 4);
     }
@@ -1442,16 +1497,16 @@ function draw() {
       ctx.fillStyle = gM; ctx.fill();
     }
 
-    // 포커스 모드 — 허브 노드 글로우 (직접 자식 2개 이상, 노드 색상)
+    // 포커스 모드 — 허브 노드 글로우 (직접 자식 3개 이상, 6개부터 고정)
     if(_focusMode && !isDim && n.level > 0) {
       const childCount = getChildCount(n.id);
-      if(childCount >= 2) {
-        const hubStrength = Math.min((childCount - 1) / 10, 1);
-        const glowR = r + 10 + hubStrength * 30;
+      if(childCount >= 3) {
+        const hubStrength = Math.min((childCount - 2) / 4, 1); // 3개=0.25, 6개=1.0 고정
+        const glowR = r + 10 + hubStrength * 20;
         const rgbH = hexToRgb(nodeColor);
         ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2);
         const gH = ctx.createRadialGradient(n.x, n.y, r, n.x, n.y, glowR);
-        gH.addColorStop(0, rgbStr(rgbH, 0.5 + hubStrength * 0.25));
+        gH.addColorStop(0, rgbStr(rgbH, 0.45 + hubStrength * 0.25));
         gH.addColorStop(1, rgbStr(rgbH, 0));
         ctx.fillStyle = gH; ctx.fill();
       }
@@ -1732,6 +1787,49 @@ function openPanel(n) {
   const toggleBtn=document.getElementById('detail-panel-sidebar-toggle');
   if(toggleBtn){toggleBtn.classList.add('visible');toggleBtn.classList.remove('collapsed');toggleBtn.innerHTML=PANEL_SVG_RIGHT;}
   if(_focusMode) applyFocusMode(n.id);
+
+  // 검색 중 매칭 노드 클릭 → 키워드 포함 문장 점선 박스 표시
+  showSearchTooltip(n);
+}
+
+// 검색 키워드 포함 문장 점선 박스
+let _searchTooltipTimer = null;
+function showSearchTooltip(n) {
+  const el = document.getElementById('search-tooltip');
+  if (!el) return;
+  if (!searchKeyword || !searchMatches.has(n.id)) { el.style.display = 'none'; return; }
+
+  const desc = n.desc || '';
+  const label = n.label || '';
+  const kw = searchKeyword.toLowerCase();
+
+  // 키워드 포함 문장 추출
+  const sentences = (label + '\n' + desc).split(/[\n。.!?]/);
+  const matched = sentences.filter(s => s.toLowerCase().includes(kw)).slice(0, 3);
+  if (!matched.length) { el.style.display = 'none'; return; }
+
+  // 키워드 강조
+  el.innerHTML = matched.map(s => {
+    const escaped = s.trim().replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;');
+    const re = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return escaped.replace(re, '<span class="s-kw">$1</span>');
+  }).join('<br>');
+
+  // 노드 위치 기준으로 박스 위치 계산
+  const nodeScreenX = (n.x - W/2) * scale + W/2 + panX;
+  const nodeScreenY = (n.y - W/2) * scale + H/2 + panY;
+  el.style.display = 'block';
+  const bw = 260, bh = 80;
+  let left = nodeScreenX + 20;
+  let top = nodeScreenY - 40;
+  if (left + bw > W - 400) left = nodeScreenX - bw - 20;
+  if (top < 10) top = 10;
+  el.style.left = left + 'px';
+  el.style.top = top + 'px';
+
+  // 4초 후 자동 숨김
+  clearTimeout(_searchTooltipTimer);
+  _searchTooltipTimer = setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
 function closePanel() {
@@ -1772,7 +1870,7 @@ function doSearch(kw){
   searchKeyword=kw.trim().toLowerCase();
   searchMatches.clear();
   const resultEl=document.getElementById('search-result-count');
-  if(searchKeyword){
+  if(searchKeyword) {
     const directMatches=new Set();
     nodes.forEach(n=>{
       if(!n.visible) return;
@@ -1790,6 +1888,8 @@ function doSearch(kw){
   } else {
     if(resultEl) resultEl.style.display='none';
     clearBtn.style.display='none';
+    const stEl = document.getElementById('search-tooltip');
+    if (stEl) stEl.style.display = 'none';
   }
   isStable=false;
 }
@@ -1903,7 +2003,9 @@ function restoreSearchHistory() {
 
 // ── 스토리지 시스템 ──
 let _useLocalStorage = localStorage.getItem('snlog_use_local') === 'true';
-let _storageScopes = JSON.parse(localStorage.getItem('snlog_scopes') || '{"pages":true,"slider":true,"connect":true,"search":true,"imgsize":true}');
+let _storageScopes = (() => { try { return JSON.parse(localStorage.getItem('snlog_scopes') || '{}'); } catch(e) { return {}; } })();
+// 기본값 보장
+['pages','slider','connect','search'].forEach(k => { if (_storageScopes[k] === undefined) _storageScopes[k] = true; });
 let _exportSize = parseInt(localStorage.getItem('snlog_export_size') || '2048');
 
 function getStorage(scope) {
