@@ -282,6 +282,35 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 }
 .token-edit-row button:hover { background: rgba(255,159,67,0.25); }
 #status { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(18,20,28,0.85); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 5px 12px; font-size: 11px; color: rgba(255,255,255,0.5); pointer-events: none; }
+
+/* ── AI 분석 ── */
+#ai-modal { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1200; backdrop-filter:blur(6px); }
+#ai-modal.open { display:flex; }
+#ai-modal-box { background:rgba(14,16,24,0.98); border:1px solid rgba(255,255,255,0.1); border-top:2px solid rgba(108,92,231,0.7); border-radius:16px; width:480px; max-height:75vh; overflow-y:auto; box-shadow:0 24px 64px rgba(0,0,0,0.7); padding:24px; }
+#ai-modal-box::-webkit-scrollbar { width:3px; }
+#ai-modal-box::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
+#ai-modal-header { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+#ai-modal-title { font-size:14px; font-weight:700; color:#fff; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ai-badge { font-size:9px; background:rgba(108,92,231,0.2); border:1px solid rgba(108,92,231,0.4); color:#a29bfe; border-radius:4px; padding:2px 7px; font-weight:700; letter-spacing:0.05em; flex-shrink:0; }
+#ai-modal-content { font-size:13px; color:#ccc; line-height:2.0; white-space:pre-wrap; word-break:keep-all; }
+#ai-modal-content strong { color:#a29bfe; font-weight:700; }
+.ai-modal-close { width:100%; margin-top:20px; padding:9px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; }
+.ai-modal-close:hover { background:rgba(255,255,255,0.1); color:#fff; }
+/* 다중 선택 바 */
+#multi-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:rgba(14,16,24,0.95); border:1px solid rgba(108,92,231,0.4); border-radius:12px; padding:10px 16px; display:none; align-items:center; gap:12px; z-index:500; backdrop-filter:blur(10px); box-shadow:0 8px 32px rgba(0,0,0,0.5); white-space:nowrap; }
+#multi-count { font-size:12px; color:rgba(255,255,255,0.6); }
+.multi-btn { font-size:12px; font-weight:700; font-family:inherit; padding:6px 14px; border-radius:7px; cursor:pointer; transition:background 0.2s; }
+.multi-btn.analyze { background:rgba(108,92,231,0.2); border:1px solid rgba(108,92,231,0.5); color:#a29bfe; }
+.multi-btn.analyze:hover { background:rgba(108,92,231,0.35); }
+.multi-btn.clear { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.55); }
+.multi-btn.clear:hover { background:rgba(255,255,255,0.12); color:#fff; }
+/* 패널 내 AI 요약 */
+.ai-sum-wrap { margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.07); }
+.ai-sum-btn { width:100%; background:rgba(108,92,231,0.12); border:1px solid rgba(108,92,231,0.35); border-radius:8px; padding:8px 12px; color:#a29bfe; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.ai-sum-btn:hover { background:rgba(108,92,231,0.22); }
+.ai-sum-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.ai-sum-result { margin-top:12px; font-size:12px; color:#ccc; line-height:1.9; white-space:pre-wrap; word-break:keep-all; display:none; padding:12px; background:rgba(108,92,231,0.07); border:1px solid rgba(108,92,231,0.15); border-radius:8px; }
+.ai-sum-result strong { color:#a29bfe; }
 </style>
 </head>
 <body>
@@ -384,14 +413,24 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       </div>
     </div>
 
-    <!-- API 토큰 -->
+    <!-- Notion API 토큰 -->
     <div class="settings-section">
-      <div class="settings-section-title">API 토큰</div>
+      <div class="settings-section-title">Notion API 토큰</div>
       <div class="token-edit-row">
         <input type="password" id="settings-token-input" placeholder="새 토큰 입력..." />
         <button onclick="updateToken()">저장</button>
       </div>
       <div id="settings-token-msg" style="font-size:11px; color:rgba(255,159,67,0.7); margin-top:6px; display:none;"></div>
+    </div>
+
+    <!-- Claude API 키 -->
+    <div class="settings-section">
+      <div class="settings-section-title">Claude API 키 <span style="color:rgba(108,92,231,0.8);">(AI 분석)</span></div>
+      <div class="token-edit-row">
+        <input type="password" id="settings-claude-input" placeholder="sk-ant-..." />
+        <button onclick="updateClaudeKey()" style="background:rgba(108,92,231,0.15);border-color:rgba(108,92,231,0.4);color:#a29bfe;">저장</button>
+      </div>
+      <div id="settings-claude-msg" style="font-size:11px; color:rgba(108,92,231,0.8); margin-top:6px; display:none;"></div>
     </div>
 
     <!-- 이미지 저장 크기 -->
@@ -454,6 +493,24 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 <div id="tab-overflow-menu"></div>
 <button id="detail-panel-sidebar-toggle" onclick="toggleDetailPanel()" title="패널 접기/펼치기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="1" x2="10" y2="15" stroke="currentColor" stroke-width="1.5"/></svg></button>
 <div id="status"></div>
+
+<!-- AI 분석 모달 -->
+<div id="ai-modal">
+  <div id="ai-modal-box">
+    <div id="ai-modal-header">
+      <div id="ai-modal-title">AI 관계 분석</div>
+      <span class="ai-badge">✦ AI</span>
+    </div>
+    <div id="ai-modal-content"></div>
+    <button class="ai-modal-close" onclick="closeAiModal()">닫기</button>
+  </div>
+</div>
+<!-- 다중 선택 바 -->
+<div id="multi-bar">
+  <span id="multi-count">0개 선택</span>
+  <button class="multi-btn analyze" onclick="aiAnalyzeSelected()">✦ AI 관계 분석</button>
+  <button class="multi-btn clear" onclick="clearMultiSelect()">선택 해제</button>
+</div>
 <script>
 
 const canvas = document.getElementById('c');
@@ -1491,6 +1548,16 @@ function draw() {
       ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=1/scale;
       ctx.setLineDash([2.5,2.5]); ctx.stroke(); ctx.setLineDash([]);
     }
+    // 다중 선택 노드 — 보라색 테두리
+    if(_multiSelected.has(n.id)) {
+      ctx.beginPath(); ctx.arc(n.x,n.y,r+5,0,Math.PI*2);
+      ctx.strokeStyle='rgba(162,155,254,0.9)'; ctx.lineWidth=2/scale;
+      ctx.setLineDash([]); ctx.stroke();
+      ctx.beginPath(); ctx.arc(n.x,n.y,r+10,0,Math.PI*2);
+      const gM=ctx.createRadialGradient(n.x,n.y,r+3,n.x,n.y,r+10);
+      gM.addColorStop(0,'rgba(108,92,231,0.25)'); gM.addColorStop(1,'rgba(108,92,231,0)');
+      ctx.fillStyle=gM; ctx.fill();
+    }
 
     // 연결 모드 — 선택된 노드: 흰색 글로우
     if(_connectMode && n.connectSelected) {
@@ -1739,13 +1806,21 @@ function renderPanelContent(n) {
   }
   if(detailContent) {
     detailContent.innerHTML = rawDesc;
-    // 키워드 위치로 스크롤
     if (searchKeyword && searchMatches.has(n.id)) {
       setTimeout(() => {
         const mark = detailContent.querySelector('mark');
         if (mark) mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
+    // AI 요약 섹션
+    let aiWrap = document.getElementById('ai-sum-wrap');
+    if (!aiWrap) {
+      aiWrap = document.createElement('div');
+      aiWrap.id = 'ai-sum-wrap';
+      aiWrap.className = 'ai-sum-wrap';
+      detailContent.insertAdjacentElement('afterend', aiWrap);
+    }
+    aiWrap.innerHTML = `<button class="ai-sum-btn" id="ai-sum-btn" onclick="aiSummarizeNode('${n.id}')"><span>✦ AI 요약</span></button><div class="ai-sum-result" id="ai-sum-result"></div>`;
   }
 }
 
@@ -1857,7 +1932,9 @@ canvas.addEventListener('mouseup',e=>{
   const elapsed=Date.now()-mouseDownTime;
   const n=getNodeAt(e.clientX,e.clientY);
   if(elapsed<150&&n&&n===mouseDownNode&&n.level>0){
-    if(_connectMode){handleConnectClick(n);}else{openPanel(n);}
+    if(_connectMode){handleConnectClick(n);}
+    else if(e.shiftKey){toggleMultiSelect(n);}
+    else{openPanel(n);}
   } else if(elapsed<150&&!n){
     if(_focusMode){
       _focusNodeId=null;
@@ -2057,6 +2134,13 @@ function openSettings() {
     if (btn) btn.classList.toggle('active', _exportSize === s);
   });
 
+  // Claude 키 상태
+  const claudeMsg = document.getElementById('settings-claude-msg');
+  if (claudeMsg) {
+    claudeMsg.textContent = _claudeKey ? '✓ API 키가 설정되어 있습니다' : '';
+    claudeMsg.style.display = _claudeKey ? 'block' : 'none';
+  }
+
   document.getElementById('settings-modal').classList.add('open');
 }
 
@@ -2077,10 +2161,9 @@ function onStorageToggle(el) {
   if (warn) warn.style.display = _useLocalStorage ? 'block' : 'none';
 
   if (_useLocalStorage) {
-    // 세션 → 로컬: 토큰 이관
     if (_savedToken) localStorage.setItem('snlog_token', _savedToken);
+    if (_claudeKey) localStorage.setItem('snlog_claude_key', _claudeKey);
   } else {
-    // 로컬 → 세션: 로컬에 저장된 snlog_ 키 전부 삭제
     Object.keys(localStorage)
       .filter(k => k.startsWith('snlog_') && k !== 'snlog_use_local')
       .forEach(k => localStorage.removeItem(k));
@@ -2139,6 +2222,124 @@ document.getElementById('settings-modal')?.addEventListener('click', function(e)
 
 function getChildCount(nodeId) {
   return edges.filter(e => e.from === nodeId && !e.weakLink && !e.manualLink).length;
+}
+
+// ── Claude API 키 ──
+let _claudeKey = sessionStorage.getItem('snlog_claude_key') || localStorage.getItem('snlog_claude_key') || '';
+
+function updateClaudeKey() {
+  const input = document.getElementById('settings-claude-input');
+  const msg = document.getElementById('settings-claude-msg');
+  const val = input?.value.trim();
+  if (!val) { if(msg){msg.textContent='키를 입력해주세요';msg.style.display='block';} return; }
+  _claudeKey = val;
+  try { sessionStorage.setItem('snlog_claude_key', val); } catch(e) {}
+  if (_useLocalStorage) { try { localStorage.setItem('snlog_claude_key', val); } catch(e) {} }
+  if (input) input.value = '';
+  if (msg) { msg.textContent='저장됐어요 ✓'; msg.style.display='block'; setTimeout(()=>{msg.style.display='none';}, 2000); }
+}
+
+// ── 다중 선택 ──
+const _multiSelected = new Set();
+
+function toggleMultiSelect(n) {
+  if (_multiSelected.has(n.id)) { _multiSelected.delete(n.id); }
+  else { _multiSelected.add(n.id); }
+  updateMultiBar();
+  isStable = false;
+}
+
+function clearMultiSelect() {
+  _multiSelected.clear();
+  updateMultiBar();
+  isStable = false;
+}
+
+function updateMultiBar() {
+  const bar = document.getElementById('multi-bar');
+  const count = document.getElementById('multi-count');
+  if (!bar) return;
+  if (_multiSelected.size >= 2) {
+    bar.style.display = 'flex';
+    if (count) count.textContent = `${_multiSelected.size}개 노드 선택됨`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+// ── AI 모달 ──
+function showAiModal(title, content) {
+  const titleEl = document.getElementById('ai-modal-title');
+  const contentEl = document.getElementById('ai-modal-content');
+  if (titleEl) titleEl.textContent = title;
+  if (contentEl) contentEl.innerHTML = content;
+  document.getElementById('ai-modal')?.classList.add('open');
+}
+function updateAiModalContent(html) {
+  const el = document.getElementById('ai-modal-content');
+  if (el) el.innerHTML = html;
+}
+function closeAiModal() {
+  document.getElementById('ai-modal')?.classList.remove('open');
+}
+document.getElementById('ai-modal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeAiModal();
+});
+
+// ── AI 노드 요약 ──
+async function aiSummarizeNode(nodeId) {
+  if (!_claudeKey) { alert('설정(프로필 아이콘)에서 Claude API 키를 먼저 입력해주세요.'); return; }
+  const n = nodeMap[nodeId];
+  if (!n) return;
+  const btn = document.getElementById('ai-sum-btn');
+  const result = document.getElementById('ai-sum-result');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span>분석 중...</span>'; }
+  if (result) { result.style.display = 'block'; result.textContent = '⋯'; }
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: _claudeKey, action: 'summarize', nodes: [{ label: n.label, desc: n.desc }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류');
+    if (result) result.innerHTML = data.result
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  } catch(e) {
+    if (result) result.textContent = '오류: ' + e.message;
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<span>✦ AI 요약</span>'; }
+  }
+}
+
+// ── AI 관계 분석 ──
+async function aiAnalyzeSelected() {
+  if (!_claudeKey) { alert('설정(프로필 아이콘)에서 Claude API 키를 먼저 입력해주세요.'); return; }
+  if (_multiSelected.size < 2) return;
+  const selectedNodes = [..._multiSelected].map(id => nodeMap[id]).filter(Boolean);
+  const title = selectedNodes.length <= 3
+    ? selectedNodes.map(n => n.label).join(' · ')
+    : `${selectedNodes[0].label} 외 ${selectedNodes.length - 1}개`;
+  showAiModal(title, '<span style="color:rgba(255,255,255,0.35)">분석 중...</span>');
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        apiKey: _claudeKey,
+        action: 'analyze',
+        nodes: selectedNodes.map(n => ({ label: n.label, desc: n.desc }))
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류');
+    updateAiModalContent(data.result
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>'));
+  } catch(e) {
+    updateAiModalContent('오류: ' + e.message);
+  }
 }
 
 updateConfig();
