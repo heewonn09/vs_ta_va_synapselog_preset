@@ -479,7 +479,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <button class="shortcut-btn fixed-key">Esc</button>
       </div>
       <div class="settings-row">
-        <div><div class="settings-row-label">노드 고정 / 해제</div><div class="settings-row-sub">더블클릭으로 고정 — 하위 노드 중력 면제</div></div>
+        <div><div class="settings-row-label">노드 고정 / 해제</div><div class="settings-row-sub">Pin / Unpin Node</div></div>
         <button class="shortcut-btn fixed-key">더블클릭</button>
       </div>
     </div>
@@ -1351,6 +1351,7 @@ function simulate() {
       if(e.from !== n.id && e.to !== n.id) return;
       const other = nodeMap[e.from===n.id?e.to:e.from];
       if(!other||!other.visible) return;
+      if(other.fixed) return; // 고정 노드와의 장력 무시
       const dx = other.x-n.x, dy = other.y-n.y;
       const d = Math.max(dist(n,other), 1);
       let natural = CONFIG.linkDistance, strength = 0.005;
