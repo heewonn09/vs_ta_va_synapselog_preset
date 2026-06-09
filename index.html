@@ -147,7 +147,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 #detail-divider { height: 1px; background: rgba(255,255,255,0.07); margin-bottom: 18px; }
 #detail-content { font-size: 13px; color: #ccc; line-height: 2.0; white-space: pre-wrap; word-break: keep-all; }
 #detail-content strong { color: #ff9f43; font-weight: 700; }
-.toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 16px; height: 16px; flex-shrink: 0; }
+.toggle-switch { position: relative; display: inline-block; cursor: pointer; width: 26px; height: 26px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-track { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
 .toggle-thumb { display: none; }
@@ -366,9 +366,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <div class="panel-title" data-i18n="graph-cfg">그래프 설정</div>
       <div class="ctrl-group"><div class="ctrl-label-row"><span data-i18n="lbl-repulsion">노드 반발력 (Repulsion)</span><span class="val" id="v-rep">5</span></div><input type="range" id="cfg-rep" min="100" max="2000" step="50" value="500"></div>
       <div class="ctrl-group"><div class="ctrl-label-row"><span data-i18n="lbl-gravity">중력 (Gravity)</span><span class="val" id="v-grav">10</span></div><input type="range" id="cfg-grav" min="0.0001" max="0.0030" step="0.0001" value="0.0010"></div>
-      <div class="ctrl-group" style="display:flex; align-items:center; gap:8px;"><label class="toggle-switch"><input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()"><span class="toggle-track"><svg width="16" height="16" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label><span style="font-size:13px; color:rgba(255,255,255,0.75);" data-i18n="lbl-title">제목 표시 (Title Mark)</span></div>
-      <div class="ctrl-group" style="display:flex; align-items:center; gap:8px;"><label class="toggle-switch"><input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()"><span class="toggle-track"><svg width="16" height="16" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label><span style="font-size:13px; color:rgba(255,255,255,0.75);" data-i18n="lbl-focus">포커스 모드 (Focus Mode)</span></div>
-      <div class="ctrl-group" style="display:flex; align-items:center; gap:8px;"><label class="toggle-switch"><input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()"><span class="toggle-track"><svg width="16" height="16" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label><span style="font-size:13px; color:rgba(255,255,255,0.75);" data-i18n="lbl-connect">연결 모드 (Connect Mode)</span></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);" data-i18n="lbl-title">제목 표시</span><label class="toggle-switch"><input type="checkbox" id="label-toggle-input" checked onchange="toggleLabels()"><span class="toggle-track"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);" data-i18n="lbl-focus">포커스 모드</span><label class="toggle-switch"><input type="checkbox" id="focus-toggle-input" onchange="toggleFocusMode()"><span class="toggle-track"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
+      <div class="ctrl-group" style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; color:rgba(255,255,255,0.75);" data-i18n="lbl-connect">연결 모드</span><label class="toggle-switch"><input type="checkbox" id="connect-toggle-input" onchange="toggleConnectMode()"><span class="toggle-track"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="12" class="r-off-outer"/><circle cx="13" cy="13" r="4" class="r-off-mid1"/><circle cx="13" cy="13" r="5" class="r-off-mid2"/><circle cx="13" cy="13" r="12" class="r-on-outer"/><circle cx="13" cy="13" r="7" class="r-on-center"/></svg></span></label></div>
       <button onclick="fitGraph()" style="width:100%; margin-top:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.7); border-radius:7px; padding:8px 12px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:space-between;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'"><span data-i18n="lbl-fit">화면 맞춤(Fit to View)</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
       <button onclick="exportGraph()" style="width:100%; margin-top:6px; background:rgba(255,159,67,0.12); border:1px solid rgba(255,159,67,0.4); color:#ff9f43; border-radius:7px; padding:8px 12px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:space-between;" onmouseover="this.style.background='rgba(255,159,67,0.22)'" onmouseout="this.style.background='rgba(255,159,67,0.12)'"><span data-i18n="lbl-export">이미지 내보내기(Export PNG)</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
     </div>
@@ -443,27 +443,27 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       <div class="s-section-body" id="section-shortcuts">
         <div style="font-size:9px;color:rgba(255,255,255,0.25);margin-bottom:8px;" data-i18n="s-shortcuts-hint">버튼 클릭 후 원하는 키 입력</div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="sc-lbl">제목 표시</div><div class="settings-row-sub">Toggle Labels</div></div>
+          <div><div class="settings-row-label" data-i18n="sc-lbl">제목 표시</div><div class="settings-row-sub" data-i18n="sc-lbl-sub">제목 표시 / 그래프</div></div>
           <button class="shortcut-btn" id="sc-toggleLabels" onclick="recordShortcut('toggleLabels',this)">T</button>
         </div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="sc-focus">포커스 모드</div><div class="settings-row-sub">Focus Mode</div></div>
+          <div><div class="settings-row-label" data-i18n="sc-focus">포커스 모드</div><div class="settings-row-sub" data-i18n="sc-focus-sub">선택 노드만 표시</div></div>
           <button class="shortcut-btn" id="sc-toggleFocusMode" onclick="recordShortcut('toggleFocusMode',this)">F</button>
         </div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="sc-connect">연결 모드</div><div class="settings-row-sub">Connect Mode</div></div>
+          <div><div class="settings-row-label" data-i18n="sc-connect">연결 모드</div><div class="settings-row-sub" data-i18n="sc-connect-sub">노드 수동 연결</div></div>
           <button class="shortcut-btn" id="sc-toggleConnectMode" onclick="recordShortcut('toggleConnectMode',this)">C</button>
         </div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="sc-fit">화면 맞춤</div><div class="settings-row-sub">Fit to View</div></div>
+          <div><div class="settings-row-label" data-i18n="sc-fit">화면 맞춤</div><div class="settings-row-sub" data-i18n="sc-fit-sub">전체 화면 맞춤</div></div>
           <button class="shortcut-btn" id="sc-fitGraph" onclick="recordShortcut('fitGraph',this)">Space</button>
         </div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="sc-hide">패널 숨기기</div><div class="settings-row-sub">Esc (fixed)</div></div>
+          <div><div class="settings-row-label" data-i18n="sc-hide">패널 숨기기</div><div class="settings-row-sub" data-i18n="sc-hide-sub">Esc (고정)</div></div>
           <button class="shortcut-btn fixed-key">Esc</button>
         </div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="sc-pin">노드 고정 / 해제</div><div class="settings-row-sub">Pin / Unpin Node</div></div>
+          <div><div class="settings-row-label" data-i18n="sc-pin">노드 고정 / 해제</div><div class="settings-row-sub" data-i18n="sc-pin-sub">더블클릭으로 고정</div></div>
           <button class="shortcut-btn fixed-key" data-i18n="sc-dblclick">더블클릭</button>
         </div>
       </div>
@@ -477,31 +477,33 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
       </div>
       <div class="s-section-body" id="section-storage">
         <div class="settings-row">
-          <div>
-            <div class="settings-row-label" data-i18n="s-local">로컬 저장 사용</div>
-            <div class="settings-row-sub" data-i18n="s-local-sub">브라우저를 닫아도 데이터가 유지됩니다</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <label class="s-toggle">
+              <input type="checkbox" id="s-local-toggle" onchange="onStorageToggle(this)">
+              <div class="s-toggle-track"></div>
+              <div class="s-toggle-thumb"></div>
+            </label>
+            <div>
+              <div class="settings-row-label" data-i18n="s-local">로컬 저장 사용</div>
+              <div class="settings-row-sub" data-i18n="s-local-sub">브라우저를 닫아도 데이터가 유지됩니다</div>
+            </div>
           </div>
-          <label class="s-toggle">
-            <input type="checkbox" id="s-local-toggle" onchange="onStorageToggle(this)">
-            <div class="s-toggle-track"></div>
-            <div class="s-toggle-thumb"></div>
-          </label>
         </div>
-        <div class="s-warn" id="s-local-warn">⚠ API 토큰이 이 기기의 브라우저에 저장됩니다. 공용 컴퓨터에서는 사용을 권장하지 않습니다.</div>
+        <div class="s-warn" id="s-local-warn" data-i18n="s-local-warn">⚠ API 토큰이 이 기기의 브라우저에 저장됩니다. 공용 컴퓨터에서는 사용을 권장하지 않습니다.</div>
         <div style="height:10px;"></div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="s-page-cache">페이지 캐시</div><div class="settings-row-sub" data-i18n="s-page-cache-sub">불러온 노션 페이지 내용</div></div>
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
             <label class="s-toggle"><input type="checkbox" id="s-scope-pages" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
-            <button class="s-delete-btn" onclick="clearCache('pages')" data-i18n="s-del">삭제</button>
+            <div><div class="settings-row-label" data-i18n="s-page-cache">페이지 캐시</div><div class="settings-row-sub" data-i18n="s-page-cache-sub">불러온 노션 페이지 내용</div></div>
           </div>
+          <button class="s-delete-btn" onclick="clearCache('pages')" data-i18n="s-del">삭제</button>
         </div>
         <div class="settings-row">
-          <div><div class="settings-row-label" data-i18n="s-connect-cache">연결 모드 캐시</div><div class="settings-row-sub" data-i18n="s-connect-cache-sub">수동 연결 엣지</div></div>
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
             <label class="s-toggle"><input type="checkbox" id="s-scope-connect" checked><div class="s-toggle-track"></div><div class="s-toggle-thumb"></div></label>
-            <button class="s-delete-btn" onclick="clearCache('connect')" data-i18n="s-del">삭제</button>
+            <div><div class="settings-row-label" data-i18n="s-connect-cache">연결 모드 캐시</div><div class="settings-row-sub" data-i18n="s-connect-cache-sub">수동 연결 엣지</div></div>
           </div>
+          <button class="s-delete-btn" onclick="clearCache('connect')" data-i18n="s-del">삭제</button>
         </div>
         <div class="settings-row"><span class="settings-row-label" data-i18n="s-all-cache">전체 캐시</span><button class="s-delete-btn" onclick="clearCache('all')" data-i18n="s-del-all">전체 삭제</button></div>
       </div>
@@ -1973,17 +1975,22 @@ canvas.addEventListener('dblclick',e=>{
 const LANG = {
   ko: {
     'pg-add':'페이지 추가','kw-search':'키워드 검색','graph-cfg':'그래프 설정',
-    'lbl-title':'제목 표시 (Title Mark)','lbl-focus':'포커스 모드 (Focus Mode)',
-    'lbl-connect':'연결 모드 (Connect Mode)','lbl-fit':'화면 맞춤(Fit to View)',
-    'lbl-export':'이미지 내보내기(Export PNG)','lbl-repulsion':'노드 반발력 (Repulsion)','lbl-gravity':'중력 (Gravity)',
+    'lbl-title':'제목 표시','lbl-focus':'포커스 모드',
+    'lbl-connect':'연결 모드','lbl-fit':'화면 맞춤',
+    'lbl-export':'이미지 내보내기','lbl-repulsion':'노드 반발력','lbl-gravity':'중력',
     'btn-add':'+ 노드 불러오기','ph-add':'노션 링크 붙여넣기 or .MD파일 불러오기','ph-search':'키워드 검색',
     'btn-sync-all':'전체 동기화','btn-close-all':'전체 닫기',
     's-lang':'언어 / Language','s-lang-label':'언어','s-lang-sub':'앱 UI 언어를 변경합니다',
     's-api':'API 토큰','sc-save':'저장','sc-placeholder-token':'새 토큰 입력...',
     's-imgsize':'이미지 저장 크기',
     's-shortcuts':'키보드 단축키','s-shortcuts-hint':'버튼 클릭 후 원하는 키 입력',
-    'sc-lbl':'제목 표시','sc-focus':'포커스 모드','sc-connect':'연결 모드',
-    'sc-fit':'화면 맞춤','sc-hide':'패널 숨기기','sc-pin':'노드 고정 / 해제','sc-dblclick':'더블클릭',
+    'sc-lbl':'제목 표시','sc-lbl-sub':'제목 표시 / 그래프',
+    'sc-focus':'포커스 모드','sc-focus-sub':'선택 노드만 표시',
+    'sc-connect':'연결 모드','sc-connect-sub':'노드 수동 연결',
+    'sc-fit':'화면 맞춤','sc-fit-sub':'전체 화면 맞춤',
+    'sc-hide':'패널 숨기기','sc-hide-sub':'Esc (고정)',
+    'sc-pin':'노드 고정 / 해제','sc-pin-sub':'더블클릭으로 고정','sc-dblclick':'더블클릭',
+    's-local-warn':'⚠ API 토큰이 이 기기의 브라우저에 저장됩니다. 공용 컴퓨터에서는 사용을 권장하지 않습니다.',
     's-storage':'저장 & 캐시','s-local':'로컬 저장 사용','s-local-sub':'브라우저를 닫아도 데이터가 유지됩니다',
     's-page-cache':'페이지 캐시','s-page-cache-sub':'불러온 노션 페이지 내용',
     's-connect-cache':'연결 모드 캐시','s-connect-cache-sub':'수동 연결 엣지',
@@ -2000,8 +2007,13 @@ const LANG = {
     's-api':'API Token','sc-save':'Save','sc-placeholder-token':'Enter new token...',
     's-imgsize':'Export Image Size',
     's-shortcuts':'Keyboard Shortcuts','s-shortcuts-hint':'Click a button, then press a key',
-    'sc-lbl':'Toggle Labels','sc-focus':'Focus Mode','sc-connect':'Connect Mode',
-    'sc-fit':'Fit to View','sc-hide':'Hide Panel','sc-pin':'Pin / Unpin Node','sc-dblclick':'Double-click',
+    'sc-lbl':'Toggle Labels','sc-lbl-sub':'Show/hide node labels',
+    'sc-focus':'Focus Mode','sc-focus-sub':'Show selected node only',
+    'sc-connect':'Connect Mode','sc-connect-sub':'Connect nodes manually',
+    'sc-fit':'Fit to View','sc-fit-sub':'Fit graph to screen',
+    'sc-hide':'Hide Panel','sc-hide-sub':'Esc (fixed)',
+    'sc-pin':'Pin / Unpin Node','sc-pin-sub':'Double-click to pin','sc-dblclick':'Double-click',
+    's-local-warn':'⚠ API token is stored in this browser. Not recommended on shared computers.',
     's-storage':'Storage & Cache','s-local':'Use Local Storage','s-local-sub':'Data persists after browser is closed',
     's-page-cache':'Page Cache','s-page-cache-sub':'Loaded Notion page content',
     's-connect-cache':'Connect Cache','s-connect-cache-sub':'Manual edge connections',
