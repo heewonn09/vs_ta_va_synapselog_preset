@@ -479,8 +479,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         <button class="shortcut-btn fixed-key">Esc</button>
       </div>
       <div class="settings-row">
-        <div><div class="settings-row-label">검색 포커스</div><div class="settings-row-sub">Search Focus</div></div>
-        <button class="shortcut-btn fixed-key">Ctrl+F</button>
+        <div><div class="settings-row-label">노드 고정 / 해제</div><div class="settings-row-sub">더블클릭으로 고정 — 하위 노드 중력 면제</div></div>
+        <button class="shortcut-btn fixed-key">더블클릭</button>
       </div>
     </div>
 
@@ -1987,10 +1987,6 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('settings-modal').classList.contains('open')){ closeSettings(); return; }
     if(detailPanel.classList.contains('open')){ hidePanel(); return; }
     return;
-  }
-  // Ctrl+F: 검색 포커스
-  if((e.ctrlKey||e.metaKey)&&e.key==='f'){
-    e.preventDefault(); searchInput.focus(); searchInput.select(); return;
   }
   // 입력창 포커스 중이거나 수식키 조합이면 단축키 무시
   const tag=document.activeElement?.tagName;
