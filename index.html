@@ -536,6 +536,23 @@ canvas.width = W; canvas.height = H;
 function nodeR(level) {
   return [10, 8, 6.5, 5.5, 4.5][Math.min(level, 4)];
 }
+function drawStar8(ctx, cx, cy, r) {
+  const outerLong = r * 2.5;
+  const outerShort = r * 1.05;
+  const inner = r * 0.32;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * Math.PI / 4) - Math.PI / 2;
+    const outer = (i % 2 === 0) ? outerLong : outerShort;
+    const ox = cx + Math.cos(angle) * outer;
+    const oy = cy + Math.sin(angle) * outer;
+    if (i === 0) ctx.moveTo(ox, oy);
+    else ctx.lineTo(ox, oy);
+    const ia = angle + Math.PI / 8;
+    ctx.lineTo(cx + Math.cos(ia) * inner, cy + Math.sin(ia) * inner);
+  }
+  ctx.closePath();
+}
 let scale = 0.85;
 let panX = 0, panY = 0;
 let searchKeyword = '';
@@ -1016,7 +1033,8 @@ function exportGraph() {
         ctx2.fillStyle = gM; ctx2.fill();
       }
     }
-    ctx2.beginPath(); ctx2.arc(n.x, n.y, r, 0, Math.PI*2);
+    if(n.level===0) drawStar8(ctx2, n.x, n.y, r);
+    else { ctx2.beginPath(); ctx2.arc(n.x, n.y, r, 0, Math.PI*2); }
     ctx2.fillStyle = hasSearch && isMatch ? '#ffffff' : rgbStr(rgb, 1);
     ctx2.fill();
     if (_showLabels) {
@@ -1541,9 +1559,10 @@ function draw() {
       ctx.fillStyle=g; ctx.fill();
     }
 
-    ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
-    if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='#ffffff'; ctx.lineWidth=isHov?2/scale:1/scale; ctx.fill(); ctx.stroke(); }
-    else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=isHov?2/scale:1/scale; ctx.fill(); ctx.stroke(); }
+    if(n.level===0) drawStar8(ctx, n.x, n.y, r);
+    else { ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2); }
+    if(isMatch) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0)'; ctx.lineWidth=0; ctx.fill(); }
+    else if(n.level===0) { ctx.fillStyle='#ffffff'; ctx.strokeStyle='rgba(255,255,255,0)'; ctx.lineWidth=0; ctx.fill(); }
     else {
       const satRatio=[1,1,0.80,0.65,0.52][Math.min(n.level,4)];
       const bg=[12,13,18];
