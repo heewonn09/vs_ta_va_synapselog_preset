@@ -950,7 +950,7 @@ async function addPageById(pageId) {
     const cacheKey = `snlog_${pageId}`;
     let data;
     const cached = sessionStorage.getItem(cacheKey);
-    if (cached) { try { data = JSON.parse(cached); } catch(e) { data = null; } }
+    if (cached) { try { const p = JSON.parse(cached); if (!p._headingsOnly) data = p; } catch(e) {} }
     if (!data) {
       data = await notionFetch({ pageId });
       try { sessionStorage.setItem(cacheKey, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) {}
@@ -1114,9 +1114,11 @@ async function restorePageList() {
   for (const { pageId, title } of list) {
     if (_addedPageIds.has(pageId)) continue;
     const cached = sessionStorage.getItem(`snlog_${pageId}`);
-    if (!cached) continue;
     let data;
-    try { data = JSON.parse(cached); } catch(e) { continue; }
+    if (cached) { try { const p = JSON.parse(cached); if (!p._headingsOnly) data = p; } catch(e) {} }
+    if (!data) {
+      try { data = await notionFetch({ pageId }); sessionStorage.setItem(`snlog_${pageId}`, JSON.stringify({ ...data, _cachedAt: Date.now() })); } catch(e) { continue; }
+    }
     _addedPageIds.add(pageId);
     mergeGraph(data.title || title, data.markdown || '', pageId);
     const listEl = document.getElementById('added-pages-list');
