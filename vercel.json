@@ -3,10 +3,6 @@
     "api/notion.js": {
       "memory": 128,
       "maxDuration": 15
-    },
-    "api/claude.js": {
-      "memory": 128,
-      "maxDuration": 30
     }
   }
 }
