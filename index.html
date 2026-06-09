@@ -1351,7 +1351,7 @@ function simulate() {
       if(e.from !== n.id && e.to !== n.id) return;
       const other = nodeMap[e.from===n.id?e.to:e.from];
       if(!other||!other.visible) return;
-      if(other.fixed) return; // 고정 노드와의 장력 무시
+      if(other.fixed && e.from === n.id) return; // 상위 노드가 고정된 하위 노드에 끌려가지 않도록
       const dx = other.x-n.x, dy = other.y-n.y;
       const d = Math.max(dist(n,other), 1);
       let natural = CONFIG.linkDistance, strength = 0.005;
