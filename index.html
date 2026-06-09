@@ -1293,7 +1293,7 @@ function mergeGraph(title, markdown, pageId) {
     edges.push({ from: firstRoot.id, to: newRootNewId, weakLink: true });
   }
   const newNodeIds = new Set(Object.values(idMap));
-  revealByLevel(newNodeIds);
+  revealByLevel(newNodeIds, restoreFixedPositions);
 }
 
 let _fitAnimId = null;
@@ -1333,6 +1333,7 @@ function placeChildrenAroundParent(parentNode, children, radius) {
   if (!children.length) return;
   const cx = parentNode.x, cy = parentNode.y;
   children.forEach((n, i) => {
+    if(n.fixed) return;
     const angle = (2*Math.PI/children.length)*i - Math.PI/2;
     n.x = cx + Math.cos(angle)*radius;
     n.y = cy + Math.sin(angle)*radius;
@@ -1340,7 +1341,7 @@ function placeChildrenAroundParent(parentNode, children, radius) {
   });
 }
 
-function revealByLevel(nodeIds) {
+function revealByLevel(nodeIds, onComplete) {
   const LEVEL_DELAY = 500;
   const RADII = [0, 300, 220, 150, 100];
   const maxLevel = Math.max(...nodes.filter(n => nodeIds.has(n.id)).map(n => n.level), 0);
@@ -1362,7 +1363,7 @@ function revealByLevel(nodeIds) {
     }, lv * LEVEL_DELAY);
   }
   isStable = false;
-  setTimeout(fitGraph, maxLevel * LEVEL_DELAY + 600);
+  setTimeout(() => { fitGraph(); if(onComplete) onComplete(); }, maxLevel * LEVEL_DELAY + 600);
 }
 
 function buildGraph() {
@@ -1378,8 +1379,7 @@ function buildGraph() {
   const root = nodes.find(n => n.level === 0);
   if (root) { root.x = W/2; root.y = H/2; root.vx = 0; root.vy = 0; }
   nodes.forEach(n => { n.visible = n.level === 0; });
-  revealByLevel(new Set(nodes.map(n => n.id)));
-  restoreFixedPositions();
+  revealByLevel(new Set(nodes.map(n => n.id)), restoreFixedPositions);
 }
 
 function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
