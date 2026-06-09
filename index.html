@@ -282,6 +282,17 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
 }
 .token-edit-row button:hover { background: rgba(255,159,67,0.25); }
 #status { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(18,20,28,0.85); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 5px 12px; font-size: 11px; color: rgba(255,255,255,0.5); pointer-events: none; }
+.shortcut-btn {
+  font-size: 11px; font-weight: 700; font-family: 'Noto Sans KR', monospace;
+  padding: 4px 10px; border-radius: 5px; cursor: pointer; min-width: 52px;
+  text-align: center; background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7);
+  transition: all 0.15s;
+}
+.shortcut-btn:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.25); }
+.shortcut-btn.recording { background: rgba(255,159,67,0.15); border-color: rgba(255,159,67,0.5); color: #ff9f43; animation: sc-pulse 0.9s ease-in-out infinite; }
+.shortcut-btn.fixed-key { opacity: 0.4; cursor: default; }
+@keyframes sc-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 </style>
 </head>
 <body>
@@ -442,6 +453,35 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px;
         </div>
       </div>
       <div class="settings-row"><span class="settings-row-label">전체 캐시</span><button class="s-delete-btn" onclick="clearCache('all')">전체 삭제</button></div>
+    </div>
+
+    <!-- 키보드 단축키 -->
+    <div class="settings-section">
+      <div class="settings-section-title">키보드 단축키 <span style="font-size:9px;color:rgba(255,255,255,0.25);font-weight:400;letter-spacing:0;">(버튼 클릭 후 원하는 키 입력)</span></div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">제목 표시</div><div class="settings-row-sub">Toggle Labels</div></div>
+        <button class="shortcut-btn" id="sc-toggleLabels" onclick="recordShortcut('toggleLabels',this)">T</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">포커스 모드</div><div class="settings-row-sub">Focus Mode</div></div>
+        <button class="shortcut-btn" id="sc-toggleFocusMode" onclick="recordShortcut('toggleFocusMode',this)">F</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">연결 모드</div><div class="settings-row-sub">Connect Mode</div></div>
+        <button class="shortcut-btn" id="sc-toggleConnectMode" onclick="recordShortcut('toggleConnectMode',this)">C</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">화면 맞춤</div><div class="settings-row-sub">Fit to View</div></div>
+        <button class="shortcut-btn" id="sc-fitGraph" onclick="recordShortcut('fitGraph',this)">Space</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">패널 숨기기</div><div class="settings-row-sub">Hide Panel</div></div>
+        <button class="shortcut-btn fixed-key">Esc</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">검색 포커스</div><div class="settings-row-sub">Search Focus</div></div>
+        <button class="shortcut-btn fixed-key">Ctrl+F</button>
+      </div>
     </div>
 
     <button class="settings-close-btn" onclick="closeSettings()">닫기</button>
@@ -1291,6 +1331,12 @@ function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
 function simulate() {
   if (isStable && !drag) return;
   const repulsion = CONFIG.repulsion, damping = 0.92, centerForce = CONFIG.gravity;
+  // 고정 노드의 모든 하위 노드 집합 (중력 면제)
+  const fixedDescendants = new Set();
+  nodes.filter(n => n.fixed && n.visible).forEach(fn => {
+    const q=[fn.id], v=new Set([fn.id]);
+    while(q.length){ const id=q.shift(); edges.forEach(e=>{ if(e.from===id&&!e.weakLink&&!v.has(e.to)){v.add(e.to);fixedDescendants.add(e.to);q.push(e.to);} }); }
+  });
   let totalVelocity = 0;
   nodes.forEach(n => {
     if(!n.visible || n.fixed || n === drag) return;
@@ -1317,7 +1363,7 @@ function simulate() {
       const f = (d-natural)*strength;
       fx += dx/d*f; fy += dy/d*f;
     });
-    fx += (W/2-n.x)*centerForce; fy += (H/2-n.y)*centerForce;
+    if(!fixedDescendants.has(n.id)){fx += (W/2-n.x)*centerForce; fy += (H/2-n.y)*centerForce;}
     n.vx = Math.max(-3, Math.min(3, (n.vx+fx)*damping));
     n.vy = Math.max(-3, Math.min(3, (n.vy+fy)*damping));
     n.x += n.vx; n.y += n.vy;
@@ -1771,6 +1817,15 @@ function closePanel() {
   if(toggleBtn) toggleBtn.classList.remove('visible','collapsed');
 }
 
+function hidePanel() {
+  if(!detailPanel.classList.contains('open')) return;
+  _detailPanelCollapsed=false;
+  detailPanel.classList.remove('open','panel-collapsed');
+  statusEl.classList.remove('panel-open');
+  const toggleBtn=document.getElementById('detail-panel-sidebar-toggle');
+  if(toggleBtn) toggleBtn.classList.remove('visible','collapsed');
+}
+
 const _searchHistory=[];
 const MAX_HISTORY=8;
 function renderSearchHistory(){
@@ -1892,15 +1947,60 @@ canvas.addEventListener('dblclick',e=>{
   }
 });
 
+// ── 단축키 시스템 ──
+const DEFAULT_SHORTCUTS = { toggleLabels:'t', toggleFocusMode:'f', toggleConnectMode:'c', fitGraph:' ' };
+let _shortcuts = (()=>{ try{ return {...DEFAULT_SHORTCUTS,...JSON.parse(localStorage.getItem('snlog_shortcuts')||'{}')}; }catch(e){ return {...DEFAULT_SHORTCUTS}; } })();
+function saveShortcuts(){ localStorage.setItem('snlog_shortcuts', JSON.stringify(_shortcuts)); }
+function formatKey(k){ return k===' '?'Space':k.toUpperCase(); }
+
+let _recordingFor=null, _recordingBtn=null;
+function recordShortcut(action, btn){
+  if(_recordingFor){
+    _recordingBtn.classList.remove('recording');
+    _recordingBtn.textContent=formatKey(_shortcuts[_recordingFor]);
+  }
+  _recordingFor=action; _recordingBtn=btn;
+  btn.classList.add('recording'); btn.textContent='...';
+}
+
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    if(detailPanel.classList.contains('open')) closePanel();
-  }
-  if((e.ctrlKey||e.metaKey)&&e.key==='f'){
+  // 단축키 녹화 중
+  if(_recordingFor){
     e.preventDefault();
-    searchInput.focus();
-    searchInput.select();
+    if(e.key==='Escape'){
+      _recordingBtn.classList.remove('recording');
+      _recordingBtn.textContent=formatKey(_shortcuts[_recordingFor]);
+      _recordingFor=null; _recordingBtn=null; return;
+    }
+    const k=e.key;
+    if(k.length===1){ // 단일 문자 or 스페이스
+      _shortcuts[_recordingFor]=k;
+      saveShortcuts();
+      _recordingBtn.classList.remove('recording');
+      _recordingBtn.textContent=formatKey(k);
+      _recordingFor=null; _recordingBtn=null;
+    }
+    return;
   }
+  // Esc: 패널 숨기기 (탭 캐시 유지)
+  if(e.key==='Escape'){
+    if(document.getElementById('settings-modal').classList.contains('open')){ closeSettings(); return; }
+    if(detailPanel.classList.contains('open')){ hidePanel(); return; }
+    return;
+  }
+  // Ctrl+F: 검색 포커스
+  if((e.ctrlKey||e.metaKey)&&e.key==='f'){
+    e.preventDefault(); searchInput.focus(); searchInput.select(); return;
+  }
+  // 입력창 포커스 중이거나 수식키 조합이면 단축키 무시
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||e.ctrlKey||e.metaKey||e.altKey) return;
+  // 커스텀 단축키
+  const k=e.key;
+  if(k===_shortcuts.toggleLabels){ e.preventDefault(); document.getElementById('label-toggle-input')?.click(); }
+  else if(k===_shortcuts.toggleFocusMode){ e.preventDefault(); document.getElementById('focus-toggle-input')?.click(); }
+  else if(k===_shortcuts.toggleConnectMode){ e.preventDefault(); document.getElementById('connect-toggle-input')?.click(); }
+  else if(k===_shortcuts.fitGraph){ e.preventDefault(); fitGraph(); }
 });
 
 canvas.addEventListener('contextmenu',e=>{
@@ -2057,10 +2157,22 @@ function openSettings() {
     if (btn) btn.classList.toggle('active', _exportSize === s);
   });
 
+  // 단축키 버튼 현재값 반영
+  ['toggleLabels','toggleFocusMode','toggleConnectMode','fitGraph'].forEach(action=>{
+    const btn=document.getElementById('sc-'+action);
+    if(btn) btn.textContent=formatKey(_shortcuts[action]);
+  });
+
   document.getElementById('settings-modal').classList.add('open');
 }
 
 function closeSettings() {
+  // 단축키 녹화 중이면 취소
+  if(_recordingFor){
+    _recordingBtn?.classList.remove('recording');
+    if(_recordingBtn) _recordingBtn.textContent=formatKey(_shortcuts[_recordingFor]);
+    _recordingFor=null; _recordingBtn=null;
+  }
   document.getElementById('settings-modal').classList.remove('open');
   // 범위 저장
   ['pages','connect','search'].forEach(k => {
