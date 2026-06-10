@@ -245,23 +245,40 @@ export default async function handler(req, res) {
       const pageRes = await fetch(`https://api.notion.com/v1/pages/${pageId}`, { headers });
       if (!pageRes.ok) { const e = await pageRes.json(); return res.status(pageRes.status).json({ error: e.message }); }
       const pageTitle = extractPageTitle(await pageRes.json());
-      let topUseDbNodes = false;
+      // Block children cache — avoids double API calls across pre-count + render passes
+      const _hCache = new Map();
+      async function _hChildren(id) {
+        if (_hCache.has(id)) return _hCache.get(id);
+        const blocks = [];
+        let cur;
+        do {
+          const r = await fetch(`https://api.notion.com/v1/blocks/${id}/children${cur ? `?start_cursor=${cur}` : ''}`, { headers });
+          if (!r.ok) break;
+          const d = await r.json();
+          blocks.push(...d.results.filter(b => b?.type));
+          cur = d.has_more ? d.next_cursor : undefined;
+        } while (cur);
+        _hCache.set(id, blocks);
+        return blocks;
+      }
+
+      // Count child_database blocks across full page tree (no extra API calls via cache)
+      async function _countDbs(id, depth = 0) {
+        if (depth > 5) return 0;
+        const blocks = await _hChildren(id);
+        let n = blocks.filter(b => b.type === 'child_database').length;
+        for (const b of blocks) {
+          if (b.has_children && /^heading_\d|^toggle$/.test(b.type)) n += await _countDbs(b.id, depth + 1);
+        }
+        return n;
+      }
+
+      const totalDbs = await _countDbs(pageId);
+      const globalUseDb = totalDbs >= 2;
 
       async function fetchHeadings(blockId, depth = 0) {
         if (depth > 5) return '';
-        const allBlocks = [];
-        let cur;
-        do {
-          const r = await fetch(`https://api.notion.com/v1/blocks/${blockId}/children${cur ? `?start_cursor=${cur}` : ''}`, { headers });
-          if (!r.ok) break;
-          const d = await r.json();
-          allBlocks.push(...d.results.filter(b => b?.type));
-          cur = d.has_more ? d.next_cursor : undefined;
-        } while (cur);
-
-        const dbCount = allBlocks.filter(b => b.type === 'child_database').length;
-        const useDb = dbCount >= 2;
-        if (depth === 0) topUseDbNodes = useDb;
+        const allBlocks = await _hChildren(blockId);
         let md = '';
 
         for (const block of allBlocks) {
@@ -276,7 +293,7 @@ export default async function handler(req, res) {
             else if (type === 'child_database') {
               try {
                 const dbPages = await fetchDatabaseChildren(block.id);
-                if (useDb) {
+                if (globalUseDb) {
                   md += `\n[DB_NODE]\n# ${block.child_database?.title || 'Database'}\n`;
                   for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n## ${extractPageTitle(p)}\n`;
                 } else {
@@ -290,7 +307,7 @@ export default async function handler(req, res) {
       }
 
       const markdown = await fetchHeadings(pageId);
-      return res.status(200).json({ title: pageTitle, markdown, useDbNodes: topUseDbNodes });
+      return res.status(200).json({ title: pageTitle, markdown, useDbNodes: globalUseDb });
     } catch(e) { return res.status(500).json({ error: e.message || '서버 오류' }); }
   }
 

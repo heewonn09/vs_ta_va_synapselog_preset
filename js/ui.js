@@ -527,7 +527,7 @@ function toggleSection(id) {
 
 // ── 단축키 시스템 ─────────────────────────────────────────────────────
 
-const DEFAULT_SHORTCUTS = { toggleLabels: 't', toggleFocusMode: 'f', toggleConnectMode: 'c', fitGraph: ' ' };
+const DEFAULT_SHORTCUTS = { toggleLabels: '1', toggleFocusMode: '2', toggleConnectMode: '3', fitGraph: ' ' };
 let _shortcuts = (() => { try { return { ...DEFAULT_SHORTCUTS, ...JSON.parse(localStorage.getItem('snlog_shortcuts') || '{}') }; } catch(e) { return { ...DEFAULT_SHORTCUTS }; } })();
 function saveShortcuts() { localStorage.setItem('snlog_shortcuts', JSON.stringify(_shortcuts)); }
 function formatKey(k) { return k === ' ' ? 'Space' : k.toUpperCase(); }
