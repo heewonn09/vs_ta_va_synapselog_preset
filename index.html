@@ -1244,7 +1244,75 @@ async function notionFetch(body) {
   return data;
 }
 
-// DB 엔트리 본문을 백그라운드에서 1개씩 로드 (각 엔트리는 독립 API 호출 → 타임아웃 없음)
+// 엔트리 본문 파싱 → 헤딩은 child 노드, 나머지는 desc
+function _addEntryChildNodes(entryNode, markdown) {
+  const lines = markdown.split('\n');
+  const prefix = 'ec' + Date.now() + '_' + Math.random().toString(36).slice(2, 6) + '_';
+  let nid = 0;
+  const newIds = new Set();
+  // mdDepth(1-5) → node id
+  const currentParents = { 0: entryNode.id };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith('---') || line.startsWith('[NOTION_ENTRY:')) continue;
+    const headerMatch = line.match(/^(#{1,5})\s+(.*)$/);
+    if (!headerMatch) continue;
+
+    const mdDepth = Math.min(headerMatch[1].length, 5);
+    const graphLevel = Math.min(entryNode.level + mdDepth, 5);
+    let lbl = headerMatch[2].trim().replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*\*/g, '');
+
+    let parentId = entryNode.id;
+    for (let d = mdDepth - 1; d >= 0; d--) { if (currentParents[d]) { parentId = currentParents[d]; break; } }
+
+    let descLines = [], nextIdx = i + 1;
+    while (nextIdx < lines.length) {
+      const nl = lines[nextIdx].trim();
+      if (!nl) { nextIdx++; continue; }
+      if (nl.startsWith('#') || nl.startsWith('[NOTION_ENTRY:')) break;
+      if (descLines.join('\n').length > 3000) { nextIdx++; continue; }
+      descLines.push(nl);
+      nextIdx++;
+    }
+
+    const parentColor = nodeMap[parentId]?.color;
+    let color = null;
+    if (graphLevel === 1) { color = getH1Color(lbl); }
+    else if (graphLevel === 2) {
+      if (parentColor) {
+        const sibCnt = edges.filter(e => e.from === parentId).length;
+        color = hslColor((extractHue(parentColor) + (sibCnt * 47) % 120 - 60 + 360) % 360, 70, 58);
+      }
+    } else if (graphLevel === 3) {
+      if (parentColor) color = hslColor(extractHue(parentColor), 65, 62);
+    } else if (graphLevel === 4) {
+      if (parentColor) color = hslColor(extractHue(parentColor), getSaturation(parentColor), 55);
+    } else if (graphLevel === 5) {
+      if (parentColor) color = hslColor(extractHue(parentColor), getSaturation(parentColor), 48);
+    }
+
+    const id = prefix + (nid++);
+    const n = {
+      id, label: cleanLabel(lbl), desc: cleanDesc(descLines.join('\n').substring(0, 5000)), date: '',
+      x: entryNode.x + (Math.random()-0.5)*50,
+      y: entryNode.y + (Math.random()-0.5)*50,
+      vx: 0, vy: 0, level: graphLevel, fixed: false, color,
+      _rgb: hexToRgb(color || '#74b9ff'),
+      sourcePageId: entryNode.sourcePageId,
+      visible: false, _frozen: false, _frozenFrames: 0
+    };
+    nodes.push(n); nodeMap[id] = n;
+    edges.push({ from: parentId, to: id });
+    newIds.add(id);
+    currentParents[mdDepth] = id;
+    for (let d = mdDepth + 1; d <= 5; d++) currentParents[d] = null;
+    if (nextIdx > i + 1) i = nextIdx - 1;
+  }
+  return newIds;
+}
+
+// DB 엔트리를 백그라운드에서 1개씩 로드: 헤딩 → child 노드, 본문 → desc
 async function _loadEntriesBackground(pageId) {
   const entryNodes = nodes.filter(n => n.sourcePageId === pageId && n.entryNotionId);
   if (!entryNodes.length) return;
@@ -1254,15 +1322,14 @@ async function _loadEntriesBackground(pageId) {
   const getTag = () => document.querySelector(`[data-page-id="${pageId}"] .entry-load-tag`);
   const setTag = (t) => { const el = getTag(); if (el) el.textContent = t; };
 
-  // 진행 태그 추가
   const item = document.querySelector(`[data-page-id="${pageId}"]`);
   const labelEl = item?.querySelector('.item-label') || item?.querySelector('span');
   if (labelEl && !labelEl.querySelector('.entry-load-tag')) {
-    labelEl.insertAdjacentHTML('beforeend', ` <span class="entry-load-tag" style="color:rgba(255,159,67,0.45);font-size:9px;">본문 0/${total}</span>`);
+    labelEl.insertAdjacentHTML('beforeend', ` <span class="entry-load-tag" style="color:rgba(255,159,67,0.45);font-size:9px;">로딩 0/${total}</span>`);
   }
 
   for (const node of entryNodes) {
-    if (!_addedPageIds.has(pageId)) break; // 페이지 제거 시 중단
+    if (!_addedPageIds.has(pageId)) break;
     const cacheKey = `snlog_entry_${node.entryNotionId}`;
     let md = sessionStorage.getItem(cacheKey);
     if (!md) {
@@ -1270,15 +1337,25 @@ async function _loadEntriesBackground(pageId) {
         const data = await notionFetch({ pageId: node.entryNotionId, action: 'entry' });
         md = data.markdown || '';
         if (md) try { sessionStorage.setItem(cacheKey, md); } catch(e) {}
-      } catch(e) { loaded++; setTag(`본문 ${loaded}/${total}`); continue; }
+      } catch(e) { loaded++; setTag(`로딩 ${loaded}/${total}`); continue; }
     }
-    if (md) node.desc = md.replace(/^#{1,5}\s+/gm, '').substring(0, 5000).trim();
+    if (md) {
+      const newIds = _addEntryChildNodes(node, md);
+      if (newIds.size > 0) {
+        // 새 노드 즉시 표시 (animation 없이 — 여러 엔트리가 순차 로드되므로)
+        newIds.forEach(id => { if (nodeMap[id]) nodeMap[id].visible = true; });
+        nodes.forEach(n => { n._frozen = false; n._frozenFrames = 0; });
+        isStable = false;
+      } else {
+        // 헤딩 없는 엔트리 → 본문 텍스트를 desc에
+        node.desc = cleanDesc(md.replace(/^#{1,5}\s+/gm, '').substring(0, 5000).trim());
+      }
+    }
     loaded++;
-    setTag(`본문 ${loaded}/${total}`);
+    setTag(`로딩 ${loaded}/${total}`);
   }
 
   const tag = getTag(); if (tag) tag.remove();
-  // 헤딩 전용 캐시 완료 표시 (다음 로드 시 재사용)
   try {
     const c = sessionStorage.getItem(`snlog_${pageId}`);
     if (c) { const p = JSON.parse(c); delete p._headingsOnly; sessionStorage.setItem(`snlog_${pageId}`, JSON.stringify(p)); }
