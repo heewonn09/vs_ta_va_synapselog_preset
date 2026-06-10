@@ -245,8 +245,9 @@ export default async function handler(req, res) {
       const pageRes = await fetch(`https://api.notion.com/v1/pages/${pageId}`, { headers });
       if (!pageRes.ok) { const e = await pageRes.json(); return res.status(pageRes.status).json({ error: e.message }); }
       const pageTitle = extractPageTitle(await pageRes.json());
-      // Block children cache — avoids double API calls across pre-count + render passes
+      // Block children cache + DB-type check cache (avoids double API calls)
       const _hCache = new Map();
+      const _dbCache = new Map(); // id → db object | null
       async function _hChildren(id) {
         if (_hCache.has(id)) return _hCache.get(id);
         const blocks = [];
@@ -261,12 +262,25 @@ export default async function handler(req, res) {
         _hCache.set(id, blocks);
         return blocks;
       }
+      async function _checkIsDb(id) {
+        if (_dbCache.has(id)) return _dbCache.get(id);
+        try {
+          const r = await fetch(`https://api.notion.com/v1/databases/${id}`, { headers });
+          const result = r.ok ? await r.json() : null;
+          _dbCache.set(id, result);
+          return result;
+        } catch(e) { _dbCache.set(id, null); return null; }
+      }
 
-      // Count child_database blocks across full page tree (no extra API calls via cache)
+      // Count all databases (child_database + child_page-that-is-db) across heading/toggle tree
       async function _countDbs(id, depth = 0) {
         if (depth > 5) return 0;
         const blocks = await _hChildren(id);
         let n = blocks.filter(b => b.type === 'child_database').length;
+        // Check child_page blocks in parallel — some may be full-page databases
+        const pageBlocks = blocks.filter(b => b.type === 'child_page');
+        const pageDbResults = await Promise.all(pageBlocks.map(b => _checkIsDb(b.id)));
+        n += pageDbResults.filter(Boolean).length;
         for (const b of blocks) {
           if (b.has_children && /^heading_\d|^toggle$/.test(b.type)) n += await _countDbs(b.id, depth + 1);
         }
@@ -289,7 +303,24 @@ export default async function handler(req, res) {
             else if (type === 'heading_3') { md += '### ' + extractHeadingText(block.heading_3?.rich_text) + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
             else if (type === 'heading_4') { md += '#### ' + extractHeadingText(block.heading_4?.rich_text) + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
             else if (type === 'toggle') { const t = extractHeadingText(block.toggle?.rich_text); if (t.trim()) md += '## ' + t + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
-            else if (type === 'child_page') { md += `\n## ${block.child_page?.title || '하위 페이지'}\n`; }
+            else if (type === 'child_page') {
+              // Check if this page is actually a full-page database
+              const dbData = await _checkIsDb(block.id); // from cache, no extra call
+              if (dbData) {
+                const dbTitle = dbData.title?.[0]?.plain_text || block.child_page?.title || 'Database';
+                try {
+                  const dbPages = await fetchDatabaseChildren(block.id);
+                  if (globalUseDb) {
+                    md += `\n[DB_NODE]\n# ${dbTitle}\n`;
+                    for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n## ${extractPageTitle(p)}\n`;
+                  } else {
+                    for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n# ${extractPageTitle(p)}\n`;
+                  }
+                } catch(e) {}
+              } else {
+                md += `\n## ${block.child_page?.title || '하위 페이지'}\n`;
+              }
+            }
             else if (type === 'child_database') {
               try {
                 const dbPages = await fetchDatabaseChildren(block.id);
