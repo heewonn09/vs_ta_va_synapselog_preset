@@ -2105,7 +2105,12 @@ document.getElementById('add-page-id').addEventListener('paste',function(e){
 
 let mouseDownNode=null, mouseDownTime=0;
 canvas.addEventListener('mousemove',e=>{
-  if(drag){const w=screenToWorld(e.clientX,e.clientY);drag.x=w.x;drag.y=w.y;nodes.forEach(n=>{if(n._frozen&&dist(n,drag)<200){n._frozen=false;n._frozenFrames=0;}});return;}
+  if(drag){const w=screenToWorld(e.clientX,e.clientY);drag.x=w.x;drag.y=w.y;
+    // 거리 기반 unfreeze
+    nodes.forEach(n=>{if(n._frozen&&dist(n,drag)<200){n._frozen=false;n._frozenFrames=0;}});
+    // 드래그 노드의 모든 하위 계층 unfreeze (거리와 무관하게)
+    {const q=[drag.id],seen=new Set([drag.id]);while(q.length){const id=q.shift();edges.forEach(e=>{if(e.from===id&&!e.weakLink&&!seen.has(e.to)){seen.add(e.to);const c=nodeMap[e.to];if(c){if(c._frozen){c._frozen=false;c._frozenFrames=0;}q.push(e.to);}}});}}
+    return;}
   if(isPanning){panX=panStartOffsetX+(e.clientX-panStartX);panY=panStartOffsetY+(e.clientY-panStartY);return;}
   const n=getNodeAt(e.clientX,e.clientY);
   hoveredNode=n; canvas.style.cursor=n?'pointer':'default';
