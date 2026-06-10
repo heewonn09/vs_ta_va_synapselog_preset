@@ -535,7 +535,7 @@ let W = window.innerWidth, H = window.innerHeight;
 canvas.width = W; canvas.height = H;
 
 function nodeR(level) {
-  return [10, 8, 6.5, 5.5, 4.5][Math.min(level, 4)];
+  return [10, 8, 6.5, 5.5, 4.5, 3.5][Math.min(level, 5)];
 }
 function drawStar8(ctx, cx, cy, r) {
   const outerLong = r * 2.0;
@@ -669,6 +669,9 @@ function parseMarkdown(text, rootTitle) {
     } else if (level === 4) {
       const parentColor = parentNode?.color;
       if (parentColor) color = hslColor(extractHue(parentColor), getSaturation(parentColor), 55);
+    } else if (level === 5) {
+      const parentColor = parentNode?.color;
+      if (parentColor) color = hslColor(extractHue(parentColor), getSaturation(parentColor), 48);
     }
     const id = 'n' + (nid++);
     const n = {
@@ -685,16 +688,16 @@ function parseMarkdown(text, rootTitle) {
   }
 
   const rootId = addNode(rootTitle || '자기관리: 내면', '', null, '', 0);
-  const currentParents = { 0: rootId, 1: null, 2: null, 3: null, 4: null };
+  const currentParents = { 0: rootId, 1: null, 2: null, 3: null, 4: null, 5: null };
   const lines = text.split('\n');
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
     if (!line || line.startsWith('---') || line.startsWith('<')) continue;
-    const headerMatch = line.match(/^(#{1,4})\s+(.*)$/);
+    const headerMatch = line.match(/^(#{1,5})\s+(.*)$/);
     if (headerMatch) {
       const rawDepth = headerMatch[1].length;
-      const depth = Math.min(rawDepth, 4);
+      const depth = Math.min(rawDepth, 5);
       let lbl = headerMatch[2].trim().replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*\*/g, '');
       let nDate = '';
       const inlineDateMatch = lbl.match(/-\s*(\d{4}\.\d{2}(?:\.\d{2})?)\s*-/);
@@ -720,7 +723,7 @@ function parseMarkdown(text, rootTitle) {
       const curId = addNode(lbl, finalDesc, parentId, nDate, depth);
       if (curId) {
         currentParents[depth] = curId;
-        for (let d = depth + 1; d <= 4; d++) currentParents[d] = null;
+        for (let d = depth + 1; d <= 5; d++) currentParents[d] = null;
       }
       if (nextIdx > i + 1) i = nextIdx - 1;
       continue;
@@ -1361,6 +1364,7 @@ function revealByLevel(nodeIds, onComplete) {
       });
       byParent.forEach(({ parent, children }) => { if (parent) placeChildrenAroundParent(parent, children, radius); });
       levelNodes.forEach(n => { n.visible = true; });
+      nodes.forEach(n => { n._frozen = false; n._frozenFrames = 0; });
       isStable = false;
     }, lv * LEVEL_DELAY);
   }
@@ -1403,15 +1407,15 @@ function restoreFixedPositions() {
 function simulate() {
   if (isStable && !drag) return;
   const repulsion = CONFIG.repulsion, damping = 0.92, centerForce = CONFIG.gravity;
-  // 고정 노드의 모든 하위 노드 집합 (중력 면제)
   const fixedDescendants = new Set();
   nodes.filter(n => n.fixed && n.visible).forEach(fn => {
     const q=[fn.id], v=new Set([fn.id]);
     while(q.length){ const id=q.shift(); edges.forEach(e=>{ if(e.from===id&&!e.weakLink&&!v.has(e.to)){v.add(e.to);fixedDescendants.add(e.to);q.push(e.to);} }); }
   });
+  // 안정된 노드는 계산 제외 (개별 freeze) — 전체 노드는 반발력 소스로 유지
+  const activeNodes = nodes.filter(n => n.visible && !n.fixed && !n._frozen && n !== drag);
   let totalVelocity = 0;
-  nodes.forEach(n => {
-    if(!n.visible || n.fixed || n === drag) return;
+  activeNodes.forEach(n => {
     let fx = 0, fy = 0;
     nodes.forEach(m => {
       if(m === n || !m.visible) return;
@@ -1423,7 +1427,7 @@ function simulate() {
       if(e.from !== n.id && e.to !== n.id) return;
       const other = nodeMap[e.from===n.id?e.to:e.from];
       if(!other||!other.visible) return;
-      if(other.fixed && e.from === n.id) return; // 상위 노드가 고정된 하위 노드에 끌려가지 않도록
+      if(other.fixed && e.from === n.id) return;
       const dx = other.x-n.x, dy = other.y-n.y;
       const d = Math.max(dist(n,other), 1);
       let natural = CONFIG.linkDistance, strength = 0.005;
@@ -1440,7 +1444,10 @@ function simulate() {
     n.vx = Math.max(-3, Math.min(3, (n.vx+fx)*damping));
     n.vy = Math.max(-3, Math.min(3, (n.vy+fy)*damping));
     n.x += n.vx; n.y += n.vy;
-    totalVelocity += Math.abs(n.vx)+Math.abs(n.vy);
+    const speed = Math.abs(n.vx) + Math.abs(n.vy);
+    totalVelocity += speed;
+    if (speed < 0.05) { n._frozenFrames = (n._frozenFrames || 0) + 1; if (n._frozenFrames > 120) n._frozen = true; }
+    else n._frozenFrames = 0;
   });
   if (totalVelocity < 2.0 && !drag) isStable = true;
 }
@@ -1965,7 +1972,7 @@ document.getElementById('add-page-id').addEventListener('paste',function(e){
 
 let mouseDownNode=null, mouseDownTime=0;
 canvas.addEventListener('mousemove',e=>{
-  if(drag){const w=screenToWorld(e.clientX,e.clientY);drag.x=w.x;drag.y=w.y;return;}
+  if(drag){const w=screenToWorld(e.clientX,e.clientY);drag.x=w.x;drag.y=w.y;nodes.forEach(n=>{if(n._frozen&&dist(n,drag)<200){n._frozen=false;n._frozenFrames=0;}});return;}
   if(isPanning){panX=panStartOffsetX+(e.clientX-panStartX);panY=panStartOffsetY+(e.clientY-panStartY);return;}
   const n=getNodeAt(e.clientX,e.clientY);
   hoveredNode=n; canvas.style.cursor=n?'pointer':'default';

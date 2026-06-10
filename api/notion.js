@@ -205,8 +205,8 @@ export default async function handler(req, res) {
                     .replace(/^(\s*)### /gm, '$1§3§ ')
                     .replace(/^(\s*)## /gm, '$1#### ')
                     .replace(/^(\s*)# /gm, '$1### ')
-                    .replace(/^(\s*)§3§ /gm, '$1#### ')
-                    .replace(/^(\s*)§4§ /gm, '$1#### ');
+                    .replace(/^(\s*)§3§ /gm, '$1##### ')
+                    .replace(/^(\s*)§4§ /gm, '$1##### ');
                   return `\n## ${pageTitle}\n${shifted}`;
                 }));
                 markdown += results.join('');
@@ -223,7 +223,7 @@ export default async function handler(req, res) {
                     .replace(/^(\s*)### /gm, '$1#### ')
                     .replace(/^(\s*)## /gm, '$1### ')
                     .replace(/^(\s*)# /gm, '$1## ')
-                    .replace(/^(\s*)§§§§ /gm, '$1#### ');
+                    .replace(/^(\s*)§§§§ /gm, '$1##### ');
                   return `\n# ${pageTitle}\n${shifted}`;
                 }));
                 markdown += results.join('');
