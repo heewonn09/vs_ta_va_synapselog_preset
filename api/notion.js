@@ -111,8 +111,8 @@ export default async function handler(req, res) {
     return '(제목 없음)';
   }
 
-  // 재귀 블록 읽기
-  async function fetchBlocks(blockId, depth = 0) {
+  // 재귀 블록 읽기 (skipDb=true면 child_database 스킵)
+  async function fetchBlocks(blockId, depth = 0, skipDb = false) {
     if (depth > 8) return '';
 
     // 모든 블록을 먼저 수집 (페이지네이션 처리)
@@ -140,51 +140,50 @@ export default async function handler(req, res) {
 
         if (type === 'heading_1') {
           markdown += '# ' + extractHeadingText(block.heading_1?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'heading_2') {
           markdown += '## ' + extractHeadingText(block.heading_2?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'heading_3') {
           markdown += '### ' + extractHeadingText(block.heading_3?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'heading_4') {
           markdown += '#### ' + extractHeadingText(block.heading_4?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'paragraph') {
           const text = extractRichText(block.paragraph?.rich_text);
           if (text.trim()) markdown += text + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'bulleted_list_item') {
           listCounter = 0;
           markdown += '- ' + extractRichText(block.bulleted_list_item?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'numbered_list_item') {
           listCounter++;
           markdown += `${listCounter}. ` + extractRichText(block.numbered_list_item?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'quote') {
           listCounter = 0;
           markdown += '> ' + extractRichText(block.quote?.rich_text) + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'callout') {
           listCounter = 0;
           const text = extractRichText(block.callout?.rich_text);
           if (text.trim()) markdown += '> ' + text + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
         } else if (type === 'toggle') {
           listCounter = 0;
           const title = extractHeadingText(block.toggle?.rich_text);
           if (title.trim()) markdown += '## ' + title + '\n';
-          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1);
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
           continue;
         } else if (type === 'child_page') {
           const childTitle = block.child_page?.title || '하위 페이지';
           markdown += `\n## ${childTitle}\n`;
-          if (block.has_children) {
-            markdown += await fetchBlocks(block.id, depth + 1);
-          }
+          if (block.has_children) markdown += await fetchBlocks(block.id, depth + 1, skipDb);
           continue;
         } else if (type === 'child_database') {
+          if (skipDb) continue;
           try {
             const dbPages = await fetchDatabaseChildren(block.id);
             const BATCH = 5;
@@ -197,7 +196,7 @@ export default async function handler(req, res) {
                 const batch = dbPages.slice(i, i + BATCH);
                 const results = await Promise.all(batch.map(async dbPage => {
                   const pageTitle = extractPageTitle(dbPage);
-                  const pageContent = await fetchBlocks(dbPage.id, depth + 2).catch(() => '');
+                  const pageContent = await fetchBlocks(dbPage.id, depth + 2, skipDb).catch(() => '');
                   // 페이지가 ## 레벨이므로 내부 콘텐츠는 2단계 올림
                   // # → ###, ## → ####, ### → ####, #### → ####
                   const shifted = pageContent
@@ -217,7 +216,7 @@ export default async function handler(req, res) {
                 const batch = dbPages.slice(i, i + BATCH);
                 const results = await Promise.all(batch.map(async dbPage => {
                   const pageTitle = extractPageTitle(dbPage);
-                  const pageContent = await fetchBlocks(dbPage.id, depth + 2).catch(() => '');
+                  const pageContent = await fetchBlocks(dbPage.id, depth + 2, skipDb).catch(() => '');
                   const shifted = pageContent
                     .replace(/^(\s*)#### /gm, '$1§§§§ ')
                     .replace(/^(\s*)### /gm, '$1#### ')
@@ -240,6 +239,70 @@ export default async function handler(req, res) {
     return markdown;
   }
 
+  // ── action: 'headings' — DB 엔트리 제목만, 본문 없이 빠르게 ────────
+  if (action === 'headings') {
+    try {
+      const pageRes = await fetch(`https://api.notion.com/v1/pages/${pageId}`, { headers });
+      if (!pageRes.ok) { const e = await pageRes.json(); return res.status(pageRes.status).json({ error: e.message }); }
+      const pageTitle = extractPageTitle(await pageRes.json());
+      let topUseDbNodes = false;
+
+      async function fetchHeadings(blockId, depth = 0) {
+        if (depth > 5) return '';
+        const allBlocks = [];
+        let cur;
+        do {
+          const r = await fetch(`https://api.notion.com/v1/blocks/${blockId}/children${cur ? `?start_cursor=${cur}` : ''}`, { headers });
+          if (!r.ok) break;
+          const d = await r.json();
+          allBlocks.push(...d.results.filter(b => b?.type));
+          cur = d.has_more ? d.next_cursor : undefined;
+        } while (cur);
+
+        const dbCount = allBlocks.filter(b => b.type === 'child_database').length;
+        const useDb = dbCount >= 2;
+        if (depth === 0) topUseDbNodes = useDb;
+        let md = '';
+
+        for (const block of allBlocks) {
+          try {
+            const type = block.type;
+            if (type === 'heading_1') { md += '# ' + extractHeadingText(block.heading_1?.rich_text) + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
+            else if (type === 'heading_2') { md += '## ' + extractHeadingText(block.heading_2?.rich_text) + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
+            else if (type === 'heading_3') { md += '### ' + extractHeadingText(block.heading_3?.rich_text) + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
+            else if (type === 'heading_4') { md += '#### ' + extractHeadingText(block.heading_4?.rich_text) + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
+            else if (type === 'toggle') { const t = extractHeadingText(block.toggle?.rich_text); if (t.trim()) md += '## ' + t + '\n'; if (block.has_children) md += await fetchHeadings(block.id, depth+1); }
+            else if (type === 'child_page') { md += `\n## ${block.child_page?.title || '하위 페이지'}\n`; }
+            else if (type === 'child_database') {
+              try {
+                const dbPages = await fetchDatabaseChildren(block.id);
+                if (useDb) {
+                  md += `\n# ${block.child_database?.title || 'Database'}\n`;
+                  for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n## ${extractPageTitle(p)}\n`;
+                } else {
+                  for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n# ${extractPageTitle(p)}\n`;
+                }
+              } catch(e) {}
+            }
+          } catch(e) {}
+        }
+        return md;
+      }
+
+      const markdown = await fetchHeadings(pageId);
+      return res.status(200).json({ title: pageTitle, markdown, useDbNodes: topUseDbNodes });
+    } catch(e) { return res.status(500).json({ error: e.message || '서버 오류' }); }
+  }
+
+  // ── action: 'entry' — DB 엔트리 1개 본문 (DB 중첩 스킵) ──────────
+  if (action === 'entry') {
+    try {
+      const markdown = await fetchBlocks(pageId, 0, true);
+      return res.status(200).json({ markdown });
+    } catch(e) { return res.status(200).json({ markdown: '' }); }
+  }
+
+  // ── 기본: 전체 로드 ───────────────────────────────────────────────
   try {
     const pageRes = await fetch(`https://api.notion.com/v1/pages/${pageId}`, { headers });
     if (!pageRes.ok) {
