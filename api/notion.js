@@ -308,10 +308,10 @@ export default async function handler(req, res) {
               const dbData = await _checkIsDb(block.id); // from cache, no extra call
               if (dbData) {
                 const dbTitle = dbData.title?.[0]?.plain_text || block.child_page?.title || 'Database';
+                if (globalUseDb) md += `\n[DB_NODE]\n# ${dbTitle}\n`;
                 try {
                   const dbPages = await fetchDatabaseChildren(block.id);
                   if (globalUseDb) {
-                    md += `\n[DB_NODE]\n# ${dbTitle}\n`;
                     for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n## ${extractPageTitle(p)}\n`;
                   } else {
                     for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n# ${extractPageTitle(p)}\n`;
@@ -322,10 +322,11 @@ export default async function handler(req, res) {
               }
             }
             else if (type === 'child_database') {
+              const dbTitle = block.child_database?.title || 'Database';
+              if (globalUseDb) md += `\n[DB_NODE]\n# ${dbTitle}\n`;
               try {
                 const dbPages = await fetchDatabaseChildren(block.id);
                 if (globalUseDb) {
-                  md += `\n[DB_NODE]\n# ${block.child_database?.title || 'Database'}\n`;
                   for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n## ${extractPageTitle(p)}\n`;
                 } else {
                   for (const p of dbPages) md += `[NOTION_ENTRY:${p.id.replace(/-/g,'')}]\n# ${extractPageTitle(p)}\n`;
