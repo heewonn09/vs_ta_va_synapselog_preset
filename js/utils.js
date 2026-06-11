@@ -40,7 +40,7 @@ function drawStar8(ctx, cx, cy, r) {
 
 // DB 중간 노드 — 4방향 십자별 (대각선 없음)
 function drawStar4(ctx, cx, cy, r) {
-  const outer = r * 1.7, inner = r * 0.42, round = r * 0.22;
+  const outer = r * 1.35, inner = r * 0.38, round = r * 0.18;
   ctx.beginPath();
   for (let i = 0; i < 4; i++) {
     const angle = (i * Math.PI / 2) - Math.PI / 2;
