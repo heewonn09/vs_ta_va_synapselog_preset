@@ -76,14 +76,25 @@ function toggleLabels() { const cb = document.getElementById('label-toggle-input
 
 // ── 포커스 모드 ────────────────────────────────────────────────────────
 
-function applyFocusMode(nodeId) {
+function applyFocusMode(nodeId, shallow = false) {
   if (!_focusMode) return;
   _focusNodeId = nodeId;
   const connectedIds = new Set([nodeId]);
-  edges.forEach(e => {
-    if (e.from === nodeId) connectedIds.add(e.to);
-    if (e.to === nodeId) connectedIds.add(e.from);
-  });
+  if (shallow) {
+    edges.forEach(e => {
+      if (e.from === nodeId) connectedIds.add(e.to);
+      if (e.to === nodeId) connectedIds.add(e.from);
+    });
+  } else {
+    const queue = [nodeId];
+    while (queue.length) {
+      const id = queue.shift();
+      edges.forEach(e => {
+        if (e.from === id && !connectedIds.has(e.to)) { connectedIds.add(e.to); queue.push(e.to); }
+      });
+    }
+    edges.forEach(e => { if (e.to === nodeId) connectedIds.add(e.from); });
+  }
   edges.forEach(e => {
     if (!e.manualLink) return;
     if (connectedIds.has(e.from)) connectedIds.add(e.to);
@@ -276,7 +287,7 @@ function openPanel(n) {
   statusEl.classList.add('panel-open');
   const toggleBtn = document.getElementById('detail-panel-sidebar-toggle');
   if (toggleBtn) { toggleBtn.classList.add('visible'); toggleBtn.classList.remove('collapsed'); toggleBtn.innerHTML = PANEL_SVG_RIGHT; }
-  if (_focusMode) applyFocusMode(n.id);
+  if (_focusMode) applyFocusMode(n.id, _focusNodeId !== null && !n.dimmed);
 }
 
 function closePanel() {
